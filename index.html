@@ -1,0 +1,23 @@
+<html>
+<head>
+  <!-- Note: Probably not the way 'bower' dependencies are supposed to be used, but works for us.
+  -->
+  <script src="bower_components/svg.js/dist/svg.js" type="text/javascript"></script>
+  <script src="bower_components/svg.draggable.js/dist/svg.draggable.js" type="text/javascript"></script>
+</head>
+
+<!-- Make a rectangle with corners as separate rectangles, so that everything
+- follows each other (i.e. corners resize the big rect, panning bit rect moves
+- also the corners).
+-->
+<body>
+  <div id="drawing">
+  </div>
+  
+  <script>
+    var draw = SVG('drawing');
+    var rect = draw.rect(100, 100);
+    rect.draggable()
+  </script>
+</body>
+</html>
