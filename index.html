@@ -4,7 +4,11 @@
   -->
   <script src="bower_components/svg.js/dist/svg.js" type="text/javascript"></script>
   <script src="bower_components/svg.draggable.js/dist/svg.draggable.js" type="text/javascript"></script>
-
+  
+  <!--
+  <script src="lib/svg.draggy.js-1.1.0/src/svg.draggy.js"></script>
+  -->
+  
   <style>
     rect.main { 
       fill: blue;
@@ -31,21 +35,46 @@
     var CORNER_SIZE = 20;
     var CORNER_OFFSET = 5;
     
-    var S = SVG("cradle");   // fills the cradle fully
+    var svg = SVG("cradle");   // fills the cradle fully
 
-    var g = S.group();
+    var g = svg.group();
 
-    g.rect(W,W).addClass("main");
-  
+    // binding two SVG elements together
+    //
+      bind( g.rect(CORNER_SIZE,CORNER_SIZE), main, function(x,y) {  // 'main' moved, move us (also initial positioning)
+        
+      }, function(x,y) {  // us moved, stretch the 'main'
+        
+      }
+
+    // beforedrag
+    // dragstart
+    // dragmove
+    // dragend
+
+    var main = g.rect(W,W).addClass("main").draggable().on("dragmove.namespace", function(ev) {
+      console.log(ev);
+    } );  
+    
     // Do four corners
     //
     for( var i=0; i<4; i++ ) {
+      /***
       g.rect(CORNER_SIZE,CORNER_SIZE)
        .move( i%2==1 ? W-CORNER_SIZE+CORNER_OFFSET:-CORNER_OFFSET, i%4>=2 ? W-CORNER_SIZE+CORNER_OFFSET:-CORNER_OFFSET )
        .addClass("corner");
+     ***/
+     
+      // this could be done a '.bind' for the SVG elements
+      //
+      bind( g.rect(CORNER_SIZE,CORNER_SIZE), main, function(x,y) {  // 'main' moved, move us (also initial positioning)
+        
+      }, function(x,y) {  // us moved, stretch the 'main'
+        
+      }
     }
 
-    g.draggable().move(50,50);
+    g.move(50,50);
     
   </script>
 </body>
