@@ -46,6 +46,11 @@
     // dragmove
     // dragend
 
+    var ne=null,
+      se=null,
+      sw=null,
+      nw=null;
+
     // Do four corners (note: the corner's (0,0) will be where the main box's particular corner tracks them).
     //
     // - use 'move()' to change the 'x,y'
@@ -61,22 +66,30 @@
                     .translate( tx,ty )
                     .move( dx,dy )
                     .addClass("corner").draggable();
-
-      /***
-      // this could be done a '.bind' for the SVG elements
-      //
-      corner.on("dragmove.namespace", function(ev) {
-        
-      } );
-      ***/
+                    
+      if (i==0) {
+        ne= corner;
+      } else if (i==1) {
+        se = corner;
+      } else if (i==2) {
+        sw = corner;
+      } else {
+        nw = corner;
+      }
     }
 
+    // Now, bind here 'ne' 'x' to 'se' x' and 'ne' y to 'nw' y
+    //
+    //...
+    
+    /***
     // Main rect, bound to the corners dynamically
     //
-    g.rect(W,W) /*.bind(se)*/ .addClass("main").draggable().on("dragmove.namespace", function(ev) {
+    g.rect(W,W) /_*.bind(se)*_/ .addClass("main").draggable().on("dragmove.namespace", function(ev) {
       console.log(ev);
     } );  
-
+    ***/
+    
     g.move(50,50); //.draggable();
     
   </script>
