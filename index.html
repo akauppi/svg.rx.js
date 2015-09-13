@@ -41,54 +41,34 @@
 
     var g = svg.group();
 
-    // beforedrag
-    // dragstart
-    // dragmove
-    // dragend
-
-    var ne=null,
-      se=null,
-      sw=null,
-      nw=null;
-
+    // Bindable values, somehow
+    //
+    var top_ = 0;   //new Bindable(0, function(dy) { ... drag the whole group up/down 'dy' ... });
+    var right = W;  //new Bindable(W);    <-- tbd
+    var bottom = W; //new Bindable(W);
+    var left = 0;   //new Bindable(0, function(dx) { ... drag the whole group left/right 'dx' ... });
+    
     // Do four corners (note: the corner's (0,0) will be where the main box's particular corner tracks them).
     //
     // - use 'move()' to change the 'x,y'
     // - use 'translate()' to position the origin
     //
     for( var i=0; i<4; i++ ) {    // ne,se,sw,nw
-      var dx = (i<2) ? W-CORNER_SIZE : 0;
-      var dy = (i==1 || i==2) ? W-CORNER_SIZE : 0;
-      var tx = (i<2) ? CORNER_OFFSET : -CORNER_OFFSET;
-      var ty = (i==1 || i==2) ? CORNER_OFFSET : -CORNER_OFFSET;
+      var dx = (i<2) ? right : left;
+      var dy = (i==1 || i==2) ? bottom : top_;
+
+      var tx = (i<2) ? -(CORNER_SIZE-CORNER_OFFSET) : -CORNER_OFFSET;
+      var ty = (i==1 || i==2) ? -(CORNER_SIZE-CORNER_OFFSET) : -CORNER_OFFSET;
     
       var corner = g.rect(CORNER_SIZE,CORNER_SIZE)
                     .translate( tx,ty )
-                    .move( dx,dy )
-                    .addClass("corner").draggable();
-                    
-      if (i==0) {
-        ne= corner;
-      } else if (i==1) {
-        se = corner;
-      } else if (i==2) {
-        sw = corner;
-      } else {
-        nw = corner;
-      }
+                    .move( dx,dy )                      // tbd: make 'move' able to read Bindable's (and subscribe to their changes)
+                    .addClass("corner").draggable();    // tbd: make 'draggable' able to inform changes to the bindables
     }
 
-    // Now, bind here 'ne' 'x' to 'se' x' and 'ne' y to 'nw' y
+    // Main rect, bound to the corners dynamically (tbd: push below them)
     //
-    //...
-    
-    /***
-    // Main rect, bound to the corners dynamically
-    //
-    g.rect(W,W) /_*.bind(se)*_/ .addClass("main").draggable().on("dragmove.namespace", function(ev) {
-      console.log(ev);
-    } );  
-    ***/
+    g.rect(right,bottom).addClass("main");
     
     g.move(50,50); //.draggable();
     
