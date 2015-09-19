@@ -33,6 +33,12 @@
   </div>
   
   <script>
+    // Override
+    //
+    /*SVG.group.prototype.move = function() {
+      alert(12);
+    }*/
+    
     var W= 100;
     var CORNER_SIZE = 20;
     var CORNER_OFFSET = 5;
@@ -43,10 +49,10 @@
 
     // Bindable values, somehow
     //
-    var top_ = 0;   //new Bindable(0, function(dy) { ... drag the whole group up/down 'dy' ... });
-    var right = W;  //new Bindable(W);    <-- tbd
-    var bottom = W; //new Bindable(W);
-    var left = 0;   //new Bindable(0, function(dx) { ... drag the whole group left/right 'dx' ... });
+    var top_ = 0;   //new Observable(0, function(dy) { ... drag the whole group up/down 'dy' ... });
+    var right = W;  //new Observable(W);    <-- tbd
+    var bottom = W; //new Observable(W);
+    var left = 0;   //new Observable(0, function(dx) { ... drag the whole group left/right 'dx' ... });
     
     // Do four corners (note: the corner's (0,0) will be where the main box's particular corner tracks them).
     //
