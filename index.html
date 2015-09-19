@@ -11,7 +11,7 @@
   -->
     
   <script src="node_modules/rx-lite/rx.lite.min.js"></script>
-  <script src="js/Observable.js"></script>
+  <script src="js/svg.glue.js"></script>
   
   <style>
     rect.main { 
@@ -54,8 +54,8 @@
     // Bindable values, somehow
     //
     var top_ = 0;   //new Observable(0, function(dy) { ... drag the whole group up/down 'dy' ... });
-    var right = new Observable(W);
-    var bottom = new Observable(W);
+    var right = new SVG.Observable(W);
+    var bottom = new SVG.Observable(W);
     var left = 0;   //new Observable(0, function(dx) { ... drag the whole group left/right 'dx' ... });
     
     // Do four corners (note: the corner's (0,0) will be where the main box's particular corner tracks them).
@@ -72,7 +72,7 @@
     
       var corner = g.rect(CORNER_SIZE,CORNER_SIZE)
                     .translate( tx,ty )
-                    .move( dx,dy )                      // tbd: make 'move' able to read Bindable's (and subscribe to their changes)
+                    .move( dx,dy )                      // tbd: make 'move' able to subscribe to Observable's changes
                     .addClass("corner").draggable();    // tbd: make 'draggable' able to inform changes to the bindables
     }
 
