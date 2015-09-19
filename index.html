@@ -1,13 +1,17 @@
 <html>
 <head>
+  <script src="https://code.jquery.com/jquery.js"></script>
+
   <!-- Note: Probably not the way 'bower' dependencies are supposed to be used, but works for us.
   -->
   <script src="bower_components/svg.js/dist/svg.js" type="text/javascript"></script>
   <script src="bower_components/svg.draggable.js/dist/svg.draggable.js" type="text/javascript"></script>
-  
   <!--
-  <script src="lib/svg.draggy.js-1.1.0/src/svg.draggy.js"></script>
+  <script src="bower_components/assert/dist/assert.js"></script>
   -->
+    
+  <script src="node_modules/rx-lite/rx.lite.min.js"></script>
+  <script src="js/Observable.js"></script>
   
   <style>
     rect.main { 
@@ -50,8 +54,8 @@
     // Bindable values, somehow
     //
     var top_ = 0;   //new Observable(0, function(dy) { ... drag the whole group up/down 'dy' ... });
-    var right = W;  //new Observable(W);    <-- tbd
-    var bottom = W; //new Observable(W);
+    var right = new Observable(W);
+    var bottom = new Observable(W);
     var left = 0;   //new Observable(0, function(dx) { ... drag the whole group left/right 'dx' ... });
     
     // Do four corners (note: the corner's (0,0) will be where the main box's particular corner tracks them).
@@ -79,5 +83,6 @@
     g.move(50,50); //.draggable();
     
   </script>
+  
 </body>
 </html>
