@@ -89,6 +89,7 @@
       var g = svg.group();
   
       g.move(50,50);
+       //.draggable();    // tbd. enabling this makes the corners go crazy when dragged. fix
   
       var obsX1 = new SVG.Observable(),
         obsY1 = new SVG.Observable(),
@@ -108,7 +109,6 @@
        .follow( "y", obsY1 )
        .follow( "width", obsX2.combineLatest( obsX1, function (x2,x1) { return x2-x1; } ))    // tbd. make it impossible to move corners past (a limiting function to the corners' draggable, different for each)
        .follow( "height", obsY2.combineLatest( obsY1, function (y2,y1) { return y2-y1; } ));
-       //.draggable();
       
       // Create four corners (note: the corners' (0,0) will be where the main box's particular corner tracks them).
       //
@@ -129,7 +129,7 @@
                       .translate( tx,ty )
                       .move( dx,dy )
                       .addClass("corner")
-                      .draggable();
+                      .draggable();   // tbd. how to not escalate dragging to the group level
 
         // Make dragging the corner change the observable, but also the corner to move
         // if another corner changes the obsersable.

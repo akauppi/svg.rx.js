@@ -124,12 +124,3 @@ SVG.Observable = SVG.invent({
   });
   
 })();
-
-
-/*** REMOVE
-    y: fact(proto.y),
-    cx: fact(proto.cx),
-    cy: fact(proto.cy),
-    width: fact(proto.width),
-    height: fact(proto.height)
-***/
