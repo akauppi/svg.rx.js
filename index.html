@@ -94,23 +94,22 @@
 
     // Main rect, bound to the corners dynamically (tbd: push below them)
     //
-    g.rect(W,W)
+    var rect= g.rect(W,W)
      .addClass("main")
      .draggable()
      .track( xObs, yObs, widthObs, heightObs );
     
     g.move(50,50);
-    g.x(100);
-        
-    // Should output x -> 50, y -> 50 at load time, then follow any drag movements.
+    rect.x(100);
+
+    // Note: We start receiving values from here on (earlier changes are not stored for us).
     //
     xObs.subscribe( function (v) { console.log("x -> "+ v); } );
     yObs.subscribe( function (v) { console.log("y -> "+ v); } );
     widthObs.subscribe( function (v) { console.log("width -> "+ v); } );
     heightObs.subscribe( function (v) { console.log("height -> "+ v); } );
 
-    g.x(120);
-    g.width(200);
+    rect.x(120);
 
   </script>
   
