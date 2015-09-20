@@ -15,13 +15,15 @@
 *   o.emit(v: Number);
 *   ...
 *   o.dispose();
+*
+* Note: We're probably not going to need this, but could go with RxJS objects directly.
 */
 SVG.Observable = SVG.invent({
 
   // Initialize
   //
-  create: function() {
-    this._subject = new Rx.Subject();
+  create: function(rxSubject) {         // ([Rx.Subject) => 
+    this._subject = rxSubject || new Rx.Subject();
   }
 
   // Add methods
@@ -30,8 +32,14 @@ SVG.Observable = SVG.invent({
       this._subject.subscribe(handlerF);
     },
 
-    emit: function (val) {              // (Number) => Unit
+    emit: function (val) {              // (Number) =>
       this._subject.onNext(val);
+    },
+
+    // Note: RxJS allows multiple values to be combined, we only wrap 1+1.
+    //
+    combineLatest: function (obs2, func) {    // (SVG.Observable, (Number,Number) => Number) => SVG.Observable
+      return new SVG.Observable( this._subject.combineLatest( obs2._subject, func ) );
     },
 
     dispose: function () {

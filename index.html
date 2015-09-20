@@ -106,8 +106,8 @@
        .addClass("main")
        .follow( "x", obsX1 )
        .follow( "y", obsY1 )
-       //.follow( "width", obsX2-obsX1 )    // tbd. how to do this?
-       //.follow( "height", obsY2-obsY1 )
+       .follow( "width", obsX2.combineLatest( obsX1, function (x2,x1) { return x2-x1; } ))
+       .follow( "height", obsY2.combineLatest( obsY1, function (y2,y1) { return y2-y1; } ))
        .draggable();
       
       // Create four corners (note: the corners' (0,0) will be where the main box's particular corner tracks them).
