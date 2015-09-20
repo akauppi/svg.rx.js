@@ -91,12 +91,25 @@ SVG.Observable = SVG.invent({
   proto.height = function(v) { return fact(was_height, 3, this)(v); };
 
   SVG.extend( SVG.Element, {
+
     track: function (obsX, obsY, obsW, obsH) {    // ([SVG.Observable], [SVG.Observable], [SVG.Observable], [SVG.Observable]) => this
 
       // Note: This overrides earlier trackings. Should we do a '.dispose()' or is it okay just to leave them waiting for
       //      garbage collection? tbd. AKa200915
       //
       this._observables = [obsX, obsY, obsW, obsH];
+      
+      return this;
+    },
+
+    // Make the element's attribute ("x","y","width" or "height") follow an 'SVG.Observable'.
+    // 
+    follow: function (attr, obs) {    // (String, SVG.Observable) => this
+      var el= this;
+      
+      obs.subscribe( function (v) {
+        el.attr(attr, v);
+      } );
       
       return this;
     }

@@ -104,8 +104,12 @@
       //
       var rect= g.rect(W,W)
        .addClass("main")
+       .follow( "x", obsX1 )
+       .follow( "y", obsY1 )
+       //.follow( "width", obsX2-obsX1 )    // tbd. how to do this?
+       //.follow( "height", obsY2-obsY1 )
        .draggable();
-        
+      
       // Create four corners (note: the corners' (0,0) will be where the main box's particular corner tracks them).
       //
       // - use 'move()' to change the 'x,y' (dragging does this)
@@ -127,7 +131,12 @@
                       .addClass("corner")
                       .draggable();
 
-        corner.track( trx, try_ );                      
+        // Make dragging the corner change the observable, but also the corner to move
+        // if another corner changes the obsersable.
+        //
+        corner.track( trx, try_ )
+              .follow( "x", trx )
+              .follow( "y", try_ );
       }
       
       obsX1.subscribe( function (v) { console.log("x1 -> "+ v); } );
