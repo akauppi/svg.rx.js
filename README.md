@@ -6,7 +6,7 @@ Sandbox for making SVG elements dynamically bind to each other.
 
 <pre>
 $ bower install svg.draggable.js
-$ npm install assert
+$ bower install jquery
 $ npm install rx-lite
 </pre>
 
