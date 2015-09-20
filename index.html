@@ -90,10 +90,10 @@
   
       g.move(50,50);
   
-      var obsX = new SVG.Observable(),
-        obsY = new SVG.Observable(),
-        obsW = new SVG.Observable(),
-        obsH = new SVG.Observable();
+      var obsX1 = new SVG.Observable(),
+        obsY1 = new SVG.Observable(),
+        obsX2 = new SVG.Observable(),
+        obsY2 = new SVG.Observable();
 
       var top_ = 0,
         right = W,
@@ -114,16 +114,27 @@
       for( var i=0; i<4; i++ ) {    // ne,se,sw,nw
         var dx = (i<2) ? right : left;
         var dy = (i==1 || i==2) ? bottom : top_;
+
+        var trx = (i<2) ? obsX2 : obsX1;
+        var try_ = (i==1 || i==2) ? obsY2 : obsY1;
   
         var tx = (i<2) ? -(CORNER_SIZE-CORNER_OFFSET) : -CORNER_OFFSET;
         var ty = (i==1 || i==2) ? -(CORNER_SIZE-CORNER_OFFSET) : -CORNER_OFFSET;
       
-        g.rect(CORNER_SIZE,CORNER_SIZE)
-          .translate( tx,ty )
-          .move( dx,dy )
-          .addClass("corner")
-          .draggable();
+        var corner = g.rect(CORNER_SIZE,CORNER_SIZE)
+                      .translate( tx,ty )
+                      .move( dx,dy )
+                      .addClass("corner")
+                      .draggable();
+
+        corner.track( trx, try_ );                      
       }
+      
+      obsX1.subscribe( function (v) { console.log("x1 -> "+ v); } );
+      obsX2.subscribe( function (v) { console.log("x2 -> "+ v); } );
+      obsY1.subscribe( function (v) { console.log("y1 -> "+ v); } );
+      obsY2.subscribe( function (v) { console.log("y2 -> "+ v); } );
+      
     })();
 
   </script>
