@@ -37,12 +37,6 @@
   </div>
   
   <script>
-    // Override
-    //
-    /*SVG.group.prototype.move = function() {
-      alert(12);
-    }*/
-    
     var W= 100;
     var CORNER_SIZE = 20;
     var CORNER_OFFSET = 5;
@@ -58,6 +52,9 @@
     var bottom = new SVG.Observable(W);
     var left = 0;   //new Observable(0, function(dx) { ... drag the whole group left/right 'dx' ... });
     
+    console.log( right instanceof SVG.Observable );
+    console.log( left instanceof SVG.Observable );
+    
     // Do four corners (note: the corner's (0,0) will be where the main box's particular corner tracks them).
     //
     // - use 'move()' to change the 'x,y'
@@ -72,8 +69,20 @@
     
       var corner = g.rect(CORNER_SIZE,CORNER_SIZE)
                     .translate( tx,ty )
-                    .move( dx,dy )                      // tbd: make 'move' able to subscribe to Observable's changes
-                    .addClass("corner").draggable();    // tbd: make 'draggable' able to inform changes to the bindables
+                    .move( dx,dy )        // '.x()' and '.y()' are updated so that this will set up a dynamic relationship
+                    .addClass("corner")
+                    .draggable();         // tbd: make 'draggable' able to inform changes to the Observables
+
+      corner.on("dragstart.namespace", function (ev) {
+        console.log("Drag start", ev);
+        
+      }).on("dragmove.namespace", function (ev) {
+        console.log("Drag move", ev);
+
+      }).on("dragend.namespace", function (ev) {
+        console.log("Drag end", ev);
+
+      });
     }
 
     // Main rect, bound to the corners dynamically (tbd: push below them)

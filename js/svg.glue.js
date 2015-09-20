@@ -45,37 +45,54 @@ SVG.Observable = SVG.invent({
 
 /*
 * Make SVG.Element able to handle observables.
-*
-* tbd. Does SVG have ways to mix in new methods? AKa190915
 */
 // assert( SVG.Element.prototype );
 
 (function() {
   var proto = SVG.Element.prototype;
 
-  var fact = function (was_f) {
+  var fact = function (was_f, ctx) {
     return function (v) {             // (num | SVG.Observable) => or () => num
-      if (typeof v === "object") {    // setting to an Observable
+      if (v instanceof SVG.Observable) {    // setting to an Observable
         v.subscribe( function (vv) {
-          was_f.call(this, vv);
+          console.log(vv);
+          was_f.call(ctx, vv);
         } );
       } else {
-        was_f.call(this, v);
+        console.log(v);
+        was_f.call(ctx, v);
       }
     };
   };
-    
-  proto.x = fact(proto.x);
-  proto.y = fact(proto.y);
-  proto.cx = fact(proto.cx);
-  proto.cy = fact(proto.cy);
-  proto.width = fact(proto.width);
-  proto.height = fact(proto.height);
 
+  // tbd. DAMN making JavaScript inheritence right is difficult (take ES6 to help!). AKa190915
+  //
+  var was_x = proto.x;
+  var was_y = proto.y;
+  var was_cx = proto.cx;
+  var was_cy = proto.cy;
+  var was_width = proto.width;
+  var was_height = proto.height;
+
+  proto.x = function(v) { return fact(was_x, this)(v); };
+  proto.y = function(v) { return fact(was_y, this)(v); };
+  proto.cx = function(v) { return fact(was_cx, this)(v); };
+  proto.cy = function(v) { return fact(was_cy, this)(v); };
+  proto.width = function(v) { return fact(was_width, this)(v); };
+  proto.height = function(v) { return fact(was_height, this)(v); };
+
+  /***
+  SVG.extend( SVG.Element, {
+    x: fact(proto.x),
+    y: fact(proto.y),
+    cx: fact(proto.cx),
+    cy: fact(proto.cy),
+    width: fact(proto.width),
+    height: fact(proto.height)
+  });
+  ***/
+  
   // note: we may have missed some methods that would need wrapping
   
 })();
-
-
-
 
