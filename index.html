@@ -11,7 +11,7 @@
   -->
     
   <script src="node_modules/rx-lite/rx.lite.min.js"></script>
-  <script src="js/svg.glue.js"></script>
+  <script src="js/svg.track.js"></script>
   
   <style>
     rect.main { 
@@ -45,6 +45,7 @@
 
     var g = svg.group();
 
+    /***
     // Bindable values, somehow
     //
     var top_ = 0;   //new Observable(0, function(dy) { ... drag the whole group up/down 'dy' ... });
@@ -84,13 +85,33 @@
 
       });
     }
+    ***/
+
+    var xObs = new SVG.Observable(),
+      yObs = new SVG.Observable(),
+      widthObs = new SVG.Observable(),
+      heightObs = new SVG.Observable();
 
     // Main rect, bound to the corners dynamically (tbd: push below them)
     //
-    g.rect(right,bottom).addClass("main");
+    g.rect(W,W)
+     .addClass("main")
+     .draggable()
+     .track( xObs, yObs, widthObs, heightObs );
     
-    g.move(50,50); //.draggable();
-    
+    g.move(50,50);
+    g.x(100);
+        
+    // Should output x -> 50, y -> 50 at load time, then follow any drag movements.
+    //
+    xObs.subscribe( function (v) { console.log("x -> "+ v); } );
+    yObs.subscribe( function (v) { console.log("y -> "+ v); } );
+    widthObs.subscribe( function (v) { console.log("width -> "+ v); } );
+    heightObs.subscribe( function (v) { console.log("height -> "+ v); } );
+
+    g.x(120);
+    g.width(200);
+
   </script>
   
 </body>
