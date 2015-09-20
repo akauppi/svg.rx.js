@@ -18,6 +18,12 @@
       fill: blue;
       fill-opacity: 0.8;
     }
+    rect.main2 { 
+      fill: purple;
+      fill-opacity: 0.8;
+      stroke: brown;
+      stroke-width: 3 px;
+    }
     rect.corner { 
       fill: yellow;
       fill-opacity: 0.5;
@@ -43,73 +49,82 @@
     
     var svg = SVG("cradle");   // fills the cradle fully
 
-    var g = svg.group();
-
-    /***
-    // Bindable values, somehow
+    //--- Track changes to an element ---
     //
-    var top_ = 0;   //new Observable(0, function(dy) { ... drag the whole group up/down 'dy' ... });
-    var right = new SVG.Observable(W);
-    var bottom = new SVG.Observable(W);
-    var left = 0;   //new Observable(0, function(dx) { ... drag the whole group left/right 'dx' ... });
-    
-    console.log( right instanceof SVG.Observable );
-    console.log( left instanceof SVG.Observable );
-    
-    // Do four corners (note: the corner's (0,0) will be where the main box's particular corner tracks them).
+    // Tracks dragging, or explicit positioning/stretching to an observable.
     //
-    // - use 'move()' to change the 'x,y'
-    // - use 'translate()' to position the origin
-    //
-    for( var i=0; i<4; i++ ) {    // ne,se,sw,nw
-      var dx = (i<2) ? right : left;
-      var dy = (i==1 || i==2) ? bottom : top_;
-
-      var tx = (i<2) ? -(CORNER_SIZE-CORNER_OFFSET) : -CORNER_OFFSET;
-      var ty = (i==1 || i==2) ? -(CORNER_SIZE-CORNER_OFFSET) : -CORNER_OFFSET;
+    (function () {
+      var g2 = svg.group();
     
-      var corner = g.rect(CORNER_SIZE,CORNER_SIZE)
-                    .translate( tx,ty )
-                    .move( dx,dy )        // '.x()' and '.y()' are updated so that this will set up a dynamic relationship
-                    .addClass("corner")
-                    .draggable();         // tbd: make 'draggable' able to inform changes to the Observables
-
-      corner.on("dragstart.namespace", function (ev) {
-        console.log("Drag start", ev);
+      var xObs = new SVG.Observable(),
+        yObs = new SVG.Observable(),
+        wObs = new SVG.Observable(),
+        hObs = new SVG.Observable();
+  
+      // Main rect, bound to the corners dynamically (tbd: push below them)
+      //
+      var rect= g2.rect(W,W)
+       .addClass("main2")
+       .draggable()
+       .track( xObs, yObs, wObs, hObs );
+      
+      g2.move(150,50);
+  
+      // Note: We start receiving values from here on (earlier changes are not stored for us).
+      //
+      xObs.subscribe( function (v) { console.log("x -> "+ v); } );
+      yObs.subscribe( function (v) { console.log("y -> "+ v); } );
+      wObs.subscribe( function (v) { console.log("width -> "+ v); } );
+      hObs.subscribe( function (v) { console.log("height -> "+ v); } );
+  
+      rect.x(120);
+    })();
         
-      }).on("dragmove.namespace", function (ev) {
-        console.log("Drag move", ev);
-
-      }).on("dragend.namespace", function (ev) {
-        console.log("Drag end", ev);
-
-      });
-    }
-    ***/
-
-    var xObs = new SVG.Observable(),
-      yObs = new SVG.Observable(),
-      widthObs = new SVG.Observable(),
-      heightObs = new SVG.Observable();
-
-    // Main rect, bound to the corners dynamically (tbd: push below them)
+        
+    //--- Bind pieces together ---
     //
-    var rect= g.rect(W,W)
-     .addClass("main")
-     .draggable()
-     .track( xObs, yObs, widthObs, heightObs );
-    
-    g.move(50,50);
-    rect.x(100);
-
-    // Note: We start receiving values from here on (earlier changes are not stored for us).
+    // Corners are directly bound to the main rectangle's position and dimensions.
     //
-    xObs.subscribe( function (v) { console.log("x -> "+ v); } );
-    yObs.subscribe( function (v) { console.log("y -> "+ v); } );
-    widthObs.subscribe( function (v) { console.log("width -> "+ v); } );
-    heightObs.subscribe( function (v) { console.log("height -> "+ v); } );
+    (function () {
+      var g = svg.group();
+  
+      g.move(50,50);
+  
+      var obsX = new SVG.Observable(),
+        obsY = new SVG.Observable(),
+        obsW = new SVG.Observable(),
+        obsH = new SVG.Observable();
 
-    rect.x(120);
+      var top_ = 0,
+        right = W,
+        bottom = W,
+        left = 0;
+
+      // Declare main rect first so corners get on top of it.
+      //
+      var rect= g.rect(W,W)
+       .addClass("main")
+       .draggable();
+        
+      // Create four corners (note: the corners' (0,0) will be where the main box's particular corner tracks them).
+      //
+      // - use 'move()' to change the 'x,y' (dragging does this)
+      // - use 'translate()' to position the corner
+      //
+      for( var i=0; i<4; i++ ) {    // ne,se,sw,nw
+        var dx = (i<2) ? right : left;
+        var dy = (i==1 || i==2) ? bottom : top_;
+  
+        var tx = (i<2) ? -(CORNER_SIZE-CORNER_OFFSET) : -CORNER_OFFSET;
+        var ty = (i==1 || i==2) ? -(CORNER_SIZE-CORNER_OFFSET) : -CORNER_OFFSET;
+      
+        g.rect(CORNER_SIZE,CORNER_SIZE)
+          .translate( tx,ty )
+          .move( dx,dy )
+          .addClass("corner")
+          .draggable();
+      }
+    })();
 
   </script>
   
