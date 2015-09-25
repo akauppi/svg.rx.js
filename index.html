@@ -47,40 +47,6 @@
     
     var svg = SVG("cradle");   // fills the cradle fully
 
-    //--- Track changes to an element ---
-    //
-    // Tracks dragging, or explicit positioning/stretching to an observable.
-    //
-    (function () {
-      var g2 = svg.group();
-    
-      var xObs = new SVG.Observable(),
-        yObs = new SVG.Observable(),
-        wObs = new SVG.Observable(),
-        hObs = new SVG.Observable();
-  
-      // Main rect, bound to the corners dynamically (tbd: push below them)
-      //
-      var rect= g2.rect(W,W)
-       .addClass("main2")
-       .draggable()
-       .track( xObs, yObs, wObs, hObs );
-      
-      g2.move(150,50);
-  
-      // Note: We start receiving values from here on (earlier changes are not stored for us).
-      //
-      /***
-      xObs.subscribe( function (v) { console.log("x -> "+ v); } );
-      yObs.subscribe( function (v) { console.log("y -> "+ v); } );
-      wObs.subscribe( function (v) { console.log("width -> "+ v); } );
-      hObs.subscribe( function (v) { console.log("height -> "+ v); } );
-      ***/
-      
-      rect.x(120);
-    }) /*nope ()*/;
-        
-        
     //--- Bind pieces together ---
     //
     // Corners are directly bound to the main rectangle's position and dimensions.
