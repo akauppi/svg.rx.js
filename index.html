@@ -54,8 +54,7 @@
     (function () {
       var g = svg.group();
   
-      g.move(50,50)
-       .draggable();    // tbd. enabling this makes the corners go crazy when dragged. fix
+      g.move(50,50).draggable();
   
       var obsX1 = new SVG.Observable(),
         obsY1 = new SVG.Observable(),
@@ -113,14 +112,7 @@
       obsY1.emit(top_);
       obsX2.emit(right);
       obsY2.emit(bottom);
-      
-      /***
-      obsX1.subscribe( function (v) { console.log("x1 -> "+ v); } );
-      obsX2.subscribe( function (v) { console.log("x2 -> "+ v); } );
-      obsY1.subscribe( function (v) { console.log("y1 -> "+ v); } );
-      obsY2.subscribe( function (v) { console.log("y2 -> "+ v); } );
-      ***/
-            
+
     })();
 
   </script>
