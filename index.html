@@ -1,10 +1,9 @@
 <html>
 <head>
-  <!-- Note: Probably not the way 'bower' dependencies are supposed to be used, but works for us.
-  -->
   <script src="bower_components/svg.js/dist/svg.js" type="text/javascript"></script>
-  <script src="lib/svg.draggable-mod.js" type="text/javascript"></script>
   <script src="bower_components/jquery/dist/jquery.min.js"></script>
+
+  <script src="lib/svg.draggable-mod.js" type="text/javascript"></script>
 
   <!-- Bower has full 'rxjs' but not the lite version. npm has that. 
   -->    
@@ -55,20 +54,17 @@
       var g = svg.group();
   
       g.move(50,50).draggable();
-  
-      var obsX1 = new SVG.Observable(),
-        obsY1 = new SVG.Observable(),
-        obsX2 = new SVG.Observable(),
-        obsY2 = new SVG.Observable();
 
-      var top_ = 0,
-        right = W,
-        bottom = W,
-        left = 0;
+      // 'Rx.BehaviorSubject' "represents a value that changes over time".
+      //  
+      var obsX1 = new Rx.BehaviorSubject(0),
+        obsY1 = new Rx.BehaviorSubject(0),
+        obsX2 = new Rx.BehaviorSubject(W),
+        obsY2 = new Rx.BehaviorSubject(W);
 
       // Declare main rect first so corners get on top of it.
       //
-      var rect= g.rect(W,W)
+      var rect= g.rect( obsX2.getValue()-obsX1.getValue(), obsY2.getValue()-obsY1.getValue() )
        .addClass("main")
        .follow( "x", obsX1 )
        .follow( "y", obsY1 )
@@ -81,9 +77,6 @@
       // - use 'translate()' to position the corner
       //
       for( var i=0; i<4; i++ ) {    // ne,se,sw,nw
-        var dx = (i<2) ? right : left;
-        var dy = (i==1 || i==2) ? bottom : top_;
-
         var trx = (i<2) ? obsX2 : obsX1;
         var try_ = (i==1 || i==2) ? obsY2 : obsY1;
   
@@ -92,7 +85,7 @@
       
         var corner = g.rect(CORNER_SIZE,CORNER_SIZE)
                       .translate( tx,ty )
-                      .move( dx,dy )
+                      .move( trx.getValue(),try_.getValue() )
                       .addClass("corner")
                       .draggable();   // tbd. how to not escalate dragging to the group level
 
@@ -103,16 +96,6 @@
               .follow( "x", trx )
               .follow( "y", try_ );
       }
-      
-      // Give the observables starting values, otherwise 'combineLatest' will not work.
-      //
-      // Note: this needs to be after the subscriptions ('.follow'), otherwise it makes no difference.
-      //
-      obsX1.emit(left);
-      obsY1.emit(top_);
-      obsX2.emit(right);
-      obsY2.emit(bottom);
-
     })();
 
   </script>

@@ -2,51 +2,7 @@
 * svg.track.js
 */
 
-//assert( Rx.Subject );
-
-/*
-* SVG.Observable
-*
-* Usage:
-*   val o = new SVG.Observable();
-*   ...
-*   o.subscribe( function(v: Number) { ... } );
-*   ...
-*   o.emit(v: Number);
-*   ...
-*   o.dispose();
-*
-* Note: We're probably not going to need this, but could go with RxJS objects directly.
-*/
-SVG.Observable = SVG.invent({
-
-  // Initialize
-  //
-  create: function(rxSubject) {         // ([Rx.Subject) => 
-    this._subject = rxSubject || new Rx.Subject();
-  }
-
-  // Add methods
-, extend: {
-    subscribe: function (handlerF) {    // ( (Number) => ) =>
-      this._subject.subscribe(handlerF);
-    },
-
-    emit: function (val) {              // (Number) =>
-      this._subject.onNext(val);
-    },
-
-    // Note: RxJS allows multiple values to be combined, we only wrap 1+1.
-    //
-    combineLatest: function (obs2, func) {    // (SVG.Observable, (Number,Number) => Number) => SVG.Observable
-      return new SVG.Observable( this._subject.combineLatest( obs2._subject, func ) );
-    },
-
-    dispose: function () {
-      this._subject.dispose();
-    }
-  }
-});
+// assert( SVG.Element.prototype );
 
 /*
 * Add '.track' to an 'SVG.Element'.
@@ -54,8 +10,6 @@ SVG.Observable = SVG.invent({
 * Update observables when x/y/width/height are being changed (either explicitly
 * or via dragging).
 */
-// assert( SVG.Element.prototype );
-
 (function() {
   var proto = SVG.Element.prototype;
 
@@ -66,19 +20,26 @@ SVG.Observable = SVG.invent({
   // Returns: the wrapped method function
   //
   var fact = function (was_f, n, ctx) {
-    return function (v) {                 // (Number) => or () => Number
+    return function (v) {                 // (Number) => ctx or () => Number
 
-      // Note: the change will get done before the observable's subscribers
-      //    hear about it (even though here we emit before the change).
-      //
       if (v !== undefined) {
+        // Making the change before informing observers (we don't want to trust
+        // in the implementation details of '.onNext'). Then again, the order
+        // probably doesn't even matter. AKa280915
+        //
+        was_f.call(ctx,v);
+
         var obs = ctx._observables ? ctx._observables[n] : null;
         if (obs) {
-          obs.emit(v);
+          obs.onNext(v);
         }
+
+        return ctx;
+        
+      } else {
+        return was_f.call(ctx);
       }
 
-      return was_f.call(ctx,v);
     };
   };
 
@@ -100,7 +61,9 @@ SVG.Observable = SVG.invent({
 
   SVG.extend( SVG.Element, {
 
-    track: function (obsX, obsY, obsW, obsH) {    // ([SVG.Observable], [SVG.Observable], [SVG.Observable], [SVG.Observable]) => this
+    // Note: In practice the observables are likely 'Rx.BehaviorSubject's.
+    //
+    track: function (obsX, obsY, obsW, obsH) {    // ([Rx.Observable], [Rx.Observable], [Rx.Observable], [Rx.Observable]) => this
 
       // Note: This overrides earlier trackings. Should we do a '.dispose()' or is it okay just to leave them waiting for
       //      garbage collection? tbd. AKa200915
