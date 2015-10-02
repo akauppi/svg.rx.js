@@ -1,5 +1,5 @@
 /*
-* svg.track.js
+* svg.rx.js
 */
 
 // assert( SVG.Element.prototype );
@@ -63,7 +63,7 @@
 
     // Note: In practice the observables are likely 'Rx.BehaviorSubject's.
     //
-    track: function (obsX, obsY, obsW, obsH) {    // ([Rx.Observable], [Rx.Observable], [Rx.Observable], [Rx.Observable]) => this
+    track: function (obsX, obsY, obsW, obsH) {    // ([Rx.BehaviorSubject], [Rx.BehaviorSubject], [Rx.BehaviorSubject], [Rx.BehaviorSubject]) => this
 
       // Note: This overrides earlier trackings. Should we do a '.dispose()' or is it okay just to leave them waiting for
       //      garbage collection? tbd. AKa200915

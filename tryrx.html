@@ -1,0 +1,36 @@
+<html>
+<head>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/rxjs/4.0.0/rx.lite.js"></script>
+</head>
+
+<body>
+  <div>
+    Should show in console:
+    <pre>
+      AB: 0a (does not show)
+      AB: 1a
+    </pre>
+  </div>
+  
+  <script>
+    var A= new Rx.BehaviorSubject(0);
+    var B= new Rx.BehaviorSubject("");
+    
+    //A.subscribe( function (v) { console.log( "A: "+ v ); } );
+    //A.onNext(0);    
+
+    // '.combineLatest' needs all the dependency Observables to get emitted, before 
+    //  its combined signal is emitted.
+    //
+    // How to have a combined signal emitted when any of the dependencies change
+    // (using earlier given values for the rest)?
+    //    
+    A.combineLatest( B, function (a,b) { return a+b; } )
+     .subscribe( function (v) { console.log( "AB: "+ v ); } );
+
+    B.onNext("a");  
+    A.onNext(1);
+  </script>
+  
+</body>
+</html>
