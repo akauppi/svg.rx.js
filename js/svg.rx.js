@@ -51,24 +51,24 @@
   //
   var was_x = proto.x;
   var was_y = proto.y;
-  var was_width = proto.width;
-  var was_height = proto.height;
+  //var was_width = proto.width;
+  //var was_height = proto.height;
 
   proto.x = function(v) { return fact(was_x, 0, this)(v); };
   proto.y = function(v) { return fact(was_y, 1, this)(v); };
-  proto.width = function(v) { return fact(was_width, 2, this)(v); };
-  proto.height = function(v) { return fact(was_height, 3, this)(v); };
+  //proto.width = function(v) { return fact(was_width, 2, this)(v); };
+  //proto.height = function(v) { return fact(was_height, 3, this)(v); };
 
   SVG.extend( SVG.Element, {
 
     // Note: In practice the observables are likely 'Rx.BehaviorSubject's.
     //
-    track: function (obsX, obsY, obsW, obsH) {    // ([Rx.BehaviorSubject], [Rx.BehaviorSubject], [Rx.BehaviorSubject], [Rx.BehaviorSubject]) => this
+    track: function (obsX, obsY /*, obsW, obsH*/) {    // ([Rx.BehaviorSubject], [Rx.BehaviorSubject], [Rx.BehaviorSubject], [Rx.BehaviorSubject]) => this
 
       // Note: This overrides earlier trackings. Should we do a '.dispose()' or is it okay just to leave them waiting for
       //      garbage collection? tbd. AKa200915
       //
-      this._observables = [obsX, obsY, obsW, obsH];
+      this._observables = [obsX, obsY /*, obsW, obsH*/];
       
       return this;
     },
