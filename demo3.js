@@ -22,12 +22,16 @@ $(function() {
         }
     );
 
-    var obs = rect.rx_draggable();      // should be an observable of observables of {x:int,y:int}
-    console.log(obs);
+    var outerObs = rect.rx_draggable();      // should be an observable of observables of {x:int,y:int}
 
-    /***
-    obs.subscribe( function(o) {
-        console.log(o);
+    outerObs.subscribe( function(innerObs) {
+        console.log("Drag started");
+
+        innerObs.subscribe( function(o) {       // {x:Int,y:Int}
+            console.log("Drag: "+ o);
+        },
+        function () {
+            console.log("Drag ended");
+        } );
     } );
-    ***/
 });

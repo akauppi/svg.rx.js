@@ -81,18 +81,22 @@
       var obsMouseDown = Rx.Observable.fromEvent(this.node, 'mousedown');
 
       var outerObs = obsMouseDown.select( function(ev) {
-        //console.log(ev);
-
         var x= ev.x;
         var y= ev.y;
 
+        console.log( "Mouse down at " + x+","+y );
+
+        // Tracking mouse moves
+        //
         var obsMouseMove = Rx.Observable.fromEvent(this.node, 'mousemove');
-        var obsMouseUp = Rx.Observable.fromEvent(this.node, 'mouseup');
 
-        ...
-        // tbd. convert 'obsMouseMove's until an 'obsMouseUp' arrives (clean up the both at that time)
+        // Note: 'take(1)' is not really needed, but may cause a better cleanup.
+        //
+        var obsMouseUpSingle = Rx.Observable.fromEvent(this.node, 'mouseup').take(1);
 
-        return {x:x, y:y};   // TEMP
+        var obsInner = obsMouseMove.pluck('x','y').takeUntil( obsMouseUpOnce );
+
+        return obsInner;
       } )
 
       return outerObs;    // note: the caller should dispose of this (and we should dispose of inner observables if one is active)
