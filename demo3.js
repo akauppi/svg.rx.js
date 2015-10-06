@@ -14,9 +14,20 @@ $(function() {
     var rect= svg.rect( W, W )
                 .addClass("main");
 
-    var obs = rect.draggable();
+    var source = Rx.Observable.fromEvent(rect.node, 'click');
 
+    source.subscribe(
+        function (x) {
+            console.log(x);
+        }
+    );
+
+    var obs = rect.rx_draggable();      // should be an observable of observables of {x:int,y:int}
+    console.log(obs);
+
+    /***
     obs.subscribe( function(o) {
         console.log(o);
     } );
+    ***/
 });

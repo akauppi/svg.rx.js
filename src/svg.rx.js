@@ -61,6 +61,43 @@
 
   SVG.extend( SVG.Element, {
 
+    // Create an rxJS observable for any dragging events
+    //
+    // Returns:
+    //  observable of observables of { x: Int, y: Int }
+    //
+    // For each drag, a new inner observable is created. That streams unique {x,y} coordinates, and terminates when
+    // the user ends the drag.
+    //
+    // tbd. disposal hasn't been planned
+    //
+    // Note: Unlike 'svg.draggable.js', we don't actually move the object anywhere. That is up to the subscriber
+    //      (they might want to do something else with the drag than simply pan the x,y).
+    //
+    rx_draggable: function () {
+
+      // tbd: add touch events (see from 'svg.draggable.js' sources)
+
+      var obsMouseDown = Rx.Observable.fromEvent(this.node, 'mousedown');
+
+      var outerObs = obsMouseDown.select( function(ev) {
+        //console.log(ev);
+
+        var x= ev.x;
+        var y= ev.y;
+
+        var obsMouseMove = Rx.Observable.fromEvent(this.node, 'mousemove');
+        var obsMouseUp = Rx.Observable.fromEvent(this.node, 'mouseup');
+
+        ...
+        // tbd. convert 'obsMouseMove's until an 'obsMouseUp' arrives (clean up the both at that time)
+
+        return {x:x, y:y};   // TEMP
+      } )
+
+      return outerObs;    // note: the caller should dispose of this (and we should dispose of inner observables if one is active)
+    },
+
     // Note: In practice the observables are likely 'Rx.BehaviorSubject's.
     //
     track: function (obsX, obsY /*, obsW, obsH*/) {    // ([Rx.BehaviorSubject], [Rx.BehaviorSubject], [Rx.BehaviorSubject], [Rx.BehaviorSubject]) => this
