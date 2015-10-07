@@ -78,6 +78,8 @@
 
       // tbd: add touch events (see from 'svg.draggable.js' sources)
 
+      var self = this;    // to be used within further inner functions
+
       var obsMouseDown = Rx.Observable.fromEvent(this.node, 'mousedown');
 
       var outerObs = obsMouseDown.select( function(ev) {
@@ -88,13 +90,16 @@
 
         // Tracking mouse moves
         //
-        var obsMouseMove = Rx.Observable.fromEvent(this.node, 'mousemove');
+        var obsMouseMove = Rx.Observable.fromEvent(self.node, 'mousemove');
 
         // Note: 'take(1)' is not really needed, but may cause a better cleanup.
         //
-        var obsMouseUpSingle = Rx.Observable.fromEvent(this.node, 'mouseup').take(1);
+        var obsMouseUpSingle = Rx.Observable.fromEvent(self.node, 'mouseup').take(1);
 
-        var obsInner = obsMouseMove.pluck('x','y').takeUntil( obsMouseUpOnce );
+        // tbd. How to optimize so that only the last event would ever be shipped, if multiple have gathered, i.e.
+        //      we only need the last coordinates. AKa071015
+        //
+        var obsInner = obsMouseMove.pluck('x','y').takeUntil( obsMouseUpSingle );
 
         return obsInner;
       } )
