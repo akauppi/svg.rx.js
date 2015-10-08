@@ -31,7 +31,7 @@ $(function() {
 
             // bug. Only gets 'undefined' and only when moved above the rectangle
             //
-            console.log("Drag: "+ o);
+            console.log( JSON.stringify(o) );
             //rect.move(o.x, o.y);
         },
         function () {

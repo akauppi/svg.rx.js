@@ -99,7 +99,9 @@
         // tbd. How to optimize so that only the last event would ever be shipped, if multiple have gathered, i.e.
         //      we only need the last coordinates. AKa071015
         //
-        var obsInner = obsMouseMove.pluck('x','y').takeUntil( obsMouseUpSingle );
+        var obsInner = obsMouseMove.select( function (o) {
+          return {x: o.x, y: o.y};
+        } ).takeUntil( obsMouseUpSingle );
 
         return obsInner;
       } )
