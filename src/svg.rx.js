@@ -59,6 +59,33 @@
   //proto.width = function(v) { return fact(was_width, 2, this)(v); };
   //proto.height = function(v) { return fact(was_height, 3, this)(v); };
 
+  // adapted from 'svg.draggable.js'
+  //
+  var draggable = {
+    // transforms one point from screen to user coords
+    transformPoint: function (event, offset) {
+      event = event || window.event
+      var touches = event.changedTouches && event.changedTouches[0] || event
+      this.p.x = touches.pageX - (offset || 0)
+      this.p.y = touches.pageY
+      return this.p.matrixTransform(this.m)
+    },
+
+    // gets elements bounding box with special handling of groups, nested and use
+    getBBox: function(){
+      var box = this.el.bbox()
+
+      if(this.el instanceof SVG.Nested) box = this.el.rbox()
+
+      if (this.el instanceof SVG.G || this.el instanceof SVG.Use || this.el instanceof SVG.Nested) {
+        box.x = this.el.x()
+        box.y = this.el.y()
+      }
+
+      return box
+    }
+  }
+
   SVG.extend( SVG.Element, {
 
     // Create an rxJS observable for any dragging events
@@ -82,6 +109,9 @@
 
       var obsMouseDown = Rx.Observable.fromEvent(this.node, 'mousedown');
 
+      // #touch tbd. could probably merge these two observables to 'obsStart'
+      //var obsTouchStart = Rx.Observable.fromEvent(this.node, 'touchstart');
+
       var outerObs = obsMouseDown.select( function(ev) {
         var x= ev.x;
         var y= ev.y;
@@ -90,11 +120,11 @@
 
         // Tracking mouse moves
         //
-        var obsMouseMove = Rx.Observable.fromEvent(self.node, 'mousemove');
+        var obsMouseMove = Rx.Observable.fromEvent(window, 'mousemove');   // #touch 'touchmove'
 
         // Note: 'take(1)' is not really needed, but may cause a better cleanup.
         //
-        var obsMouseUpSingle = Rx.Observable.fromEvent(self.node, 'mouseup').take(1);
+        var obsMouseUpSingle = Rx.Observable.fromEvent(window, 'mouseup').take(1);      // #touch 'touchend'
 
         // tbd. How to optimize so that only the last event would ever be shipped, if multiple have gathered, i.e.
         //      we only need the last coordinates. AKa071015
