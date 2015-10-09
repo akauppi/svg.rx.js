@@ -59,9 +59,9 @@
   //proto.width = function(v) { return fact(was_width, 2, this)(v); };
   //proto.height = function(v) { return fact(was_height, 3, this)(v); };
 
-  // adapted from 'svg.draggable.js'
+  // adapted from 'svg.draggable.js' -> https://github.com/wout/svg.draggable.js
   //
-  var draggable = {
+  var Draggable = {
     // transforms one point from screen to user coords
     transformPoint: function (event, offset) {
       event = event || window.event
@@ -71,6 +71,7 @@
       return this.p.matrixTransform(this.m)
     },
 
+    /**
     // gets elements bounding box with special handling of groups, nested and use
     getBBox: function(){
       var box = this.el.bbox()
@@ -84,6 +85,7 @@
 
       return box
     }
+    **/
   }
 
   SVG.extend( SVG.Element, {
@@ -101,7 +103,7 @@
     // Note: Unlike 'svg.draggable.js', we don't actually move the object anywhere. That is up to the subscriber
     //      (they might want to do something else with the drag than simply pan the x,y).
     //
-    rx_draggable: function () {
+    rx_draggable: function () {   // () ->
 
       // tbd: add touch events (see from 'svg.draggable.js' sources)
 
@@ -113,10 +115,16 @@
       //var obsTouchStart = Rx.Observable.fromEvent(this.node, 'touchstart');
 
       var outerObs = obsMouseDown.select( function(ev) {
-        var x= ev.x;
-        var y= ev.y;
+        var ev_x = ev.x,
+            ev_y = ev.y;
 
-        console.log( "Mouse down at " + x+","+y );
+        console.log( "Mouse down at " + ev_x+","+ev_y );
+
+        var x_offset = ev_x - self.x(),
+            y_offset = ev_y - self.y();
+
+        var cx_offset = ev_x - self.cx(),
+            cy_offset = ev_y - self.cy();
 
         // Tracking mouse moves
         //
@@ -129,9 +137,17 @@
         // tbd. How to optimize so that only the last event would ever be shipped, if multiple have gathered, i.e.
         //      we only need the last coordinates. AKa071015
         //
+        // Note: some events actually come with the same x,y values (at least on Safari OS X). We can filter those
+        //      out with '.distinctUntilChanged()'.
+        //
         var obsInner = obsMouseMove.select( function (o) {
-          return {x: o.x, y: o.y};
-        } ).takeUntil( obsMouseUpSingle );
+          return {
+            x: o.x-x_offset,
+            y: o.y-y_offset
+          };
+        } )
+          .distinctUntilChanged()
+          .takeUntil( obsMouseUpSingle );
 
         return obsInner;
       } )

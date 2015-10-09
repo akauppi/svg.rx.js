@@ -29,11 +29,9 @@ $(function() {
 
         innerObs.subscribe( function(o) {       // {x:Int,y:Int}
 
-            // bug. Only gets 'undefined' and only when moved above the rectangle
-            //
-            console.log( JSON.stringify(o) );
+            //console.log( JSON.stringify(o) );
 
-            //rect.move(o.x, o.y);
+            rect.move(o.x, o.y);
         },
         function () {
             console.log("Drag ended");
