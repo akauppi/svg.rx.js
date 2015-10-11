@@ -49,14 +49,15 @@
         return Rx.Observable.fromEvent(self.node, touch ? 'touchstart':'mousedown')
           .select( function (ev) {
             console.log( "Outer observable started" );    // happens on touch
-            console.log(ev);  // tbd. with touch it's not .x and .y
+            //console.log(ev);
 
+            /** remove
             var ev_x = ev.x,
                 ev_y = ev.y;
 
             var x_offset = ev_x - self.x(),
                 y_offset = ev_y - self.y();
-
+            **/
             //var cx_offset = ev_x - self.cx(),
             //    cy_offset = ev_y - self.cy();
 
@@ -103,10 +104,8 @@
             }
             **/
 
-            var startPoints = {
-              point: transformP(ev /*, anchorOffset*/),
-              box:   self.bbox()    // note. 'svg.draggable.js' had special code for handling G, Use, Nested
-            }
+            var offset = transformP(ev /*, anchorOffset*/);
+            var startBox = self.bbox();    // note. 'svg.draggable.js' had special code for handling G, Use, Nested
 
             // prevent browser drag behavior
             //
@@ -128,13 +127,13 @@
             // Note: some events actually come with the same x,y values (at least on Safari OS X) - removed by the
             //      '.distinctUntilChanged()'.
             //
-            var obsInner = obsMove.select( function (o) {
-              console.log( o );   // tbd. with touch, it's not '.x','.y'
+            var obsInner = obsMove.select( function (ev) {
+              //console.log( ev );   // tbd. with touch, it's not '.x','.y'
 
-              var box = self.bbox();
+              //var box = self.bbox();
               var p = self.transformPoint(o);
-              var x = startPoints.box.x + p.x - startPoints.point.x,
-                  y = startPoints.box.y + p.y - startPoints.point.y;
+              var x = startBox.x + p.x - offset.x,
+                  y = startBox.y + p.y - offset.y;
 
               return {
                 x: x,   //remove: o.x - x_offset,
