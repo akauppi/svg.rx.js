@@ -124,28 +124,34 @@
         var cx_offset = ev_x - self.cx(),
             cy_offset = ev_y - self.cy();
 
-        // Tracking mouse moves
+        // Tracking mouse or touch moves
         //
-        var obsMouseMove = Rx.Observable.fromEvent(window, 'mousemove');   // #touch 'touchmove'
+        // Note: We expect the events to be similar. If they are not, we'll simply do a
+        //      select before the merge.
+        //
+        var obsMove = Rx.Observable.merge(
+          Rx.Observable.fromEvent(window, 'mousemove'),
+          Rx.Observable.fromEvent(window, 'touchmove')
+        );
 
-        // Note: 'take(1)' is not really needed, but may cause a better cleanup.
-        //
-        var obsMouseUpSingle = Rx.Observable.fromEvent(window, 'mouseup').take(1);      // #touch 'touchend'
+        var obsUpSingle = Rx.Observable.merge(
+          Rx.Observable.fromEvent(window, 'mouseup'),
+          Rx.Observable.fromEvent(window, 'touchend')
+        ).take(1);    // note: 'take(1)' is not really needed (we're simply waiting for one event)
 
         // tbd. How to optimize so that only the last event would ever be shipped, if multiple have gathered, i.e.
         //      we only need the last coordinates. AKa071015
         //
-        // Note: some events actually come with the same x,y values (at least on Safari OS X). We can filter those
-        //      out with '.distinctUntilChanged()'.
+        // Note: some events actually come with the same x,y values (at least on Safari OS X). 
         //
-        var obsInner = obsMouseMove.select( function (o) {
+        var obsInner = obsMove.select( function (o) {
           return {
             x: o.x-x_offset,
             y: o.y-y_offset
           };
         } )
           .distinctUntilChanged()
-          .takeUntil( obsMouseUpSingle );
+          .takeUntil( obsUpSingle );
 
         return obsInner;
       } )
