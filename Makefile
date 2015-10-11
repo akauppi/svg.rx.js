@@ -16,7 +16,7 @@
 bower=node_modules/.bin/bower
 npm=$(shell which npm)
 
-libs=lib/svg.min.js lib/jquery.min.js lib/rx.lite.min.js
+libs=lib/svg.min.js lib/jquery.min.js lib/rx.lite.js
 
 #---
 all: $(libs)
@@ -76,15 +76,27 @@ $(jquery_min): | $(bower)
 #- -
 # Note: 'bower' does not have 'rs.lite' but 'npm' has
 #  
-rxlite_min=node_modules/rx-lite/rx.lite.min.js
+# Note: Using non-minified for now, for development.
+#
+rxlite=node_modules/rx-lite/rx.lite.js
 
-lib/rx.lite.min.js: $(rxlite_min)
+lib/rx.lite.js: $(rxlite)
 	cp $< $@
-	cp $(<:.min.js=.map) lib/
 
-$(rxlite_min): | $(npm)
+$(rxlite): | $(npm)
 	$(npm) install rx-lite
 	@test -f $@ || (echo "ERROR: couldn't create $@"; false)
+
+# DISABLED (for now)
+#rxlite_min=node_modules/rx-lite/rx.lite.min.js
+#
+#lib/rx.lite.min.js: $(rxlite_min)
+#	cp $< $@
+#	cp $(<:.min.js=.map) lib/
+#
+#$(rxlite_min): | $(npm)
+#	$(npm) install rx-lite
+#	@test -f $@ || (echo "ERROR: couldn't create $@"; false)
 	
 #---
 # Installing tools
