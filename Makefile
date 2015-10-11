@@ -16,7 +16,7 @@
 bower=node_modules/.bin/bower
 npm=$(shell which npm)
 
-libs=lib/svg.min.js lib/jquery.min.js lib/rx.lite.js
+libs=lib/svg.min.js lib/jquery.min.js lib/rx.lite-4.0.0.js
 
 #---
 all: $(libs)
@@ -36,8 +36,10 @@ update: | $(npm) $(bower)
 # Note: normally 'make clean' would not change anything in the repo. This does, however,
 #			clear away the JavaScript files in 'lib/'.
 #
+# Note: We're deliberately emptying the whole directory. This covers leftovers (e.g. min vs non-min).
+#
 clean:
-	-rm $(libs)
+	-rm lib/*
 
 # To be used in release testing. Clears the slate like it was a fresh clone.
 #
@@ -53,6 +55,15 @@ wipe:
 #
 
 #- -
+#svgjs=bower_components/svg.js/dist/svg.js
+#
+#lib/svg.js: $(svgjs)
+#	cp $< $@
+#
+#$(svgjs): | $(bower)
+#	$(bower) install svg.js
+#	@test -f $@ || (echo "ERROR: couldn't create $@"; false)
+
 svgjs_min=bower_components/svg.js/dist/svg.min.js
 
 lib/svg.min.js: $(svgjs_min)
@@ -78,16 +89,17 @@ $(jquery_min): | $(bower)
 #  
 # Note: Using non-minified for now, for development.
 #
+# NOTE: rx-lite 4.0.1 is broken ('fromEvent' does not fire events)
+#
 rxlite=node_modules/rx-lite/rx.lite.js
 
-lib/rx.lite.js: $(rxlite)
+lib/rx.lite-4.0.0.js: $(rxlite)
 	cp $< $@
 
 $(rxlite): | $(npm)
-	$(npm) install rx-lite
+	$(npm) install rx-lite@4.0.0
 	@test -f $@ || (echo "ERROR: couldn't create $@"; false)
 
-# DISABLED (for now)
 #rxlite_min=node_modules/rx-lite/rx.lite.min.js
 #
 #lib/rx.lite.min.js: $(rxlite_min)
@@ -95,7 +107,7 @@ $(rxlite): | $(npm)
 #	cp $(<:.min.js=.map) lib/
 #
 #$(rxlite_min): | $(npm)
-#	$(npm) install rx-lite
+#	$(npm) install rx-lite@4.0.0
 #	@test -f $@ || (echo "ERROR: couldn't create $@"; false)
 	
 #---

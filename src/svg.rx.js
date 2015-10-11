@@ -37,15 +37,6 @@
     **/
   };
 
-  if (true) {  // TESTING
-    var xxx= Rx.Observable.fromEvent(window, 'click');
-    console.log(xxx);
-
-    xxx.subscribe( function(ev) {
-      alert(ev);
-    });
-  }
-
   SVG.extend( SVG.Element, {
 
     // Create an rxJS observable for any dragging events
@@ -65,17 +56,16 @@
 
       var self = this;    // to be used within further inner functions
 
-      console.log(this);
+      console.log(this.node);
       
       // Note: If the events are identical by the fields we need, we can merge them right here.
       //      Otherwise, 
       //
-      var obsDown = //Rx.Observable.merge(
-        Rx.Observable.fromEvent(this.node, 'mousedown');
-        //Rx.Observable.fromEvent(this.node, 'touchmove')
-      //);
-      
+      var obsDown = Rx.Observable.fromEvent(this.node, 'mousedown');  // tbd. #touch
+
       var outerObs = obsDown.select( function(ev) {
+        console.log(52);
+
         var ev_x = ev.x,
             ev_y = ev.y;
 
