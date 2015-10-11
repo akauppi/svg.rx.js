@@ -8,34 +8,20 @@
 */
 (function() {
 
-  // adapted from 'svg.draggable.js' -> https://github.com/wout/svg.draggable.js
+  /** DISABLED we don't support '.G', '.Use', '.Nested', yet. Do we need to?
+  // gets elements bounding box with special handling of groups, nested and use
   //
-  var Draggable = {
-    // transforms one point from screen to user coords
-    transformPoint: function (event, offset) {
-      event = event || window.event
-      var touches = event.changedTouches && event.changedTouches[0] || event
-      this.p.x = touches.pageX - (offset || 0)
-      this.p.y = touches.pageY
-      return this.p.matrixTransform(this.m)
+  var getBBox = function(el) {
+    var box = (el instanceof SVG.Nested) ? el.rbox() : el.bbox();
+
+    if (el instanceof SVG.G || el instanceof SVG.Use || el instanceof SVG.Nested) {
+      box.x = el.x();
+      box.y = el.y();
     }
 
-    /**
-    // gets elements bounding box with special handling of groups, nested and use
-    getBBox: function(){
-      var box = this.el.bbox()
-
-      if(this.el instanceof SVG.Nested) box = this.el.rbox()
-
-      if (this.el instanceof SVG.G || this.el instanceof SVG.Use || this.el instanceof SVG.Nested) {
-        box.x = this.el.x()
-        box.y = this.el.y()
-      }
-
-      return box
-    }
-    **/
-  };
+    return box;
+  }
+  **/
 
   SVG.extend( SVG.Element, {
 
@@ -56,56 +42,122 @@
 
       var self = this;    // to be used within further inner functions
 
-      // Note: If the events are identical by the fields we need, we can merge them right here. Otherwise, need to do
-      //      mapping before the merge.
+      // Helper function to give us an outer stream of drags. Either coming from desktop, or touch.
       //
-      var outerObs = Rx.Observable.merge(
-        Rx.Observable.fromEvent(this.node, 'mousedown'),
-        Rx.Observable.fromEvent(this.node, 'touchstart')
+      var outerObs = function (touch) {    // (boolean) -> observable of {x:Int, y:Int}
 
-      ).select( function(ev) {
-        var ev_x = ev.x,
-            ev_y = ev.y;
+        return Rx.Observable.fromEvent(self.node, touch ? 'touchstart':'mousedown')
+          .select( function (ev) {
+            console.log( "Outer observable started" );    // happens on touch
+            console.log(ev);  // tbd. with touch it's not .x and .y
 
-        var x_offset = ev_x - self.x(),
-            y_offset = ev_y - self.y();
+            var ev_x = ev.x,
+                ev_y = ev.y;
 
-        var cx_offset = ev_x - self.cx(),
-            cy_offset = ev_y - self.cy();
+            var x_offset = ev_x - self.x(),
+                y_offset = ev_y - self.y();
 
-        // Tracking mouse or touch moves
-        //
-        // Note: We expect the events to be similar. If they are not, we'll simply do a
-        //      select before the merge.
-        //
-        var obsMove = Rx.Observable.merge(
-          Rx.Observable.fromEvent(window, 'mousemove'),
-          Rx.Observable.fromEvent(window, 'touchmove')
-        );
+            //var cx_offset = ev_x - self.cx(),
+            //    cy_offset = ev_y - self.cy();
 
-        var obsUpSingle = Rx.Observable.merge(
-          Rx.Observable.fromEvent(window, 'mouseup'),
-          Rx.Observable.fromEvent(window, 'touchend')
-        ).take(1);    // note: 'take(1)' is not really needed (we're simply waiting for one event)
+            // Transforms from screen to user coords
+            //
+            // adapted from 'svg.draggable.js' -> https://github.com/wout/svg.draggable.js
+            //
+            var transformP = (function () {    // -> function (event) -> point
 
-        // tbd. How to optimize so that only the last event would ever be shipped, if multiple have gathered, i.e.
-        //      we only need the last coordinates. AKa071015
-        //
-        // Note: some events actually come with the same x,y values (at least on Safari OS X). 
-        //
-        var obsInner = obsMove.select( function (o) {
-          return {
-            x: o.x-x_offset,
-            y: o.y-y_offset
-          };
-        } )
-          .distinctUntilChanged()
-          .takeUntil( obsUpSingle );
+              // Note: local values are hidden in this scope.
+              //
+              // nb. Only stuff we actually test (manually) is enabled. 'SVG.Nested' is not one of them (from 'svg.draggable.js')
+              //
+              var parent = /*self.parent(SVG.Nested) ||*/ self.parent(SVG.Doc);
 
-        return obsInner;
-      } )
+              var p = parent.node.createSVGPoint();     // point buffer (avoid reallocation per each coordinate change)
+              var m = self.node.getScreenCTM().inverse();
 
-      return outerObs;    // note: the caller should dispose of this (and we should dispose of inner observables if one is active)
+              return function (ev /*, offset*/) {
+                //event = event || window.event
+                var touches = ev.changedTouches && ev.changedTouches[0] || ev;
+                p.x = touches.pageX;  // - (offset || 0)
+                p.y = touches.pageY;
+
+                return p.matrixTransform(m);
+              }
+            })();
+
+            /** DISABLED text element support not needed, yet
+            var anchorOffset;
+
+            // fix text-anchor in text-element (#37)
+            if (self instanceof SVG.Text) {
+              anchorOffset = self.node.getComputedTextLength();
+
+              switch (self.attr('text-anchor')) {
+                case 'middle':
+                  anchorOffset /= 2;
+                  break;
+                case 'start':
+                  anchorOffset = 0;
+                  break;
+              }
+            }
+            **/
+
+            var startPoints = {
+              point: transformP(ev /*, anchorOffset*/),
+              box:   self.bbox()    // note. 'svg.draggable.js' had special code for handling G, Use, Nested
+            }
+
+            // prevent browser drag behavior
+            //
+            ev.preventDefault();
+
+            // prevent propagation to a parent that might also have dragging enabled (tbd. this probably also takes
+            // care of '.preventDefault()').
+            //
+            ev.stopPropagation();
+
+            var obsMove = Rx.Observable.fromEvent(window, touch ? 'touchmove':'mousemove');
+
+            var obsUpSingle = Rx.Observable.fromEvent(window, touch ? 'touchend':'mouseup')
+                                .take(1);    // note: 'take(1)' is not really needed (we're simply waiting for one event)
+
+            // tbd. How to optimize so that only the last event would ever be shipped, if multiple have gathered, i.e.
+            //      we only need the last coordinates. AKa071015
+            //
+            // Note: some events actually come with the same x,y values (at least on Safari OS X) - removed by the
+            //      '.distinctUntilChanged()'.
+            //
+            var obsInner = obsMove.select( function (o) {
+              console.log( o );   // tbd. with touch, it's not '.x','.y'
+
+              var box = self.bbox();
+              var p = self.transformPoint(o);
+              var x = startPoints.box.x + p.x - startPoints.point.x,
+                  y = startPoints.box.y + p.y - startPoints.point.y;
+
+              return {
+                x: x,   //remove: o.x - x_offset,
+                y: y    //remove: o.y - y_offset //,
+                //cx: o.cx - cx_offset,
+                //cy: o.cy - cy_offset
+              };
+            } )
+              .distinctUntilChanged()
+              .takeUntil( obsUpSingle );
+
+            return obsInner;
+          } );
+        };  // function outerObs
+
+      // Merge the two approaches. Only one inner drag active at any one time (desktop or touch)
+      //
+      // Note: the caller should dispose of this (and we need to check if we need to dispose some).
+      //
+      return Rx.Observable.merge(
+        outerObs(false),  // mouse
+        outerObs(true)    // touch
+      );
     }
 
   });
