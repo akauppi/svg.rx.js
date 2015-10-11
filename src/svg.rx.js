@@ -56,8 +56,6 @@
 
       var self = this;    // to be used within further inner functions
 
-      console.log(this.node);
-      
       // Note: If the events are identical by the fields we need, we can merge them right here. Otherwise, need to do
       //      mapping before the merge.
       //
