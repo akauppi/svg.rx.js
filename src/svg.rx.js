@@ -58,14 +58,14 @@
 
       console.log(this.node);
       
-      // Note: If the events are identical by the fields we need, we can merge them right here.
-      //      Otherwise, 
+      // Note: If the events are identical by the fields we need, we can merge them right here. Otherwise, need to do
+      //      mapping before the merge.
       //
-      var obsDown = Rx.Observable.fromEvent(this.node, 'mousedown');  // tbd. #touch
+      var outerObs = Rx.Observable.merge(
+        Rx.Observable.fromEvent(this.node, 'mousedown'),
+        Rx.Observable.fromEvent(this.node, 'touchstart')
 
-      var outerObs = obsDown.select( function(ev) {
-        console.log(52);
-
+      ).select( function(ev) {
         var ev_x = ev.x,
             ev_y = ev.y;
 
@@ -80,15 +80,15 @@
         // Note: We expect the events to be similar. If they are not, we'll simply do a
         //      select before the merge.
         //
-        var obsMove = //Rx.Observable.merge(
-          Rx.Observable.fromEvent(window, 'mousemove');
-          //Rx.Observable.fromEvent(window, 'touchmove')
-        //);
+        var obsMove = Rx.Observable.merge(
+          Rx.Observable.fromEvent(window, 'mousemove'),
+          Rx.Observable.fromEvent(window, 'touchmove')
+        );
 
-        var obsUpSingle = //Rx.Observable.merge(
-          Rx.Observable.fromEvent(window, 'mouseup');
-          //Rx.Observable.fromEvent(window, 'touchend')
-        //).take(1);    // note: 'take(1)' is not really needed (we're simply waiting for one event)
+        var obsUpSingle = Rx.Observable.merge(
+          Rx.Observable.fromEvent(window, 'mouseup'),
+          Rx.Observable.fromEvent(window, 'touchend')
+        ).take(1);    // note: 'take(1)' is not really needed (we're simply waiting for one event)
 
         // tbd. How to optimize so that only the last event would ever be shipped, if multiple have gathered, i.e.
         //      we only need the last coordinates. AKa071015

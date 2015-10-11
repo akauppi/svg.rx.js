@@ -22,14 +22,14 @@ $(function() {
     var outerObs = rect.rx_draggable();      // observable of observables of {x:int,y:int}
     
     outerObs.subscribe( function(dragObs) {
-        console.log("Drag started");
+        //console.log("Drag started");
     
         dragObs.subscribe( function(o) {       // {x:Int,y:Int}
-            console.log( JSON.stringify(o) );
+            //console.log( JSON.stringify(o) );
             rect.move(o.x, o.y);
         },
         function () {
-            console.log("Drag ended");
+            //console.log("Drag ended");
         } );
     } );
 });

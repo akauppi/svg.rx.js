@@ -16,7 +16,9 @@
 bower=node_modules/.bin/bower
 npm=$(shell which npm)
 
-libs=lib/svg.min.js lib/jquery.min.js lib/rx.lite-4.0.0.js
+rx-lite-version=4.0.0
+
+libs=lib/svg.min.js lib/jquery.min.js lib/rx.lite-$(rx-lite-version).js
 
 #---
 all: $(libs)
@@ -93,11 +95,11 @@ $(jquery_min): | $(bower)
 #
 rxlite=node_modules/rx-lite/rx.lite.js
 
-lib/rx.lite-4.0.0.js: $(rxlite)
+lib/rx.lite-$(rx-lite-version).js: $(rxlite)
 	cp $< $@
 
 $(rxlite): | $(npm)
-	$(npm) install rx-lite@4.0.0
+	$(npm) install rx-lite@$(rx-lite-version)
 	@test -f $@ || (echo "ERROR: couldn't create $@"; false)
 
 #rxlite_min=node_modules/rx-lite/rx.lite.min.js
