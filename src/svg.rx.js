@@ -37,6 +37,15 @@
     **/
   };
 
+  if (true) {  // TESTING
+    var xxx= Rx.Observable.fromEvent(window, 'click');
+    console.log(xxx);
+
+    xxx.subscribe( function(ev) {
+      alert(ev);
+    });
+  }
+
   SVG.extend( SVG.Element, {
 
     // Create an rxJS observable for any dragging events
@@ -57,15 +66,6 @@
       var self = this;    // to be used within further inner functions
 
       console.log(this);
-      
-      if (true) {  // TESTING
-        var xxx= Rx.Observable.fromEvent(this.node, 'click');
-        console.log(xxx);
-        
-        xxx.subscribe( function(ev) {
-          console.log(ev);
-        });
-      }
       
       // Note: If the events are identical by the fields we need, we can merge them right here.
       //      Otherwise, 
