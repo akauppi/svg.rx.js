@@ -118,8 +118,6 @@
         var ev_x = ev.x,
             ev_y = ev.y;
 
-        console.log( "Mouse down at " + ev_x+","+ev_y );
-
         var x_offset = ev_x - self.x(),
             y_offset = ev_y - self.y();
 
