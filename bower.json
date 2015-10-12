@@ -17,6 +17,7 @@
   "ignore": [
     "**/.*",
     "demo",
+    "index.html",
     "_Trash_"
   ],
   "dependencies": {
