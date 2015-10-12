@@ -1,0 +1,27 @@
+{
+  "name": "svg.rx.js",
+  "version": "0.0.0",
+  "homepage": "https://github.com/akauppi/svg.rx.js",
+  "authors": [
+    "Asko Kauppi <asko.kauppi@zalando.fi>"
+  ],
+  "description": "Bridge between RxJS and svg.js",
+  "main": "src/svg.rx.js",
+  "moduleType": [],
+  "keywords": [
+    "svg.js",
+    "rxjs",
+    "rx"
+  ],
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "svg.js": "~2.1.1"
+  }
+}

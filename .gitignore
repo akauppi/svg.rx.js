@@ -2,5 +2,8 @@ bower_components/
 node_modules/
 *.map
 
-.idea/
+# OS X
+.DS_Store
 
+# IntelliJ IDEA
+.idea/

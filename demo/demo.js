@@ -19,6 +19,12 @@ $(function() {
     var rect= svg.rect( W, W )
                 .addClass("main");
 
+    // Test that it works with transformations
+    //
+    // Note: because order of transforms matter, they cannot be given in the same object.
+    //
+    rect.transform({ scale: 0.5 }).transform({ rotation:45 });
+
     var outerObs = rect.rx_draggable();      // observable of observables of {x:int,y:int}
     
     outerObs.subscribe( function(dragObs) {
