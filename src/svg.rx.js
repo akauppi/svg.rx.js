@@ -4,24 +4,13 @@
 
 // assert( SVG.Element.prototype );
 
+// Note: The event handling code is based on 'svg.draggable.js' -> https://github.com/wout/svg.draggable.js
+//      but we only enable stuff that we actually test (manually). I.e. 'SVG.Nested', 'SVG.Use', 'SVG.Text' support
+//      remains disabled until we need it, and there are demos that exercise those things.
+
 /*
 */
 (function() {
-
-  /** DISABLED we don't support '.G', '.Use', '.Nested', yet. Do we need to?
-  // gets elements bounding box with special handling of groups, nested and use
-  //
-  var getBBox = function(el) {
-    var box = (el instanceof SVG.Nested) ? el.rbox() : el.bbox();
-
-    if (el instanceof SVG.G || el instanceof SVG.Use || el instanceof SVG.Nested) {
-      box.x = el.x();
-      box.y = el.y();
-    }
-
-    return box;
-  }
-  **/
 
   SVG.extend( SVG.Element, {
 
@@ -47,40 +36,29 @@
       var outerObs = function (touch) {    // (boolean) -> observable of {x:Int, y:Int}
 
         return Rx.Observable.fromEvent(self.node, touch ? 'touchstart':'mousedown')
-          .select( function (ev) {
-            console.log( "Outer observable started" );    // happens on touch
-            //console.log(ev);
+          .select( function (evStart) {
+            //console.log( "Outer observable started" );    // happens on touch
+            //console.log(evStart);
 
-            /** remove
-            var ev_x = ev.x,
-                ev_y = ev.y;
-
-            var x_offset = ev_x - self.x(),
-                y_offset = ev_y - self.y();
-            **/
-            //var cx_offset = ev_x - self.cx(),
-            //    cy_offset = ev_y - self.cy();
-
-            // Transforms from screen to user coords
+            // Transform from screen to user coordinates. Take care of pointer and touch events having different
+            // inner structures.
             //
-            // adapted from 'svg.draggable.js' -> https://github.com/wout/svg.draggable.js
-            //
-            var transformP = (function () {    // -> function (event) -> point
+            var transformP = (function () {    // scope
 
               // Note: local values are hidden in this scope.
               //
-              // nb. Only stuff we actually test (manually) is enabled. 'SVG.Nested' is not one of them (from 'svg.draggable.js')
-              //
               var parent = /*self.parent(SVG.Nested) ||*/ self.parent(SVG.Doc);
+
+              // tbd. Can we do these withing the 'svg.js', without using the '.node' (i.e. dropping to plain SVG APIs)?
 
               var p = parent.node.createSVGPoint();     // point buffer (avoid reallocation per each coordinate change)
               var m = self.node.getScreenCTM().inverse();
 
-              return function (ev /*, offset*/) {
-                //event = event || window.event
-                var touches = ev.changedTouches && ev.changedTouches[0] || ev;
-                p.x = touches.pageX;  // - (offset || 0)
-                p.y = touches.pageY;
+              return function (ev /*, offset*/) {   // (mouse or touch event) -> point
+                //ev = ev || window.ev;     // we always provide 'ev' so this is not needed
+                var o = touch ? ev.changedTouches[0] : ev;
+                p.x = o.pageX;  // - (offset || 0)
+                p.y = o.pageY;
 
                 return p.matrixTransform(m);
               }
@@ -89,7 +67,7 @@
             /** DISABLED text element support not needed, yet
             var anchorOffset;
 
-            // fix text-anchor in text-element (#37)
+            // fix text-anchor in text-element (svg.draggable.js #37)
             if (self instanceof SVG.Text) {
               anchorOffset = self.node.getComputedTextLength();
 
@@ -104,17 +82,22 @@
             }
             **/
 
-            var offset = transformP(ev /*, anchorOffset*/);
-            var startBox = self.bbox();    // note. 'svg.draggable.js' had special code for handling G, Use, Nested
+            var p0 = transformP(evStart /*, anchorOffset*/);
+
+            var x_offset = p0.x - self.x(),
+                y_offset = p0.y - self.y();
+
+            //var cx_offset = p0.x - self.cx(),
+            //    cy_offset = p0.y - self.cy();
 
             // prevent browser drag behavior
             //
-            ev.preventDefault();
+            evStart.preventDefault();
 
             // prevent propagation to a parent that might also have dragging enabled (tbd. this probably also takes
             // care of '.preventDefault()').
             //
-            ev.stopPropagation();
+            evStart.stopPropagation();
 
             var obsMove = Rx.Observable.fromEvent(window, touch ? 'touchmove':'mousemove');
 
@@ -127,17 +110,14 @@
             // Note: some events actually come with the same x,y values (at least on Safari OS X) - removed by the
             //      '.distinctUntilChanged()'.
             //
-            var obsInner = obsMove.select( function (ev) {
-              //console.log( ev );   // tbd. with touch, it's not '.x','.y'
+            var obsInner = obsMove.select( function (evMove) {
+              //console.log( evMove );
 
-              //var box = self.bbox();
-              var p = self.transformPoint(o);
-              var x = startBox.x + p.x - offset.x,
-                  y = startBox.y + p.y - offset.y;
+              var p = transformP(evMove);
 
               return {
-                x: x,   //remove: o.x - x_offset,
-                y: y    //remove: o.y - y_offset //,
+                x: p.x - x_offset,
+                y: p.y - y_offset
                 //cx: o.cx - cx_offset,
                 //cy: o.cy - cy_offset
               };
