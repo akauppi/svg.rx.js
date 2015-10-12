@@ -18,6 +18,7 @@ Handling multiple levels of asynchronous flying events, and callbacks can be ted
 See the demo code<_!-- tbd. make 'demo code' into link--_> for how it looks in practice.
 -->
 
+
 ## Code
 
 - [src/svg.rx.js](src/svg.rx.js)
@@ -28,13 +29,13 @@ The demos work both as sample code and as manual tests. There are no automated t
 
 ## Usage 
 
-Fetch package:
+### Fetch package
 
 ```
 $ bower install akauppi/svg.rx.js
 ```
 
-HTML:
+### HTML
 
 ```
   <script src="..some../svg.min.js"></script>
@@ -42,15 +43,15 @@ HTML:
   <script src="..some../svg.rx.js"></script>
 ```
 
-JavaScript API:
+### JavaScript API
 
 The library extends `SVGElement` by:
 
 ```
-.rx_draggable()      // () -> observable of observables of {x:int,y:int}
+.rx_draggable()		// () -> observable of observables of {x:int,y:int}
 ```
 
-Sample:
+### Sample
 
 ```
     var outerObs = rect.rx_draggable();
@@ -96,6 +97,7 @@ $ git merge master
 # do 'cd demo; make update' if libraries are to be updated
 $ git push
 ```
+
 ## Scope
 
 The project aims at:
@@ -126,6 +128,7 @@ These are presented for code comparisons. Their approach is the normal event cap
 - [svg.draggable.js](https://github.com/wout/svg.draggable.js)
   - has been the basis for our touch event and coordinate translation handling. Thanks, Fuzzy!
 - [svg.draggy.js](https://github.com/jillix/svg.draggy.js/)
+
 
 ## Contributors
 
