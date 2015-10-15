@@ -23,7 +23,7 @@ $(function() {
         el.rx_draggable()      // observable of observables of {x:int,y:int}
           .subscribe( function(dragObs) {
             //console.log("Drag started");
-            dragObs.subscribe( f || function(o) {       // {x:Int,y:Int}
+            dragObs.do( f || function(o) {       // {x:Int,y:Int}
                 //console.log( JSON.stringify(o) );
                 el.move(o.x, o.y);
             },
@@ -75,10 +75,12 @@ $(function() {
     // tbd. very thin ice
     //
     var dragCorner = function (el, obsX, obsY) {        // (SVGElem, Observable of int, Observable of int) =>
-        Rx.Observable.combineLatest( obsX, obsY ).subscribe( function (arr) {
-            //console.log(arr);
-            el.move(arr[0],arr[1]);
-        });
+
+        Rx.Observable.combineLatest( obsX, obsY )
+            .do( function (arr) {      // e.g. [100,0]
+                console.log(arr);
+                el.move(arr[0],arr[1]);
+            });
     }
 
     dragCorner( corner[0], obsX2, obsY1 );
@@ -89,11 +91,11 @@ $(function() {
     var main= svg.rect( W, W )
                 .addClass("main");
 
-    Rx.Observable.combineLatest( obsX2, obsX1, function (x2,x1) { return x2-x1; } ).subscribe( function (width) {
+    Rx.Observable.combineLatest( obsX2, obsX1, function (x2,x1) { return x2-x1; } ).do( function (width) {
         main.attr("width", width);
     } );
 
-    Rx.Observable.combineLatest( obsY2, obsY1, function (y2,y1) { return y2-y1; } ).subscribe( function (height) {
+    Rx.Observable.combineLatest( obsY2, obsY1, function (y2,y1) { return y2-y1; } ).do( function (height) {
         main.attr("height", height);
     } );
 });
