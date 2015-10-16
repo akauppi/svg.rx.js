@@ -19,18 +19,19 @@ $(function() {
     *     cursor).
     */
     var dragIt = function (el,f) {        // (SVGElem, [({x:int,y:int}) =>]) =>
+        f = f || function (o) {     // ({x:int, y:int}) =>
+            //console.log( JSON.stringify(o) );
+            el.move(o.x, o.y);
+        };
 
         el.rx_draggable()      // observable of observables of {x:int,y:int}
           .subscribe( function(dragObs) {
             //console.log("Drag started");
-            dragObs.do( f || function(o) {       // {x:Int,y:Int}
-                //console.log( JSON.stringify(o) );
-                el.move(o.x, o.y);
-            },
+            dragObs.subscribe(f,
             function () {
-                //console.log("Drag ended");
+              //console.log("Drag ended");
             } );
-        } );
+          } );
     }
 
     /*
@@ -61,7 +62,9 @@ $(function() {
                     .move( x,y )
                     .addClass("corner");
 
-      obsCorner[i] = dragIt(corner[i]);
+      // Note: the '.switch()' simply gives us the latest drag (we lose track of when drags start/end).
+      //
+      obsCorner[i] = corner[i].rx_draggable().switch();
     }
 
     // Make the corners follow each other's (and their own) drags
@@ -77,8 +80,8 @@ $(function() {
     var dragCorner = function (el, obsX, obsY) {        // (SVGElem, Observable of int, Observable of int) =>
 
         Rx.Observable.combineLatest( obsX, obsY )
-            .do( function (arr) {      // e.g. [100,0]
-                console.log(arr);
+            .subscribe( function (arr) {      // e.g. [100,0]
+                //console.log(arr);
                 el.move(arr[0],arr[1]);
             });
     }
@@ -88,14 +91,15 @@ $(function() {
     dragCorner( corner[2], obsX1, obsY2 );
     dragCorner( corner[3], obsX1, obsY1 );
 
-    var main= svg.rect( W, W )
-                .addClass("main");
+    var main= g.rect( W, W )
+                .addClass("main")
+                .back();
 
-    Rx.Observable.combineLatest( obsX2, obsX1, function (x2,x1) { return x2-x1; } ).do( function (width) {
+    Rx.Observable.combineLatest( obsX2, obsX1, function (x2,x1) { return x2-x1; } ).subscribe( function (width) {
         main.attr("width", width);
     } );
 
-    Rx.Observable.combineLatest( obsY2, obsY1, function (y2,y1) { return y2-y1; } ).do( function (height) {
+    Rx.Observable.combineLatest( obsY2, obsY1, function (y2,y1) { return y2-y1; } ).subscribe( function (height) {
         main.attr("height", height);
     } );
 });

@@ -1,8 +1,8 @@
 # TODO
 
-- Change `demo3` so that the dynamic rectangle still follows the cursor. i.e. follow the center, and size by the center.
+- `demo1` bottom right corner works right - fix others.
 
-- Place the rect + corners demo back
+- Change `demo3` so that the dynamic rectangle still follows the cursor. i.e. follow the center, and size by the center.
 
 - Rotational dial demo
 
