@@ -23,7 +23,7 @@ See the demo code<_!-- tbd. make 'demo code' into link--_> for how it looks in p
 
 - [src/svg.rx.js](src/svg.rx.js)
 - [demo sources](demo/)
-- [demo online](http://akauppi.github.io/SvgBind/demo/index.html). <!-- tbd. change URL -->
+- [demo online](http://akauppi.github.io/svg.rx.js/demo/index.html)
 
 The demos work both as sample code and as manual tests. There are no automated tests, because testing such graphical stuff would probably become more complex than the library itself. Ideas for how to make automated tests are of course appreciated.
 
