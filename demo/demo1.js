@@ -75,8 +75,6 @@ $(function() {
     var obsY1 = Rx.Observable.merge( obsCorner[0], obsCorner[3] ).pluck('y').startWith(0);
     var obsY2 = Rx.Observable.merge( obsCorner[1], obsCorner[2] ).pluck('y').startWith(W);
 
-    // tbd. very thin ice
-    //
     var dragCorner = function (el, obsX, obsY) {        // (SVGElem, Observable of int, Observable of int) =>
 
         Rx.Observable.combineLatest( obsX, obsY )
@@ -94,6 +92,9 @@ $(function() {
     var main= g.rect( W, W )
                 .addClass("main")
                 .back();
+
+    obsX1.subscribe( function (x) { main.x(x); } );
+    obsY1.subscribe( function (y) { main.y(y); } );
 
     Rx.Observable.combineLatest( obsX2, obsX1, function (x2,x1) { return x2-x1; } ).subscribe( function (width) {
         main.attr("width", width);
