@@ -35,21 +35,25 @@ $(function() {
 
     g.circle(X).addClass("origin").center(0,0);     // debugging
 
-    g.rotate(-45);
+    //g.animate().rotate(-45,0,0);
 
-    var pivotX = g.cx(),
-        pivotY = g.cy();
+    var pivotX = 0,
+        pivotY = 0;
+
+    console.log("pivot: "+ pivotX +" "+ pivotY);
 
     // Tie dragging the 'handle' to rotating the whole group
     //
     dragIt( handle,
         function (o) {     // ({x:int, y:int}) =>
+
+            console.log(o.x +" "+ o.y);
             var dx = o.x - pivotX,
                 dy = o.y - pivotY;
 
             if (dx && dy) {
-                var deg = Math.atan2(dx,dy) * (180.0/Math.PI);
-                g.rotate(deg);
+                var deg = Math.atan2(dy,dx) * (180.0/Math.PI);
+                g.rotate(deg,pivotX,pivotY);
             }
         }
     );

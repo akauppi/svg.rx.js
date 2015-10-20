@@ -38,7 +38,6 @@
         return Rx.Observable.fromEvent(self.node, touch ? 'touchstart':'mousedown')
           .select( function (evStart) {
             //console.log( "Outer observable started" );    // happens on touch
-            //console.log(evStart);
 
             // Transform from screen to user coordinates. Take care of pointer and touch events having different
             // inner structures.
@@ -49,13 +48,12 @@
               //
               var parent = /*self.parent(SVG.Nested) ||*/ self.parent(SVG.Doc);
 
-              // tbd. Can we do these withing the 'svg.js', without using the '.node' (i.e. dropping to plain SVG APIs)?
+              // tbd. Can we do these within 'svg.js', without using the '.node' (i.e. dropping to plain SVG APIs)?
 
               var p = parent.node.createSVGPoint();     // point buffer (avoid reallocation per each coordinate change)
               var m = self.node.getScreenCTM().inverse();
 
               return function (ev /*, offset*/) {   // (mouse or touch event) -> point
-                //ev = ev || window.ev;     // we always provide 'ev' so this is not needed
                 var o = touch ? ev.changedTouches[0] : ev;
                 p.x = o.pageX;  // - (offset || 0)
                 p.y = o.pageY;
