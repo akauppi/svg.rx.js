@@ -14,20 +14,19 @@ $(function() {
     var svg = SVG("cradle");
 
     /*
-    * Helper function for a rotational drag
+    * Helper function for dragging.
     */
-    var dragIt = function (el,f) {        // (SVGElem, ({x:int,y:int}) =>) =>
-        el.rx_draggable()      // observable of observables of {x:int,y:int}
-          .subscribe( function(dragObs) {
-            //console.log("Drag started");
-            dragObs.subscribe(f,
-            function () {
-              //console.log("Drag ended");
-            } );
+    var dragItWithFilter = function (outerObs,conv,f) {        // (observable of observables of {x:int,y:int}, (observable of {x:int,y:int}) => observable of T, (T) =>)
+        outerObs.subscribe( function(dragObs) {
+          //console.log("Drag started");
+          conv(dragObs).subscribe(f,
+          function () {
+            //console.log("Drag ended");
           } );
+        } );
     }
 
-    var g = svg.group().move(75,75);
+    var g = svg.group().move(100,100);
 
     g.circle(2*A).addClass("knob").center(0,0);
     g.rect(B+C/2,C).addClass("lever").move(-C/2,-C/2);
@@ -40,21 +39,31 @@ $(function() {
     var pivotX = 0,
         pivotY = 0;
 
-    console.log("pivot: "+ pivotX +" "+ pivotY);
-
-    // Tie dragging the 'handle' to rotating the whole group
+    // Tie dragging the 'handle' to rotating the whole group.
     //
-    dragIt( handle,
-        function (o) {     // ({x:int, y:int}) =>
+    // Note: This could be done simpler but wanted to show how a 'deg' observable can be created. It can be useful
+    //      e.g. if a value should be shown in some text field.
+    //
+    // tbd. Is there an RxJS method that does both filter and map?
+    //
+    dragItWithFilter( handle.rx_draggable(),
 
-            console.log(o.x +" "+ o.y);
-            var dx = o.x - pivotX,
-                dy = o.y - pivotY;
+        function (dragObs) {   // (observable of {x:int,y:int}) => observable
+            return dragObs.map( function (o) {  // ({x:int, y:int}) => degNum|null
+                var dx = o.x - pivotX,
+                    dy = o.y - pivotY;
 
-            if (dx && dy) {
-                var deg = Math.atan2(dy,dx) * (180.0/Math.PI);
-                g.rotate(deg,pivotX,pivotY);
-            }
+                if (dx && dy) {
+                    var deg = Math.atan2(dy,dx) * (180.0/Math.PI);
+                    return deg;
+                } else {
+                    return null;
+                }
+            }).filter( function(degOrNull) { return degOrNull !== null; } )
+        },
+
+        function (deg) {    // (degNum) =>
+            g.rotate(deg,pivotX,pivotY);
         }
     );
 });
