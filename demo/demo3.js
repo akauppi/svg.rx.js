@@ -55,8 +55,10 @@ $(function() {
 
     /*
     * Rectangle with a twist (dynamic behaviour).
+    *
+    * tbd. should we even support draggable objects where conversion matrix changes during the drag?
     */
-    var rect3= svg.rect( W, W )
+    var rect3= svg.rect( W, W ).translate(W/2,W/2)
                 .move(2*GAP,0)
                 .addClass("dynamic");
 
@@ -64,7 +66,7 @@ $(function() {
 
     dragIt(rect3,
         function (o) {
-            rect3.center(o.x,o.y).size(50 + o.y * 1.0).rotate(o.x * 1.0);
+            rect3.move(o.x,o.y).rotate(0); // o.x * (360/800) );
         }
     );
 });
