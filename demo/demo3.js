@@ -4,7 +4,7 @@
 * Simple rectangle, getting its moves from an RxJs observable.
 */
 
-$(function() {
+(function() {
     var W= 80;
     var GAP=150;
     
@@ -69,4 +69,4 @@ $(function() {
             rect3.move(o.x,o.y).rotate(0); // o.x * (360/800) );
         }
     );
-});
+})();

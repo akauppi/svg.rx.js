@@ -4,7 +4,7 @@
 * A group with sizing corners.
 */
 
-$(function() {
+(function() {
     var W= 100;
     var CORNER_SIZE = 20;
     var CORNER_OFFSET = 5;
@@ -103,4 +103,4 @@ $(function() {
     Rx.Observable.combineLatest( obsY2, obsY1, function (y2,y1) { return y2-y1; } ).subscribe( function (height) {
         main.attr("height", height);
     } );
-});
+})();
