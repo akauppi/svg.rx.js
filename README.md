@@ -4,6 +4,17 @@ Binding [RxJS](https://github.com/Reactive-Extensions/RxJS) with [svg.js](https:
 
 Allows SVG applications to be crafted without callbacks or events, using `RX.Observable`s instead.
 
+## Platform scope
+
+Scope of the project is SVG, and modern browsers. That probably means IE9 and later, but in practice the code gets tested on:
+
+- Safari 9 on OS X
+- Safari on iOS 9
+- Latest Android browser (Nexus 7)
+
+If you find platforms where it doesn't work for you, Pull Requests are the way to go.
+
+
 ## What are Reactive Extensions?
 
 [Reactive Extensions](http://reactivex.io) is a wonderful programming model that replaces callbacks and events with observables. These are one-to-many async relations between entities, and tend to make the code simpler and more maintainable than functionally equal implementations using callbacks and events.
