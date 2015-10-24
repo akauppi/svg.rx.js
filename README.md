@@ -129,6 +129,8 @@ Not supported:
 - Dragging of `SVG.Nested`, `SVG.Use` and `SVG.Text`
   - there is special code for these in the [svg.draggable.js](https://github.com/wout/svg.draggable.js) project but since we're not having demos for these, we've also commented out such code
 
+- Changing the draggable object's conversion matrix (scaling, rotation and translation) during a drag.
+
 Please send a PR if you need these - and provide a manual test that proves the support works.
 
 
