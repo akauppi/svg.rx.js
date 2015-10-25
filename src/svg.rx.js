@@ -33,11 +33,11 @@
 
       // Helper function to give us an outer stream of drags. Either coming from desktop, or touch.
       //
-      var outerObs = function (touch) {    // (boolean) -> observable of {x:Int, y:Int}
+      var outerObs = function (keys) {    // ({start:string, move:string, end:string}) -> observable of {x:Int, y:Int}
 
-        return Rx.Observable.fromEvent(self.node, touch ? 'touchstart':'mousedown')
+        return Rx.Observable.fromEvent(self.node, keys.start)
           .select( function (evStart) {
-            //console.log( "Outer observable started" );    // happens on touch
+            //console.log( "Outer observable started" );
 
             // Transform from screen to user coordinates. Take care of pointer and touch events having different
             // inner structures.
@@ -54,7 +54,7 @@
               var m = self.node.getScreenCTM().inverse();
 
               return function (ev /*, offset*/) {   // (mouse or touch event) -> point
-                var o = touch ? ev.changedTouches[0] : ev;
+                var o = ev.changedTouches ? ev.changedTouches[0] : ev;
                 p.x = o.pageX;  // - (offset || 0)
                 p.y = o.pageY;
 
@@ -85,9 +85,6 @@
             var x_offset = p0.x - self.x(),
                 y_offset = p0.y - self.y();
 
-            //var cx_offset = p0.x - self.cx(),
-            //    cy_offset = p0.y - self.cy();
-
             // prevent browser drag behavior
             //
             evStart.preventDefault();
@@ -97,10 +94,10 @@
             //
             evStart.stopPropagation();
 
-            var obsMove = Rx.Observable.fromEvent(window, touch ? 'touchmove':'mousemove');
+            var obsMove = Rx.Observable.fromEvent(window, keys.move);
 
-            var obsUpSingle = Rx.Observable.fromEvent(window, touch ? 'touchend':'mouseup')
-                                .take(1);    // note: 'take(1)' is not really needed (we're simply waiting for one event)
+            var obsUpSingle = Rx.Observable.fromEvent(window, keys.end)
+                                .take(1);    // tbd. is there any benefit of doing this '.take(1)'? We're using '.takeUntil()' below.
 
             // tbd. How to optimize so that only the last event would ever be shipped, if multiple have gathered, i.e.
             //      we only need the last coordinates. AKa071015
@@ -116,8 +113,6 @@
               return {
                 x: p.x - x_offset,
                 y: p.y - y_offset
-                //cx: o.cx - cx_offset,
-                //cy: o.cy - cy_offset
               };
             } )
               .distinctUntilChanged()
@@ -127,13 +122,45 @@
           } );
         };  // function outerObs
 
+      /*** DISABLED - no 'root' in Safari. AKa251015
+      * Decide which events we observe.
+      *
+      * For any platform, it should be enough to just observe one kind of events, right? This part may need revising, e.g.
+      *
+      * - role of 'root.PointerEvent' - what is it, how is it connected with the normal mouse events?
+      *
+      var keys = null;
+
+      if (root.TouchEvent) {
+        keys = {
+          start: 'touchstart',
+          move: 'touchmove',
+          end: 'touchend'
+        };
+      } else if (root.PointerEvent) {   // TBD: not tested!!! (which browsers would have this, IE only?) AKa251015
+        keys = {
+          start: 'pointerstart',
+          move: 'pointermove',
+          end: 'pointerhend'
+        };
+      } else {        // traditional mouse fallback
+        keys = {
+          start: 'mousedown',
+          move: 'mousemove',
+          end: 'mouseup'
+        };
+      }
+
+      return outerObs(keys);
+      ***/
+
       // Merge the two approaches. Only one inner drag active at any one time (desktop or touch)
       //
       // Note: the caller should dispose of this (and we need to check if we need to dispose some).
       //
       return Rx.Observable.merge(
-        outerObs(false),  // mouse
-        outerObs(true)    // touch
+        outerObs( {start: 'mousedown', move: 'mousemove', end: 'mouseup' }),    // mouse
+        outerObs( {start: 'touchstart', move: 'touchmove', end: 'touchend' })   // touch
       );
     }
 
