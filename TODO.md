@@ -11,4 +11,12 @@
 
 - Adding support for more (touch) events: swipes, rotation etc. IF these need SVG specific help. I would like to see this coming up via real world needs, not #justforthesakeofit. If needed, using something like the [deeptissue.js](http://deeptissuejs.com) project may be okay, but I'd rather keep the `svg.rx.js` code really, really slim.
 
+---
 
+## Follow
+
+- use [RxJS 5.0](https://github.com/ReactiveX/RxJS) when appropriate. It e.g. binds together with the ES7 built-in Observable Spec.
+
+or
+
+- tie directly to the ES7 `Observable`s (if they are enough for us)

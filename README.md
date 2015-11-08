@@ -8,25 +8,23 @@ Allows SVG applications to be crafted without callbacks or events, using `RX.Obs
 
 Scope of the project is SVG, and modern browsers. That probably means IE9 and later, but in practice the code gets tested on:
 
-- Safari 9 on OS X
+- Safari on OS X
+- Chrome on OS X
 - Safari on iOS 9
-- Latest Android browser (Nexus 7)
+- Latest Android browser on Nexus 7
 
-If you find platforms where it doesn't work for you, Pull Requests are the way to go.
+If you find platforms where it doesn't work for you, Issues and Pull Requests are the way to go.
 
-
+<!-- disabled (not needed here AKa081115)
 ## What are Reactive Extensions?
 
 [Reactive Extensions](http://reactivex.io) is a wonderful programming model that replaces callbacks and events with observables. These are one-to-many async relations between entities, and tend to make the code simpler and more maintainable than functionally equal implementations using callbacks and events.
 
 RxJS is the implementation of RX programming for browsers. It provides support for transforming native browser events into observables, but no support for svg.js itself.
 
-<!--
 ### What's the benefit?
 
 Handling multiple levels of asynchronous flying events, and callbacks can be tedious. This bridge aims at eliminating all that - so you can make SVG "applications" with all the user interactions (drags, clicks etc.) modeled as RxJS streams, instead.
-
-See the demo code<_!-- tbd. make 'demo code' into link--_> for how it looks in practice.
 -->
 
 
