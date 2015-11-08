@@ -48,7 +48,7 @@ help:
 
 # Fetch demo dependencies via bower and npm
 #
-libs: $(demo_libs) $(demo)/svg.rx.js
+libs: $(demo_libs)
 
 # Update the libraries in 'demo/lib/' to latest available versions - this is only done manually.
 #

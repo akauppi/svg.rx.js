@@ -8,7 +8,7 @@
   "main": [
     "src/svg.rx.js"
   ],
-  "dependencies": {
+  "buildDependencies": {
     "svg.js": "~2.2.0"
   },
   "moduleType": "globals",
@@ -22,7 +22,9 @@
     "**/.*",
     "node_modules",
     "bower_components",
-    "demo"
+    "demo",
+    "Makefile",
+    "TODO.md"
   ],
   "repository": {
     "type": "git",

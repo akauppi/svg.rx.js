@@ -131,13 +131,19 @@ This removes any previous contents of the `gh-pages` branch and replaces them wi
 
 ## Bower
 
-### Exporting the package
-
-### Fetch package
+The package has been registered with the `svg.rx.js` bower name, so this should be enough to use it:
 
 ```
-$ bower install akauppi/svg.rx.js
+$ bower install svg.rx.js
 ```
+
+### Adding versions (only by maintaners!)
+
+Bower uses semver tags. Just
+
+- edit `CHANGELOG.md` and commit
+- `git tag <x.y.z>`
+- `git push --tags`
 
 
 ## Other dragging libraries
