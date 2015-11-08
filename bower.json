@@ -1,13 +1,17 @@
 {
   "name": "svg.rx.js",
-  "version": "0.0.1",
+  "description": "Bridge between RxJS and svg.js",
   "homepage": "https://github.com/akauppi/svg.rx.js",
   "authors": [
     "Asko Kauppi <akauppi@gmail.com>"
   ],
-  "description": "Bridge between RxJS and svg.js",
-  "main": "src/svg.rx.js",
-  "moduleType": [],
+  "main": [
+    "src/svg.rx.js"
+  ],
+  "dependencies": {
+    "svg.js": "~2.2.0"
+  },
+  "moduleType": "globals",
   "keywords": [
     "svg.js",
     "rxjs",
@@ -16,11 +20,12 @@
   "license": "MIT",
   "ignore": [
     "**/.*",
-    "demo",
-    "index.html",
-    "_Trash_"
+    "node_modules",
+    "bower_components",
+    "demo"
   ],
-  "dependencies": {
-    "svg.js": "~2.2.0"
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/akauppi/svg.rx.js"
   }
 }
