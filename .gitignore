@@ -1,9 +1,0 @@
-bower_components/
-node_modules/
-*.map
-
-# OS X
-.DS_Store
-
-# IntelliJ IDEA
-.idea/

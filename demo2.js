@@ -4,7 +4,7 @@
 * A rotary group.
 */
 
-$(function() {
+(function() {
     var A= 50;     // radius of the rotating circle
     var B= 75;     // distance of the handle origin from rotating origin
     var C= 10;     // width of the lever
@@ -66,4 +66,4 @@ $(function() {
             g.rotate(deg,pivotX,pivotY);
         }
     );
-});
+})();
