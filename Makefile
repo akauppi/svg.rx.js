@@ -12,9 +12,6 @@
 #       'bower' could be fetched as a local npm module, as well. We've opted for asking it to be globally installed
 #       since it starts to be quite a common tool. AKa081115
 #
-# References:
-#       GutHub gh-pages: https://github.com/blog/272-github-pages
-#
 
 #---
 # Global tools
@@ -51,7 +48,7 @@ help:
 
 # Fetch demo dependencies via bower and npm
 #
-libs: $(demo_libs)
+libs: $(demo_libs) $(demo)/svg.rx.js
 
 # Update the libraries in 'demo/lib/' to latest available versions - this is only done manually.
 #
@@ -66,17 +63,12 @@ update: | $(npm) $(bower)
 #
 # PLEASE do not use this unnecessarily. Only for project maintainers!
 #
-# Note: If anyone has ideas on how to do the update in one go, that would be splendid. I would like to keep the
-#       actual source file under 'src/', and allow the demo files to work unmodified both locally and online. This is
-#       the best I was able to do. :) AKa081115
-#
 gh-pages: $(gh_pages)
 	@echo ""
 	@echo "WARNING: proceeding will IMMEDIATELY update the demo files available online. Think before you act."
 	@echo ""
 	@read -p "Press Ctrl-C if you are not sure." -n 1 -r
-	$(gh_pages) -d . -s "demo/**"
-	$(gh_pages) -d . -s "src/*" --add
+	$(gh_pages) -d demo
 	@echo ""
 
 clean:
