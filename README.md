@@ -129,13 +129,20 @@ $ node_modules/.bin/gh-pages -d demo
 This removes any previous contents of the `gh-pages` branch and replaces them with what's in `demo`.
 
 
-## Bower
+## Bower packaging
+
+We're only packaging for bower. Enough to keep one package system happy.
 
 The package has been registered with the `svg.rx.js` bower name, so this should be enough to use it:
 
 ```
 $ bower install svg.rx.js
 ```
+
+### Notes on `bower.json`
+
+- we're listing `svg.js` as a build requirement, not actual runtime requirement. This is so we get it fetched for the demos to work, but we presume the application to separately fetch both `svg.js` and `rx-lite.js` in the way that best suits it. Carrying one of those with `svg.rx.js` is unnecessary.
+
 
 ### Adding versions (only by maintaners!)
 
