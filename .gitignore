@@ -2,6 +2,8 @@ bower_components/
 node_modules/
 *.map
 
+demo/lib/
+
 # OS X
 .DS_Store
 

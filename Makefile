@@ -12,6 +12,9 @@
 #       'bower' could be fetched as a local npm module, as well. We've opted for asking it to be globally installed
 #       since it starts to be quite a common tool. AKa081115
 #
+# References:
+#       GutHub gh-pages: https://github.com/blog/272-github-pages
+#
 
 #---
 # Global tools
@@ -23,19 +26,18 @@ npm=$(shell which npm)
 bower=$(shell which bower)
 
 #---
-# Build tools
+# Local build tools
 #
 gh_pages=node_modules/.bin/gh-pages
 
-#REMOVE if 4.0.6 is fixed
+#---
+# Demo dependencies
 #
-#rx-lite-version=4.0.0
+# Note: we're not using these directly from within 'node_modules' and 'bower_components' to keep the 'gh-pages' branch
+#       tidy.
 #
-#libs=lib/svg.min.js lib/rx.lite-$(rx-lite-version).js
-
 demo_lib=demo/lib
-
-libs=$(demo_lib)/svg.min.js $(demo_lib)/rx.lite.min.js
+demo_libs=$(demo_lib)/svg.min.js $(demo_lib)/rx.lite.min.js
 
 #---
 all: libs
@@ -64,8 +66,18 @@ update: | $(npm) $(bower)
 #
 # PLEASE do not use this unnecessarily. Only for project maintainers!
 #
+# Note: If anyone has ideas on how to do the update in one go, that would be splendid. I would like to keep the
+#       actual source file under 'src/', and allow the demo files to work unmodified both locally and online. This is
+#       the best I was able to do. :) AKa081115
+#
 gh-pages: $(gh_pages)
-	$(gh_pages) -d demo
+	@echo ""
+	@echo "WARNING: proceeding will IMMEDIATELY update the demo files available online. Think before you act."
+	@echo ""
+	@read -p "Press Ctrl-C if you are not sure." -n 1 -r
+	$(gh_pages) -d . -s "demo/**"
+	$(gh_pages) -d . -s "src/*" --add
+	@echo ""
 
 clean:
 	-rm $(demo_lib)/*
@@ -105,19 +117,6 @@ $(demo_lib)/svg.min.js: $(svgjs_min)
 #- -
 # Note: bower does not have 'rx.lite' but npm has
 #  
-
-# REMOVE if 4.0.6 works
-## NOTE: rx-lite 4.0.1 is broken ('fromEvent' does not fire events)
-##
-#rxlite=node_modules/rx-lite/rx.lite.js
-#
-#lib/rx.lite-$(rx-lite-version).js: $(rxlite)
-#	cp $< $@
-#
-#$(rxlite): | $(npm)
-#	$(npm) install rx-lite@$(rx-lite-version)
-#	@test -f $@ || (echo "ERROR: couldn't create $@"; false)
-
 rxlite_min=node_modules/rx-lite/rx.lite.min.js
 
 $(rxlite_min): | $(npm)
@@ -127,6 +126,13 @@ $(rxlite_min): | $(npm)
 $(demo_lib)/rx.lite.min.js: $(rxlite_min)
 	cp $< $@
 	cp $(<:.min.js=.map) $(demo_lib)/
+
+#---
+# Local build tools
+#
+$(gh_pages): | $(npm)
+	$(npm) install gh-pages
+	@test -f $@ || (echo "ERROR: couldn't create $@"; false)
 
 #---
 # Global tools
@@ -146,4 +152,4 @@ echo: | $(npm)
 	@echo $(npm)
 
 #--	
-.PHONY: help libs update echo
+.PHONY: help libs update gh-pages echo
