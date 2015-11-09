@@ -144,7 +144,7 @@ $ bower install svg.rx.js
 - we're listing `svg.js` as a build requirement, not actual runtime requirement. This is so we get it fetched for the demos to work, but we presume the application to separately fetch both `svg.js` and `rx-lite.js` in the way that best suits it. Carrying one of those with `svg.rx.js` is unnecessary.
 
 
-### Adding versions (only by maintaners!)
+### Adding versions (only by maintainers!)
 
 Bower uses semver tags. Just
 
