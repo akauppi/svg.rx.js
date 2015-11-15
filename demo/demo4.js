@@ -40,6 +40,6 @@
     });
   };
 
-  handleMultiTouch( 1, svg.rx_multitouch )
+  handleMultiTouch( 1, svg.rx_multitouch() )
 
 })();
