@@ -17,6 +17,4 @@
 
 - use [RxJS 5.0](https://github.com/ReactiveX/RxJS) when appropriate. It e.g. binds together with the ES7 built-in Observable Spec.
 
-or
-
-- tie directly to the ES7 `Observable`s (if they are enough for us)
+  - or tie directly to the ES7 `Observable`s (if they are enough for us)
