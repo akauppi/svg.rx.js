@@ -4,17 +4,6 @@ Binding [RxJS](https://github.com/Reactive-Extensions/RxJS) with [svg.js](https:
 
 Allows SVG applications to be crafted without callbacks or events, using `RX.Observable`s instead.
 
-## Platform scope
-
-Scope of the project is SVG, and modern browsers. That probably means IE9 and later, but in practice the code gets tested on:
-
-- Safari on OS X
-- Chrome on OS X
-- Safari on iOS 9
-- Latest Android browser on Nexus 7
-
-If you find platforms where it doesn't work for you, Issues and Pull Requests are the way to go.
-
 ## Code
 
 - [src/svg.rx.js](src/svg.rx.js)
@@ -32,10 +21,11 @@ The project aims at:
 
 - providing enough bridging between `RxJS` and `svg.js` so that event callbacks are never needed in application code
 - using the RxJS API directly - no need to blur it behind an abstraction
+  - alternatively, the ES7 native Observables API can be used, if that is sufficient for our other purposes
 - having manual tests (demos) for all supported entries
 - providing the bare mechanisms needed, instead of trying to cater for a certain kind of application
 - value brewity of the code, and maintainability
-- provide support for both desktop and touch (tablet) use cases
+- provide support for both desktop and touch use cases, equally
   
 Not supported:
   
@@ -47,15 +37,36 @@ Not supported:
 
 Please send a PR if you need these - and provide a manual test that proves when the support works.
 
+### Platform scope
+
+Scope of the project is SVG, and modern browsers. That probably means IE9 and later, but in practice the code gets tested on:
+
+- Safari on OS X
+- Chrome on OS X
+- Safari on iOS 9
+  - on iPhone 6 and iPad Lite
+- Latest Android browser 
+  - on Nexus 7
+
+If you find platforms where it doesn't work for you, [Issues](https://github.com/akauppi/svg.rx.js/issues) and Pull Requests are the way to go.
+
+
+---
 
 ## Usage 
+
+You can simply download the `svg.rx.js` file and place in your project, or download via Bower:
+
+```
+$ bower install svg.rx.js
+```
 
 ### HTML
 
 ```html
-  <script src=".../svg.min.js"></script>
-  <script src=".../rx.lite.min.js"></script>
-  <script src=".../svg.rx.js"></script>
+  <script src="svg.min.js"></script>
+  <script src="rx.lite.min.js"></script>
+  <script src="svg.rx.js"></script>
 ```
 
 ### JavaScript API
@@ -87,8 +98,8 @@ Note that the library does not move (drag) your object automatically. This is in
 
 Dependencies:
 
-- `svg.js` ^2.2.0
-- `rx.lite.js` ^4.0.6
+- `svg.js`
+- `rx.lite.js`
 
 Note: `rx.lite.js` is not available via `bower` (the full `rx.js` package is).
 
@@ -96,55 +107,46 @@ Note: `rx.lite.js` is not available via `bower` (the full `rx.js` package is).
 Note: `rx[.lite].js` 4.0.1 release has a bug that causes `fromEvent()` not to pass events to an observable. Avoid that release.
 -->
 
-## Building
+---
+
+## Development
+
+If you wish to help with the project, do this after cloning:
 
 ```
-$ make
+$ npm update
+$ bower update
 ```
 
 This downloads the demo dependencies.
 
-Then open `demo/index.html` in the browser.
+The `demo/lib/*` files are symbolic links to the libraries that are fetched when doing the updates. After this, demos can be launched locally.
 
-### src/ symbolic linking
+Note: It is important to keep `demo/` self-sufficient (i.e. no paths leading up from it, other than via the symbolic links), because of the way it gets published (see below). Likewise, `demo/src` is a symbolic link to `src`.
 
-The `demo/src` directory is a symbolic link to `src`. This is so that we can both:
+## Publishing
 
-- separate the actual sources from the demo code
-- publish just the ´demo´ folder using ´gh-pages´ branch
-
-This arrangement seems to work (i.e. git is fine with symbolic links). Please tell if you have problems with it.
-
-## Publishing the demo
-
-The `gh-pages` branch has the ´demo´ folder, with dependency libraries, visible online. This is a very nice, normal GitHub feature. 
-
-To update the online demo (note: this should only be done by project maintainers!):
+The demos are published using the wonderful [GitHub Pages](https://pages.github.com) feature and a `gh-pages` npm module.
 
 ```
-$ npm install gh-pages
-$ node_modules/.bin/gh-pages -d demo
+$ npm script publish
 ```
 
-This removes any previous contents of the `gh-pages` branch and replaces them with what's in `demo`.
+This removes any previous contents of the `gh-pages` branch and replaces them with what's in `demo`. 
 
 
-## Bower packaging
+## Packaging
 
-We're only packaging for bower. Enough to keep one package system happy.
+We're only packaging for [Bower](http://bower.io). Enough to keep one package system happy.
 
-The package has been registered with the `svg.rx.js` bower name, so this should be enough to use it:
-
-```
-$ bower install svg.rx.js
-```
+The package has been registered with the `svg.rx.js` Bower name. Bower has a first-come-first-served naming policy.
 
 ### Notes on `bower.json`
 
-- we're listing `svg.js` as a build requirement, not actual runtime requirement. This is so we get it fetched for the demos to work, but we presume the application to separately fetch both `svg.js` and `rx-lite.js` in the way that best suits it. Carrying one of those with `svg.rx.js` is unnecessary.
+- we're listing `svg.js` as a build requirement, not actual runtime requirement. This is so we get it fetched for the demos to work, but we presume the application to separately fetch both `svg.js` and `rx-lite.js` in the way that best suits it. Carrying those with `svg.rx.js` is unnecessary.
 
 
-### Adding versions (only by maintaners!)
+### Adding versions
 
 Bower uses semver tags. Just
 
@@ -152,14 +154,7 @@ Bower uses semver tags. Just
 - `git tag <x.y.z>`
 - `git push --tags`
 
-
-## Other dragging libraries
-
-These are presented for code comparisons. Their approach is the normal event capture (no Rx).
-
-- [svg.draggable.js](https://github.com/wout/svg.draggable.js)
-  - has been the basis for our touch event and coordinate translation handling. Thanks, Fuzzy!
-- [svg.draggy.js](https://github.com/jillix/svg.draggy.js/)
+Features that have come after the last release are shown at the top of `CHANGELOG.md` under `"..."`, i.e. no version number.
 
 
 ## Contributors
@@ -173,5 +168,21 @@ These are presented for code comparisons. Their approach is the normal event cap
 - checking the code from `svg.js` point of view
   - are there `svg.js` APIs that could be used instead of `.node` (i.e. native SVG)?  
 - general testing on Windows platform (building and behaviour in IE versions)
+
+---
+
+## References
+
+### Other dragging libraries
+
+These are presented for code comparisons. Their approach is the normal event capture (no Rx).
+
+- [svg.draggable.js](https://github.com/wout/svg.draggable.js)
+  - has been the basis for our touch event and coordinate translation handling. Thanks, Fuzzy!
+- [svg.draggy.js](https://github.com/jillix/svg.draggy.js/)
+
+### Background info
+
+- [How to Use npm as a Build Tool](http://blog.keithcirkel.co.uk/how-to-use-npm-as-a-build-tool/) - blog by Keith Cirkel
 
 <br />
