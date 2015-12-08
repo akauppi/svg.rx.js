@@ -1,3 +1,23 @@
+circle.level1 {
+  fill: blue;
+}
+circle.level2 {
+  fill: purple;
+}
+circle.level3 {
+  fill: red;
+}
+circle.level4 {
+  fill: green;
+}
+circle.level5 {
+  fill: orange;
+}
+circle.level6 {
+  fill: yellow;
+}
+
+
 /***
 rect.simple {
   fill: blue;
