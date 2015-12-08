@@ -129,7 +129,7 @@ Note: It is important to keep `demo/` self-sufficient (i.e. no paths leading up 
 The demos are published using the wonderful [GitHub Pages](https://pages.github.com) feature and a `gh-pages` npm module.
 
 ```
-$ npm script publish
+$ npm run publish
 ```
 
 This removes any previous contents of the `gh-pages` branch and replaces them with what's in `demo`. 
