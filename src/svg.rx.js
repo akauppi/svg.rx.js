@@ -27,7 +27,7 @@
     // Note: Unlike 'svg.draggable.js', we don't actually move the object anywhere. That is up to the subscriber
     //      (they might want to do something else with the drag than simply pan the x,y).
     //
-    rx_draggable: function () {   // () ->
+    rx_draggable: function () {   // () -> observable of observables of { x: Int, y: Int }
 
       var self = this;    // to be used within further inner functions
 
@@ -165,5 +165,60 @@
     }
 
   });
-  
+
+  /*
+  * The main document gets a method to track multiple touches within it.
+  *
+  * Note: We could enable this for 'SVG.Nested' as well, if we one day decide to support them.
+  */
+  SVG.extend( SVG.Element, {
+
+    // Returns:
+    //  observable of [<observable from rx_draggable>, <observable from rx_multitouch>]
+    //
+    // This is a bit bizarre - but dead simple at the same time!
+    //
+    // An observable is returned that will get a message when a touch (first touch) within the given SVG element happens.
+    //
+    //  - the first parameter of it is a "draggable" observable that will follow such touch's moves, until it is cancelled
+    //    (roamed past the SVG boundaries) or ended (touch lifted).
+    //
+    //    This observable behaves precisely like those given by '.rx_draggable'. If the (first) touch happens again, later,
+    //    the draggable observable provides a new dragging experience, and so one.
+    //
+    //  - the second parameter is a recursive observable, in the sense that it's precisely like the one returned
+    //    by '.rx_multitouch', but for the next level (2nd) concurrent touch. The second touch (and thereafter) can happen
+    //    anywhere on the SVG document, not tied to the particular element. The limit of how many simultaneous touches
+    //    can be tracked comes from the hardware.
+    //
+    // Special cases:
+    //
+    //    If the last touch is ended, a new touch will be placed onto that level's draggable (i.e. a new level is not
+    //    created); this is trivial.
+    //
+    //    But what if a touch in the "middle" is lifted?
+    //
+    //    In this case, the remaining touches (let's say 1 and 3) continue their drags as if nothing had occured. Only
+    //    the touch 2 ended.
+    //
+    //    If in this case, a new touch is initiated, is it touch 2 or 4?
+    //
+    //    This is really a matter of specification, and what is deemed useful by the application code. Here, we make it
+    //    touch 4, i.e. we allow gaps to be formed in the touches (nb. by tapping two fingers off one after each other,
+    //    you'd get a multitouch where only touches n-1 and n are active, raising by each tap).
+    //
+    rx_multitouch: function (n) {   // () -> [observable of observables of { x: Int, y: Int }, ...]
+
+      // implement when knowing touch events really, really good!!!
+      //...
+      var doc = this.doc;    // to be used within further inner functions
+
+      var obs = this.rx_draggable();    // observable of observables of { x: Int, y: Int }
+
+      return obs.select( function (obsDrag) {
+        return [obsDrag, doc.rx_multitouch(n+1)];
+      } );
+    }
+  });
+
 })();

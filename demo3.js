@@ -8,7 +8,7 @@
     var W= 80;
     var GAP=150;
     
-    var svg = SVG("cradle");   // fills the cradle fully
+    var svg = SVG("cradle");
 
     /*
     * Helper function for a linear drag

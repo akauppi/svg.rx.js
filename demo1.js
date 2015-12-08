@@ -9,7 +9,7 @@
     var CORNER_SIZE = 20;
     var CORNER_OFFSET = 5;
 
-    var svg = SVG("cradle");   // fills the cradle fully
+    var svg = SVG("cradle");
 
     /*
     * Helper function for a linear drag
