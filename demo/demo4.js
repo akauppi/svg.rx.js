@@ -13,11 +13,11 @@
 
 (function() {
   var R=60;
+  var N=10;    // how many fingers to track (if the hardware is up to it, e.g. Nexus 7 is)
 
   var svg = SVG("cradle");
 
-  //var el = svg.circle(20).center(0,0);
-
+    /*** DISABLED - development aids
   var genHandler = function (name) {
     return function (ev) {
       //console.log(name);
@@ -35,38 +35,25 @@
   svg.node.addEventListener("touchend", genHandler("touchend"), false);
   svg.node.addEventListener("touchcancel", genHandler("touchcancel"), false);
   svg.node.addEventListener("touchmove", genHandler("touchmove"), false);
+    ***/
 
-  /*** needs editing
-  /_*
-  * Helper to handle multitouch events
-  *
-  * i:  1..n (level of recursion) = Nth touch
-  *
-  * obs: observable of (observable of {x:Int,y:Int}, observable like 'obs' (recursively))
-  *_/
-  var handleMultiTouch = function (i, obs) {
+  // Start getting events for N fingers
+  //
+  var arr = svg.rx_touch(N);    // [(observable of obseravables of ({x: Int, y: Int})), ...]
 
-    obs.subscribe( function (obs1, obs2) {
-      // create a circle for the touch ('obs1' will move it around)
+  arr.forEach( function (obsOuter,i) {
+
+    var circle = svg.circle(R).class("touch"+i).hide();
+
+    obsOuter.subscribe( function (obsDrag) {
+      dragObs.subscribe( function (o) {
+        circle.show().center(o.x, o.y);
+      });
+    }, function () {
+      // tbd. Could make the hiding with animation to look coooool!
       //
-      var circle = svg.circle(0,0).attr("level",i);
-
-      obs1.subscribe( function (o) {   // {x:Int,y:Int}
-          console.log( "Moving touch: "+i );
-          console.log(o);
-          circle.move(o.x,o.y);
-        },
-        function () {   // drag ended
-          console.log( "Out of touch: "+i );
-          circle.release();
-        }
-      )
-
-      handleMultiTouch(i+1, obs2);    // dig one level deeper (anticipate next touch)
-    });
-  };
-
-  handleMultiTouch( 1, svg.rx_multitouch() )
-  ***/
+      circle.hide();    // end of touch
+    } );
+  });
 
 })();
