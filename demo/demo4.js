@@ -17,17 +17,32 @@
 
   var svg = SVG("cradle");
 
-    /*** DISABLED - development aids
   var genHandler = function (name) {
     return function (ev) {
-      //console.log(name);
 
+      console.log(ev.changedTouches);
+
+      // Note: 'ev.changedTouches' does not work like an array, i.e. no '.map' and such. AKa131215
+      //
+      var s="";
+
+      for( var i=0; i< ev.changedTouches.length; i++ ) {
+        var touch = ev.changedTouches[i];
+        var x = touch.clientX;
+        var y = touch.clientY;
+        s += touch.identifier + ": "+ x +" "+ y + " ";
+      }
+
+      console.log(name + " "+ s);
+
+      /***
       for( var i=0; i< ev.changedTouches.length; i++ ) {
         var touch = ev.changedTouches[i];
         var x = touch.clientX;
         var y = touch.clientY;
         console.log(name + " "+ touch.identifier + ": "+ x +" "+ y);
       }
+      ***/
     }
   }
 
@@ -35,8 +50,8 @@
   svg.node.addEventListener("touchend", genHandler("touchend"), false);
   svg.node.addEventListener("touchcancel", genHandler("touchcancel"), false);
   svg.node.addEventListener("touchmove", genHandler("touchmove"), false);
-    ***/
 
+  /*** PENDING
   // Start getting events for N fingers
   //
   var arr = svg.rx_touch(N);    // [(observable of obseravables of ({x: Int, y: Int})), ...]
@@ -55,5 +70,6 @@
       circle.hide();    // end of touch
     } );
   });
+  ***/
 
 })();
