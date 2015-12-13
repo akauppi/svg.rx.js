@@ -8,9 +8,6 @@
   "main": [
     "src/svg.rx.js"
   ],
-  "buildDependencies": {
-    "svg.js": "~2.2.3"
-  },
   "moduleType": "globals",
   "keywords": [
     "svg.js",

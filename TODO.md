@@ -1,5 +1,6 @@
 # TODO
 
+Note: We're not very pleased with Bower overall. If you have suggestions on better packaging framework, please suggest (or better yet, pass a PR). AKa131215 
 
 ```
 // tbd. How to optimize so that only the last event would ever be shipped, if multiple have gathered, i.e. we only need the last coordinates. AKa071015

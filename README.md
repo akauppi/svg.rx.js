@@ -101,6 +101,8 @@ Dependencies:
 - `svg.js`
 - `rx.lite.js`
 
+You are expected to provide the dependencies in any way you like. They are not dependencies of the bower packaging intentionally.
+
 Note: `rx.lite.js` is not available via `bower` (the full `rx.js` package is).
 
 <!-- disabled (now using 4.0.6)
@@ -115,7 +117,6 @@ If you wish to help with the project, do this after cloning:
 
 ```
 $ npm update
-$ bower update
 ```
 
 This downloads the demo dependencies.
@@ -123,6 +124,21 @@ This downloads the demo dependencies.
 The `demo/lib/*` files are symbolic links to the libraries that are fetched when doing the updates. After this, demos can be launched locally.
 
 Note: It is important to keep `demo/` self-sufficient (i.e. no paths leading up from it, other than via the symbolic links), because of the way it gets published (see below). Likewise, `demo/src` is a symbolic link to `src`.
+
+### Testing on Android Browser
+
+Chrome has a wonderful [Android Remote Debugging](https://developer.chrome.com/devtools/docs/remote-debugging) mode that allows one to debug what's happening in the mobile browser, from the desktop. It requires no additional installations (no `adb`) - just:
+
+1. enable the USB debugging mode in your device (see the link)
+2. open desktop Chrome at `chrome:inspect`
+
+You can use the "Port forwarding" feature, together with a lightweight node based http-server, to test code changes without publishing to the Internet:
+
+1. run `npm run serve` on the command line. This serves the `demo/` folder in `localhost:8080`
+2. enable the "Port forwarding" in desktop Chrome (under `chrome:inspect`)
+3. browse the demos with the phone/tablet
+
+It really couldn't be easier!
 
 ## Publishing
 
@@ -143,8 +159,9 @@ The package has been registered with the `svg.rx.js` Bower name. Bower has a fir
 
 ### Notes on `bower.json`
 
-- we're listing `svg.js` as a build requirement, not actual runtime requirement. This is so we get it fetched for the demos to work, but we presume the application to separately fetch both `svg.js` and `rx-lite.js` in the way that best suits it. Carrying those with `svg.rx.js` is unnecessary.
+We're omitting dependencies by purpose. We first downloaded `svg.js` via bower, but it turned out to be less reliable / easy to use than `npm`. So now all dependencies come from `npm`.
 
+The package still needs `svg.js` and `rx.lite.js` (or equivalent) to run, but since especially RxJS can be built in many variants, we presume the application to separately fetch both in the way that best suits it. Carrying those with `svg.rx.js` is unnecessary.
 
 ### Adding versions
 
@@ -157,11 +174,7 @@ Bower uses semver tags. Just
 Features that have come after the last release are shown at the top of `CHANGELOG.md` under `"..."`, i.e. no version number.
 
 
-## Contributors
-
-- [akauppi](https://github.com/akauppi)
-
-### Help requested!!
+## Help requested!!
 
 - checking the code from `RxJS` point of view
   - especially for leaks - does something need to be manually discarded?
