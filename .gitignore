@@ -1,9 +1,15 @@
 /node_modules/
-#/bower_components/
 #*.map
 
 # IntelliJ IDEA
 .idea/
 
+# Misc
+#
+/npm-debug.log
+
 # OS X
-.DS_Store
+#
+# You should ignore these system-wide.
+#
+#.DS_Store

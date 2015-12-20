@@ -6,10 +6,12 @@
   "devDependencies": {
     "gh-pages": "^0.5.0",
     "http-server": "^0.8.5",
+    "jslint": "^0.9.5",
     "svg.js": "^2.2.4"
   },
   "scripts": {
     "publish": "node_modules/.bin/gh-pages -d demo",
-    "serve": "node_modules/.bin/http-server demo -p 8080"
+    "serve": "node_modules/.bin/http-server demo -p 8080",
+    "lint": "node_modules/.bin/jslint src/*.js demo/*.js"
   }
 }
