@@ -3,9 +3,10 @@
 *
 * Multi-touch demo
 *
-* Follow each finger touch with a circle of different colour, and tie them together in the order of the touches.
+* One circle is on the screen all the time. When it is being pushed, other fingers will be tracked by different
+* colors on the screen. The first one does not move.
 *
-* Allow any touch to be removed while following.
+* The demo is the way it is because this is alike one real-world need. Maybe.
 *
 * Credit:
 *   http://tomicloud.com/2012/03/multi-touch-demo
@@ -14,12 +15,33 @@
 (function() {
   "use strict";
 
-  var R=60;
+  /*
+  * Return an array that actually has 'length' elements. This can be used as a seed for '.foreach' and '.map' -
+  * just use the index parameters, and not the contents.
+  *
+  * Note: 'new Array(n)' does not do the same.
+  *
+  * Ref. -> http://stackoverflow.com/questions/3746725/create-a-javascript-array-containing-1-n
+  */
+  function emptyArray(len) {   // (Int) -> [null, ...]
+    return Array.apply( null, { length: len });
+  }
+
+  function range(start,end) {
+    var arr = [];
+    for (var i = start; i <= end; i++) {
+        arr.push(i);
+    }
+    return arr;
+  }
+
+  var R=200;
   var N=10;    // how many fingers to track (if the hardware is up to it, e.g. Nexus 7 is)
 
   var svg = SVG("cradle");
 
   var circle = [];
+  var outerObs = [];
 
   for( var i=0; i<N; i++ ) {
     circle[i] = svg.circle(R).addClass("touch"+i).hide();
@@ -31,51 +53,36 @@
 
   // Catch the first touch
   //
-  var outerObs0 = circle[0].rx_touch(0);   // observable of observables of {x: Int, y: Int}
+  outerObs[0] = circle[0].rx_touch(0);   // observable of observables of {x: Int, y: Int}
 
-  outerObs0.subscribe( function (dragObs0) {
-
-    // track the other N-1 touches, while the first one is held
-    //
-    var circles = [];
-    var obs = [];
-
-    for( var i=1; i<N; i++ ) {
-/*jshint -W083 */
-      obs[i-1] = window.rx_touch(i);
-
-      obs[i-1].subscribe( function (dragObs) {
-        circle[i].center(o.x, o.y).show();
-      });
-/*jshint +W083 */
-    }
+  outerObs[0].subscribe( function (dragObs0) {
 
     dragObs0.subscribe( function (o) {
       circle[0].center(o.x, o.y);
-    });
 
-  }, function () {    // end of drag
-    for( var i=1; i<N; i++ ) {
-      circles[i].hide();
-      obs[i-1].cancel();
-    }
-  });
+      // track the other N-1 touches, while the first one is held down
 
-  // Start getting events for N fingers
-  //
-  var arr = svg.rx_touch(N);    // [observable of obseravables of ({x: Int, y: Int}), ...]
-
-  arr.forEach( function (obsOuter,i) {
-
-    obsOuter.subscribe( function (obsDrag) {
-      dragObs.subscribe( function (o) {
-        circle.show().center(o.x, o.y);
-      });
-    }, function () {
-      // tbd. Could make the hiding with animation to look coooool!
+      // Note: Using Array map instead of for-looping, to make sure 'i' is captured for the later processing.
       //
-      circle.hide();    // end of touch
+      range(1,N).forEach( function(_,i) {
+        outerObs[i] = window.rx_touch(i);
+
+        outerObs[i].subscribe( function (dragObs) {
+
+          dragObs.subscribe( function (o) {
+            circle[i].center(o.x, o.y).show();
+          });
+        });
+      } );
+
+    }, function () {  // end of drag
+      // tbd. could change size or color
+      for( var i=1; i<N; i++ ) {
+        circle[i].hide();
+        outerObs[i].cancel();
+      }
     } );
+
   });
 
 })();

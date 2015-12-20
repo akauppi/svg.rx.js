@@ -36,12 +36,12 @@
 
           // Note: local values are hidden in this scope.
           //
-          var parent = /*self.parent(SVG.Nested) ||*/ self.parent(SVG.Doc);
+          var parent = /*el.parent(SVG.Nested) ||*/ el.parent(SVG.Doc);
 
           // tbd. Can we do these within 'svg.js', without using the '.node' (i.e. dropping to plain SVG APIs)?
 
           var p = parent.node.createSVGPoint();     // point buffer (avoid reallocation per each coordinate change)
-          var m = self.node.getScreenCTM().inverse();
+          var m = el.node.getScreenCTM().inverse();
 
           return function (o /*, offset*/) {   // (mouseEvent or Touch) -> point
             p.x = o.pageX;  // - (offset || 0)
@@ -55,10 +55,10 @@
         var anchorOffset;
 
         // fix text-anchor in text-element (svg.draggable.js #37)
-        if (self instanceof SVG.Text) {
-          anchorOffset = self.node.getComputedTextLength();
+        if (el instanceof SVG.Text) {
+          anchorOffset = el.node.getComputedTextLength();
 
-          switch (self.attr('text-anchor')) {
+          switch (el.attr('text-anchor')) {
             case 'middle':
               anchorOffset /= 2;
               break;
@@ -98,40 +98,6 @@
         return innerObs;
       } );
     };  // function outerObs
-
-
-  /*** DISABLED
-  SVG.extend( SVG.Element, {
-
-    // Create an rxJS observable for any dragging events
-    //
-    // Returns:
-    //  observable of observables of { x: Int, y: Int }
-    //
-    // For each drag, a new inner observable is created. That streams unique {x,y} coordinates, and terminates when
-    // the user ends the drag.
-    //
-    // tbd. disposal hasn't been planned
-    //
-    // Note: Unlike 'svg.draggable.js', we don't actually move the object anywhere. That is up to the subscriber
-    //      (they might want to do something else with the drag than simply pan the x,y).
-    //
-    rx_draggable: function () {   // () -> observable of observables of { x: Int, y: Int }
-
-      var self = this;    // to be used within further inner functions
-
-      // Merge the two approaches. Only one inner drag active at any one time (desktop or touch)
-      //
-      // Note: the caller should dispose of this (and we need to check if we need to dispose some).
-      //
-      return Rx.Observable.merge(
-        outerObs( {start: 'mousedown', move: 'mousemove', end: 'mouseup' }),    // mouse
-        outerObs( {start: 'touchstart', move: 'touchmove', end: 'touchend' })   // touch
-      );
-    }
-
-  });
-  ***/
 
 
   SVG.extend( SVG.Element, {
@@ -220,7 +186,35 @@
       // tbd. check if we should just have this, or merge with 'rx_touch(0)' stream ('Rx.Observable.merge').
       //
       return outerObs( self, startObs, moveObs, endObs );
+    } //,
+
+    /*** disabled
+    //---
+    // Create an rxJS observable for either mouse or touch drags
+    //
+    // Returns:
+    //  observable of observables of { x: Int, y: Int }
+    //
+    // For each drag, a new inner observable is created. That streams unique {x,y} coordinates, and terminates when
+    // the user ends the drag.
+    //
+    // Note: Unlike 'svg.draggable.js', we don't actually move the object anywhere. That is up to the subscriber
+    //      (they might want to do something else with the drag than simply pan the x,y).
+    //
+    rx_draggable: function () {   // () -> observable of observables of { x: Int, y: Int }
+
+      var self = this;    // to be used within further inner functions
+
+      // Merge the two approaches. Only one inner drag active at any one time (desktop or touch)
+      //
+      // Note: the caller should dispose of this (and we need to check if we need to dispose some).
+      //
+      return Rx.Observable.merge(
+        this.rx_desktop,
+        this.rx_touch(0)
+      );
     }
+    ***/
   });
 
 })();

@@ -1,11 +1,5 @@
 # TODO
 
-## Bugs
-
-- can't use `npm run jshint` - why?
-
----
-
 Note: We're not very pleased with Bower overall. If you have suggestions on better packaging framework, please suggest (or better yet, pass a PR). AKa131215 
 
 ```
