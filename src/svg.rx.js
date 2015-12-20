@@ -45,7 +45,7 @@
           var p = parent.node.createSVGPoint();     // point buffer (avoid reallocation per each coordinate change)
           var m = el.node.getScreenCTM().inverse();
 
-          return function (o /*, offset*/) {   // (mouseEvent or Touch) -> point
+          return function (o /*, offset*/) {   // (MouseEvent or Touch) -> point
             p.x = o.pageX;  // - (offset || 0)
             p.y = o.pageY;
 
@@ -165,16 +165,18 @@
     //---
     // Pointer tracking for the element
     //
-    rx_desktop: function () {
+    rx_mouse: function () {
       var self = this;
 
-      var startObs =  Rx.Observable.fromEvent(self.node, "mousestart");
+      var startObs =  Rx.Observable.fromEvent(self.node, "mousedown");
       var moveObs =   Rx.Observable.fromEvent(window, "mousemove");
       var endObs =    Rx.Observable.fromEvent(window, "mouseup");
 
-      // Prevent browser drag behaviour. Note: wonder if we should do the same also for touch #1 evens. tbd AKa171215
+      // Prevent browser drag behaviour. Note: wonder if we should do the same also for touch #0 events. tbd AKa171215
       //
       startObs.select( function (ev) {
+        console.log("aaa");
+
         // prevent browser drag behavior
         //
         ev.preventDefault();
@@ -185,8 +187,6 @@
         ev.stopPropagation();
       });
 
-      // tbd. check if we should just have this, or merge with 'rx_touch(0)' stream ('Rx.Observable.merge').
-      //
       return outerObs( self, startObs, moveObs, endObs, "desktop" );
     },
 
@@ -206,7 +206,7 @@
       // Note: the caller should dispose of this (and we need to check if we need to dispose some).
       //
       return Rx.Observable.merge(
-        this.rx_desktop(),
+        this.rx_mouse(),
         this.rx_touch(0)
       );
     }
