@@ -1,14 +1,13 @@
 /*
 * svg.rx.js
 */
-/*global a,b,c */
-"use strict";
 
 // Note: The event handling code is based on 'svg.draggable.js' -> https://github.com/wout/svg.draggable.js
 //      but we only enable stuff that we actually test (manually). I.e. 'SVG.Nested', 'SVG.Use', 'SVG.Text' support
 //      remains disabled until we need it, and there are demos that exercise those things.
 
-(function() {
+(function () {
+  "use strict";
 
   // Helper function to give us an outer stream of drags. Either coming from desktop, or touch.
   //
@@ -49,7 +48,7 @@
             p.y = o.pageY;
 
             return p.matrixTransform(m);
-          }
+          };
         })();
 
         /** DISABLED text element support not needed, yet
@@ -164,7 +163,7 @@
           self.remember(key,obs);
         }
         return obs;
-      }
+      };
 
       var startAllObs = cache( "touchstart" );
       var moveAllObs = cache( "touchmove" );
@@ -183,7 +182,7 @@
             return touch;
           }
         }
-      }
+      };
 
       var startObs = startAllObs.select(f);
       var moveObs = moveAllObs.select(f);
@@ -193,7 +192,7 @@
       var cancelOrEndObs = Rx.Observable.merge( endObs, cancelObs );
 
       return outerObs( self, startObs, moveObs, cancelOrEndObs );
-    }
+    },
 
     //---
     // Pointer tracking for the element

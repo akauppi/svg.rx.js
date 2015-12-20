@@ -1,5 +1,8 @@
 # svg.rx.js
 
+<font color=red>Currently, the master is broken. Working on the demo4 and multitouch. Will fix demos back once that works. Sorry. Check out a [previous tagged](https://github.com/akauppi/svg.rx.js/releases/tag/0.0.2) release for working stuff. AKa201215
+</font>
+
 Binding [RxJS](https://github.com/Reactive-Extensions/RxJS) with [svg.js](https://github.com/wout/svg.js).
 
 Allows SVG applications to be crafted without callbacks or events, using `RX.Observable`s instead.

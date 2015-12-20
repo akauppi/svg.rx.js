@@ -1,7 +1,7 @@
 /*
 * demo4.js
 *
-* Multi-touch demo.
+* Multi-touch demo
 *
 * Follow each finger touch with a circle of different colour, and tie them together in the order of the touches.
 *
@@ -10,10 +10,10 @@
 * Credit:
 *   http://tomicloud.com/2012/03/multi-touch-demo
 */
-/*global a,b,c */
-"use strict";
 
 (function() {
+  "use strict";
+
   var R=60;
   var N=10;    // how many fingers to track (if the hardware is up to it, e.g. Nexus 7 is)
 
@@ -22,7 +22,7 @@
   var circle = [];
 
   for( var i=0; i<N; i++ ) {
-    circle[i] = svg.circle(R).class("touch"+i).hide();
+    circle[i] = svg.circle(R).addClass("touch"+i).hide();
   }
 
   // Object for first touch is always visible
@@ -41,11 +41,13 @@
     var obs = [];
 
     for( var i=1; i<N; i++ ) {
+/*jshint -W083 */
       obs[i-1] = window.rx_touch(i);
 
       obs[i-1].subscribe( function (dragObs) {
         circle[i].center(o.x, o.y).show();
       });
+/*jshint +W083 */
     }
 
     dragObs0.subscribe( function (o) {
@@ -57,7 +59,7 @@
       circles[i].hide();
       obs[i-1].cancel();
     }
-  })
+  });
 
   // Start getting events for N fingers
   //
