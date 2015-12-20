@@ -2,32 +2,34 @@
 * svg.rx.js
 */
 
-// Note: The event handling code is based on 'svg.draggable.js' -> https://github.com/wout/svg.draggable.js
-//      but we only enable stuff that we actually test (manually). I.e. 'SVG.Nested', 'SVG.Use', 'SVG.Text' support
-//      remains disabled until we need it, and there are demos that exercise those things.
+/*
+* Note: The event handling code is based on 'svg.draggable.js' -> https://github.com/wout/svg.draggable.js
+*       but we only enable stuff that we actually test (manually). I.e. 'SVG.Nested', 'SVG.Use', 'SVG.Text' support
+*       remains disabled until we need it, and there are demos that exercise those things.
+*/
 
 (function () {
   "use strict";
 
   // Helper function to give us an outer stream of drags. Either coming from desktop, or touch.
   //
-  // All parameters are 'observable of events', where the event may either be coming from mouse of (particular touch id's)
-  // touch events.
+  // All parameters are 'observable of x', where the 'x' is either a 'MouseEvent' or a 'Touch' (which contains touches
+  // of only one touch id; TouchEvent has all changes).
   //
-  // mouse:
-  //    ... show event structure here ...
+  // References:
+  //    MouseEvent -> https://developer.mozilla.org/en-US/docs/Web/API/MouseEvent
+  //    Touch -> https://developer.mozilla.org/en-US/docs/Web/API/Touch
   //
-  // touch:
-  //    ... touch event structure here ...
-  //
-  var outerObs = function (el, startObs, moveObs, endObs) {    // (SVG.Element, observable of mouseEvent or Touch, ...) -> observable of {x:Int, y:Int}
+  var outerObs = function (el, startObs, moveObs, endObs, debugName) {    // (SVG.Element, observable of MouseEvent or Touch, ...) -> observable of observable of {x:Int, y:Int}
+
+    debugName = debugName | "unknown";
 
     // Note: keep helper functions within the '.select()' function, since things like the positioning of the element,
     //      its transformation etc. may change during the lifespan of the observable.
 
     return startObs.
       select( function (oStart) {
-        //console.log( "Outer observable started" );
+        console.log( debugName +": Outer observable started" );
 
         // Transform from screen to user coordinates. Take care of pointer and touch events having different
         // inner structures.
@@ -83,7 +85,7 @@
         //      '.distinctUntilChanged()'.
         //
         var innerObs = moveObs.select( function (o) {
-          //console.log( evMove );
+          console.log( debugName +": "+ o );
 
           var p = transformP(o);
 
@@ -157,7 +159,7 @@
 
       var cancelOrEndObs = Rx.Observable.merge( endObs, cancelObs );
 
-      return outerObs( self, startObs, moveObs, cancelOrEndObs );
+      return outerObs( self, startObs, moveObs, cancelOrEndObs, "touch"+n );
     },
 
     //---
@@ -185,12 +187,11 @@
 
       // tbd. check if we should just have this, or merge with 'rx_touch(0)' stream ('Rx.Observable.merge').
       //
-      return outerObs( self, startObs, moveObs, endObs );
-    } //,
+      return outerObs( self, startObs, moveObs, endObs, "desktop" );
+    },
 
-    /*** disabled
     //---
-    // Create an rxJS observable for either mouse or touch drags
+    // Create an rxJS observable for either mouse or touch (index 0) drags
     //
     // Returns:
     //  observable of observables of { x: Int, y: Int }
@@ -198,23 +199,17 @@
     // For each drag, a new inner observable is created. That streams unique {x,y} coordinates, and terminates when
     // the user ends the drag.
     //
-    // Note: Unlike 'svg.draggable.js', we don't actually move the object anywhere. That is up to the subscriber
-    //      (they might want to do something else with the drag than simply pan the x,y).
-    //
     rx_draggable: function () {   // () -> observable of observables of { x: Int, y: Int }
-
-      var self = this;    // to be used within further inner functions
 
       // Merge the two approaches. Only one inner drag active at any one time (desktop or touch)
       //
       // Note: the caller should dispose of this (and we need to check if we need to dispose some).
       //
       return Rx.Observable.merge(
-        this.rx_desktop,
+        this.rx_desktop(),
         this.rx_touch(0)
       );
     }
-    ***/
   });
 
 })();

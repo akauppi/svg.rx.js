@@ -13,6 +13,7 @@
     "publish": "node_modules/.bin/gh-pages -d demo",
     "serve": "node_modules/.bin/http-server demo -p 8080",
     "jshint": "node_modules/.bin/jshint --verbose src/*.js demo/*.js",
+    "preserve": "npm run jshint",
     "prepublish": "npm run jshint"
   },
   "jshintConfig": {
