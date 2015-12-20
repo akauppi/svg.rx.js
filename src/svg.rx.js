@@ -13,14 +13,18 @@
 
   // Helper function to give us an outer stream of drags. Either coming from desktop, or touch.
   //
-  // All parameters are 'observable of x', where the 'x' is either a 'MouseEvent' or a 'Touch' (which contains touches
+  // '...Obs'  parameters are 'observable of x', where the 'x' is either a 'MouseEvent' or a 'Touch' (which contains touches
   // of only one touch id; TouchEvent has all changes).
+  //
+  // 'debugName': used for console output
+  //
+  // 'preventDefault': true for when default browser events are not wished for.
   //
   // References:
   //    MouseEvent -> https://developer.mozilla.org/en-US/docs/Web/API/MouseEvent
   //    Touch -> https://developer.mozilla.org/en-US/docs/Web/API/Touch
   //
-  var outerObs = function (el, startObs, moveObs, endObs, debugName) {    // (SVG.Element, observable of MouseEvent or Touch, ...) -> observable of observable of {x:Int, y:Int}
+  var outerObs = function (el, startObs, moveObs, endObs, debugName, preventDefault) {    // (SVG.Element, observable of MouseEvent or Touch, ...) -> observable of observable of {x:Int, y:Int}
 
     debugName = debugName | "unknown";
 
@@ -152,6 +156,24 @@
         }
       };
 
+      // Prevent browser drag behaviour for touch #0
+      //
+      // Note: Just preventing all "touchstart" events, if the application tracks id 0. This is simplest and works
+      //      the way we want.
+      //
+      if (n===0) {
+        startAllObs.subscribe( function (ev) {     // (TouchEvent)
+
+          // prevent browser drag behavior (eg. pulling shadow and refresh gestures on Android)
+          //
+          ev.preventDefault();
+
+          // prevent propagation to a parent that might also have dragging enabled (see demo1).
+          //
+          ev.stopPropagation();
+        });
+      }
+
       var startObs = startAllObs.select(f);
       var moveObs = moveAllObs.select(f);
       var cancelObs = cancelAllObs.select(f);
@@ -163,7 +185,9 @@
     },
 
     //---
-    // Pointer tracking for the element
+    // Pointer (button 1) tracking for the element
+    //
+    // Note: We currently only support button 1.
     //
     rx_mouse: function () {
       var self = this;
@@ -172,22 +196,20 @@
       var moveObs =   Rx.Observable.fromEvent(window, "mousemove");
       var endObs =    Rx.Observable.fromEvent(window, "mouseup");
 
-      // Prevent browser drag behaviour. Note: wonder if we should do the same also for touch #0 events. tbd AKa171215
+      // Prevent browser drag behaviour and bubbling to parents.
       //
-      startObs.select( function (ev) {
-        console.log("aaa");
+      startObs.subscribe( function (ev) {     // (MouseEvent)
 
-        // prevent browser drag behavior
+        // prevent browser drag behavior (do we have any, for mouse based browsers and button 1?)
         //
-        ev.preventDefault();
+        //ev.preventDefault();
 
-        // prevent propagation to a parent that might also have dragging enabled (tbd. this probably also takes
-        // care of '.preventDefault()').
+        // prevent propagation to a parent that might also have dragging enabled (see demo1).
         //
         ev.stopPropagation();
       });
 
-      return outerObs( self, startObs, moveObs, endObs, "desktop" );
+      return outerObs( self, startObs, moveObs, endObs, "mouse", true );
     },
 
     //---
