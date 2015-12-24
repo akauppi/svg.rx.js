@@ -23,10 +23,11 @@
   *
   * Ref. -> http://stackoverflow.com/questions/3746725/create-a-javascript-array-containing-1-n
   */
+  /*** not needed
   function emptyArray(len) {   // (Int) -> [null, ...]
     return Array.apply( null, { length: len });
   }
-
+  ***/
   function range(start,end) {
     var arr = [];
     for (var i = start; i <= end; i++) {
@@ -64,7 +65,7 @@
 
       // Note: Using Array map instead of for-looping, to make sure 'i' is captured for the later processing.
       //
-      range(1,N).forEach( function(_,i) {
+      range(1,N).forEach( function(i) {
         outerObs[i] = window.rx_touch(i);
 
         outerObs[i].subscribe( function (dragObs) {

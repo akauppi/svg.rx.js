@@ -3,6 +3,7 @@
 *
 * Simple rectangle, getting its moves from an RxJs observable.
 */
+/*jshint devel: true */
 
 (function() {
   "use strict";

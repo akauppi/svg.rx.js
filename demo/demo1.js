@@ -54,10 +54,10 @@
 
   for( var i=0; i<4; i++ ) {    // ne,se,sw,nw
     var x = (i<2) ? W : 0;
-    var y = (i==1 || i==2) ? W : 0;
+    var y = (i===1 || i===2) ? W : 0;
 
     var tx = (i<2) ? -(CORNER_SIZE-CORNER_OFFSET) : -CORNER_OFFSET;
-    var ty = (i==1 || i==2) ? -(CORNER_SIZE-CORNER_OFFSET) : -CORNER_OFFSET;
+    var ty = (i===1 || i===2) ? -(CORNER_SIZE-CORNER_OFFSET) : -CORNER_OFFSET;
 
     corner[i] = g.rect(CORNER_SIZE,CORNER_SIZE)
                   .translate( tx,ty )
