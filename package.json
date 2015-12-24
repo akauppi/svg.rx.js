@@ -1,4 +1,8 @@
 {
+  "": {
+    "jhint reference": "http://jshint.com/docs/cli/",
+    "jshint options": "http://jshint.com/docs/options/"
+  },
   "dependencies": {
     "@reactivex/rxjs": ">= 5.0.0-alpha.12",
     "rx-lite": ">= 4.0.7"
@@ -10,11 +14,12 @@
     "jshint": "^2.8.0"
   },
   "scripts": {
-    "publish": "node_modules/.bin/gh-pages -d demo",
+    "": "Don't use script name 'publish' - 'npm install' seems to get entangled with 'prepublish', for some reason. AKa241215",
+    "gh-pages": "node_modules/.bin/gh-pages -d demo",
     "serve": "node_modules/.bin/http-server demo -p 8080",
-    "jshint": "node_modules/.bin/jshint --verbose src/*.js demo/*.js",
+    "jshint": "node_modules/.bin/jshint --verbose --show-non-errors --config jshint.json src/*.js demo/*.js",
     "preserve": "npm run jshint",
-    "prepublish": "npm run jshint"
+    "pregh-pages": "npm run jshint"
   },
   "jshintConfig": {
     "strict": "global"

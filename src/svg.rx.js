@@ -1,6 +1,7 @@
 /*
 * svg.rx.js
 */
+/*jshint devel:true */
 
 /*
 * Note: The event handling code is based on 'svg.draggable.js' -> https://github.com/wout/svg.draggable.js
@@ -24,7 +25,7 @@
   //    MouseEvent -> https://developer.mozilla.org/en-US/docs/Web/API/MouseEvent
   //    Touch -> https://developer.mozilla.org/en-US/docs/Web/API/Touch
   //
-  var outerObs = function (el, startObs, moveObs, endObs, debugName, preventDefault) {    // (SVG.Element, observable of MouseEvent or Touch, ...) -> observable of observable of {x:Int, y:Int}
+  var outerObs = function (el, startObs, moveObs, endObs, debugName /*, preventDefault*/) {    // (SVG.Element, observable of MouseEvent or Touch, ...) -> observable of observable of {x:Int, y:Int}
 
     debugName = debugName | "unknown";
 
@@ -150,7 +151,7 @@
         //
         for (var i=0; i<ev.changedTouches.length; i++) {
           var touch = ev.changedTouches[i];
-          if (touch.identifier == n) {
+          if (touch.identifier === n) {
             return touch;
           }
         }

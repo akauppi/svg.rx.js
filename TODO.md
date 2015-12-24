@@ -1,5 +1,21 @@
 # TODO
 
+- Clear the `npm run jshint` output (globals)
+
+- Using `npm run jshint` with an external configuration (with `-config`) fails, always. 
+
+The error says should be reported to:
+
+```
+antonkovalyov <anton@kovalyov.net>
+rwaldron <waldron.rick@gmail.com>
+jugglinmike <mike@mikepennisi.com>
+```
+
+Do this once otherwise fine, and pushed to the github (ie. can give them instructions to reproduce).
+
+---
+
 Note: We're not very pleased with Bower overall. If you have suggestions on better packaging framework, please suggest (or better yet, pass a PR). AKa131215 
 
 ```
