@@ -1,10 +1,6 @@
 # TODO
 
-- Clear the `npm run jshint` output (globals)
-
-- Using `npm run jshint` with an external configuration (with `-config`) fails, always. 
-
-The error says should be reported to:
+- Using `npm run jshint` with an external configuration (with `-config`) fails in a crash if there are hint errors. Replicate in a simple repo and report to:
 
 ```
 antonkovalyov <anton@kovalyov.net>
@@ -12,7 +8,10 @@ rwaldron <waldron.rick@gmail.com>
 jugglinmike <mike@mikepennisi.com>
 ```
 
-Do this once otherwise fine, and pushed to the github (ie. can give them instructions to reproduce).
+- Test demo1,2,3 on touch
+
+- Make small text for each demo to show what it's about (especially demo4).
+
 
 ---
 

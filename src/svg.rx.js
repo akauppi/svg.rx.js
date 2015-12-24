@@ -19,13 +19,11 @@
   //
   // 'debugName': used for console output
   //
-  // 'preventDefault': true for when default browser events are not wished for.
-  //
   // References:
   //    MouseEvent -> https://developer.mozilla.org/en-US/docs/Web/API/MouseEvent
   //    Touch -> https://developer.mozilla.org/en-US/docs/Web/API/Touch
   //
-  var outerObs = function (el, startObs, moveObs, endObs, debugName /*, preventDefault*/) {    // (SVG.Element, observable of MouseEvent or Touch, ...) -> observable of observable of {x:Int, y:Int}
+  var outerObs = function (el, startObs, moveObs, endObs, debugName) {    // (SVG.Element, observable of MouseEvent or Touch, ...) -> observable of observable of {x:Int, y:Int}
 
     debugName = debugName | "unknown";
 
@@ -210,7 +208,7 @@
         ev.stopPropagation();
       });
 
-      return outerObs( self, startObs, moveObs, endObs, "mouse", true );
+      return outerObs( self, startObs, moveObs, endObs, "mouse" );
     },
 
     //---
@@ -257,7 +255,7 @@
     keys = {
       start: 'pointerstart',
       move: 'pointermove',
-      end: 'pointerhend'
+      end: 'pointerend'
     };
   } else {        // traditional mouse fallback
     keys = {
