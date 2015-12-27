@@ -22,14 +22,15 @@
   //
   // Ref. https://xgrommx.github.io/rx-book/content/guidelines/implementations/index.html#implement-new-operators-by-composing-existing-operators
   //
+  // tbd. Is it true RxJS does not have a built-in operator for this? Ask at StackOverflow (pointing to this line). AKa271215
+  //
   Rx.Observable.prototype.filterAndSelect = function (f) {
     return this.select(f).filter( function (x) { return x !== undefined; } );
   }
 
   // Helper function to give us an outer stream of drags. Either coming from desktop, or touch.
   //
-  // '...Obs'  parameters are 'observable of x', where the 'x' is either a 'MouseEvent' or a 'Touch' (which contains touches
-  // of only one touch id; TouchEvent has all changes).
+  // '...Obs'  parameters are 'observable of x' where 'x' is either 'MouseEvent' or { pageX:Int, pageY:Int [,_ev:TouchEvent] }'.
   //
   // 'debugName': used for console output
   //
@@ -37,7 +38,7 @@
   //    MouseEvent -> https://developer.mozilla.org/en-US/docs/Web/API/MouseEvent
   //    Touch -> https://developer.mozilla.org/en-US/docs/Web/API/Touch
   //
-  var outerObs = function (el, startObs, moveObs, endObs, debugName) {    // (SVG.Element|SVG.G|SVG.Doc, observable of MouseEvent or Touch, ...) -> observable of observable of {x:Int, y:Int}
+  var outerObs = function (el, startObs, moveObs, endObs, debugName) {    // (SVG.Element|SVG.G|SVG.Doc, observable of MouseEvent or {pageX: Int, pageY: Int, _ev:TouchEvent}, ...) -> observable of observable of {x:Int, y:Int}
 
     debugName = debugName | "unknown";
 
@@ -47,12 +48,12 @@
       throw "svg.rx.js does not support: "+ (typeof el);
     }
 
+    /*** disabled
     // Prevent browser default behavior and propagation to parent entries.
     //
     // Note: Preventing default behaviour on mouse events is a bit weird, since the same event can carry multiple touch id
     //      information. We cannot just prevent one of them, but have to bite out all. Does this do any harm? AKa271215
     //
-    /***
     function eatUp (o) {
       var ev = o._ev | o;
 
@@ -68,12 +69,6 @@
     return startObs.
       select( function (oStart) {   // (MouseEvent or {pageX: Int, pageY: Int, _ev: TouchEvent}) -> observable of {x:Int, y:Int}
         //console.log( debugName +": Outer observable started" );
-
-        // Why do we get here with "undefined" ???
-        //
-        console.log("DRAG START: "+ debugName + " "+ oStart);
-
-        if (!oStart) { return null; }
 
         //eatUp(oStart);
 
@@ -125,8 +120,6 @@
         //console.log("move screenXY "+ oStart.screenX + " "+ oStart.screenY);
 
         var p0 = transformP(oStart /*, anchorOffset*/);
-
-        console.log("p0 "+ p0.x + " "+ p0.y);
 
         // With 'S.Doc', 'el.x()' and 'el.y()' are always 0 (well, unless viewport is used, likely..). Don't really
         // understand why the below is the right thing but it is. AKa271215
@@ -189,8 +182,8 @@
 
       var self = this;    // to be used within further inner functions
 
-      /*** disabled (code below did not really work - 'remember' remembers nada. AKa271215
-
+      /*** disabled (code below did not really work - 'remember' remembers nada. tbd. fix it. AKa271215
+      ***/
       // Return an observable for certain touch events for the element. Also remember the observable for later calls
       // (only one is ever created, for a certain element and 'evName').
       //
@@ -207,10 +200,11 @@
         }
         return obs;
       };
-      ***/
+      /***
       var cache = function (evName) {   // temporary
         return Rx.Observable.fromEvent(self,evName);
       }
+      ***/
 
       var startAllObs = cache( "touchstart" );
       var moveAllObs = cache( "touchmove" );
@@ -269,27 +263,29 @@
 
       // DEBUGGING
       //
-      var tap = function (name) {
-        return function (ev) {
-          console.log( "TAPPING "+name );
-          console.log( ev );
+      if (false) {
+        var tap = function (name) {
+          return function (ev) {
+            console.log( "TAPPING "+name );
+            console.log( ev );
 
-          var arr = [];
+            var arr = [];
 
-          for (var i=0; i<ev.changedTouches.length; i++) {
-            var touch = ev.changedTouches[i];
-            arr.push( touch.identifier );
-          }
-          console.log(arr);
+            for (var i=0; i<ev.changedTouches.length; i++) {
+              var touch = ev.changedTouches[i];
+              arr.push( touch.identifier );
+            }
+            console.log(arr);
+          };
         };
-      };
 
-      startAllObs.subscribe( tap("start") );
-      moveAllObs.subscribe( tap("move") );
-      cancelAllObs.subscribe( tap("cancel") );
-      endAllObs.subscribe( tap("end") );
+        startAllObs.subscribe( tap("start") );
+        moveAllObs.subscribe( tap("move") );
+        cancelAllObs.subscribe( tap("cancel") );
+        endAllObs.subscribe( tap("end") );
+      }
 
-      // Just one buffer may be enough (if not, give each their own).
+      // Just one buffer seems to be enough (keep like this until tested on multiple platforms).
       //
       var buf = {};
 
@@ -321,9 +317,10 @@
       //
       startObs.subscribe( function (ev) {     // (MouseEvent)
 
-        // prevent browser drag behavior (do we have any, for mouse based browsers and button 1?)
+        // prevent browser drag behavior (this eg. makes sure text doesn't get "painted" when moving the cursor
+        // outside of the SVG cradle, on top of HTML text).
         //
-        //ev.preventDefault();
+        ev.preventDefault();
 
         // prevent propagation to a parent that might also have dragging enabled (see demo1).
         //
