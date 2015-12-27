@@ -8,6 +8,7 @@
 * Credit:
 *   http://tomicloud.com/2012/03/multi-touch-demo
 */
+/*jshint devel: true */
 
 (function() {
   "use strict";
@@ -21,8 +22,6 @@
   //
 /*jshint -W083 */
 
-  var doc = svg.doc;
-
   // Bringing also mouse in here - helps us with debugging
   //
   for( var iMaster=-1; iMaster<N; iMaster++ ) { (function () {   // scope for the inner values
@@ -34,8 +33,10 @@
 
     outerObs.subscribe(
       function (dragObs) {
+        console.log( "Drag start: "+ i );
         dragObs.subscribe(
           function (o) {
+            console.log( "Dragging: "+ o.x + " "+ o.y );
             circle.center(o.x, o.y).show();
           },
           null,   // error handling

@@ -12,6 +12,9 @@ jugglinmike <mike@mikepennisi.com>
 
 - Make small text for each demo to show what it's about (especially demo4).
 
+- Animation of demo 4, using CSS (because that's where visual animations should be)
+
+
 
 ---
 

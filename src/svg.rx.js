@@ -12,6 +12,20 @@
 (function () {
   "use strict";
 
+  function assert(b,msg) {    // (boolish, String) =>
+    if (!b) {
+      throw ("Assert failed" + (msg ? ": "+msg : ""))
+    }
+  }
+
+  // Note: RxJS does not seem to have what Scala calls '.collect': to both filter and convert.
+  //
+  // Ref. https://xgrommx.github.io/rx-book/content/guidelines/implementations/index.html#implement-new-operators-by-composing-existing-operators
+  //
+  Rx.Observable.prototype.filterAndSelect = function (f) {
+    return this.select(f).filter( function (x) { return x !== undefined; } );
+  }
+
   // Helper function to give us an outer stream of drags. Either coming from desktop, or touch.
   //
   // '...Obs'  parameters are 'observable of x', where the 'x' is either a 'MouseEvent' or a 'Touch' (which contains touches
@@ -33,12 +47,35 @@
       throw "svg.rx.js does not support: "+ (typeof el);
     }
 
+    // Prevent browser default behavior and propagation to parent entries.
+    //
+    // Note: Preventing default behaviour on mouse events is a bit weird, since the same event can carry multiple touch id
+    //      information. We cannot just prevent one of them, but have to bite out all. Does this do any harm? AKa271215
+    //
+    /***
+    function eatUp (o) {
+      var ev = o._ev | o;
+
+      debugger;
+      ev.preventDefault();      // don't cause browser pan, refresh etc. (touch)
+      ev.stopPropagation();     // needed eg. for demo1 (so corner events don't also drag the main element)
+    }
+    ***/
+
     // Note: keep helper functions within the '.select()' function, since things like the positioning of the element,
     //      its transformation etc. may change during the lifespan of the observable.
 
     return startObs.
-      select( function (oStart) {
+      select( function (oStart) {   // (MouseEvent or {pageX: Int, pageY: Int, _ev: TouchEvent}) -> observable of {x:Int, y:Int}
         //console.log( debugName +": Outer observable started" );
+
+        // Why do we get here with "undefined" ???
+        //
+        console.log("DRAG START: "+ debugName + " "+ oStart);
+
+        if (!oStart) { return null; }
+
+        //eatUp(oStart);
 
         // Transform from screen to user coordinates
         //
@@ -83,9 +120,9 @@
         }
         **/
 
-        console.log("move clientXY "+ oStart.clientX + " "+ oStart.clientY);
-        console.log("move pageXY "+ oStart.pageX + " "+ oStart.pageY);
-        console.log("move screenXY "+ oStart.screenX + " "+ oStart.screenY);
+        //console.log("move clientXY "+ oStart.clientX + " "+ oStart.clientY);
+        //console.log("move pageXY "+ oStart.pageX + " "+ oStart.pageY);
+        //console.log("move screenXY "+ oStart.screenX + " "+ oStart.screenY);
 
         var p0 = transformP(oStart /*, anchorOffset*/);
 
@@ -113,7 +150,12 @@
         //      '.distinctUntilChanged()'.
         //
         var innerObs = moveObs.select( function (o) {
-          console.log( debugName +": "+ o );
+          //console.log( debugName +": "+ o );
+
+          // When moving outside of SVG area, shouldn't paint text. (not sure if this works for that; anyways a rather
+          // marginal issue). AKa271215
+          //
+          //eatUp(o);
 
           var p = transformP(o);
 
@@ -136,7 +178,7 @@
   SVG.extend( SVG.Element, {
 
     //---
-    // Create an RxJS observable for touch events of a certain touchId.
+    // Create an RxJS observable for touch events of a certain touch id.
     //
     // Returns:
     //  observable of observables of { x: Int, y: Int }
@@ -147,41 +189,65 @@
 
       var self = this;    // to be used within further inner functions
 
-      // tbd. Could make those filter the data so that it's uniform with pointer events
-      //
+      /*** disabled (code below did not really work - 'remember' remembers nada. AKa271215
 
       // Return an observable for certain touch events for the element. Also remember the observable for later calls
       // (only one is ever created, for a certain element and 'evName').
       //
       var cache = function (evName) {   // (String) -> observable of touchEvent
-        var key = "svgrxjs."+evName;
+        var key = "svg.rx.js."+evName;
 
         var obs = self.remember(obs);
         if (!obs) {
           obs = Rx.Observable.fromEvent(self, evName);
           self.remember(key,obs);
+          console.log( "cached: "+evName+" for "+ self );
+        } else {
+          console.log( "found from cache: "+ evName +" for "+self )
         }
         return obs;
       };
+      ***/
+      var cache = function (evName) {   // temporary
+        return Rx.Observable.fromEvent(self,evName);
+      }
 
       var startAllObs = cache( "touchstart" );
       var moveAllObs = cache( "touchmove" );
       var cancelAllObs = cache( "touchcancel" );
       var endAllObs = cache( "touchend" );
 
+      // Note: If the one buffer for all touch id messages works fine, we can simplify this a bit (declare the 'buf'
+      //      here instead of the caller). AKa271215
+
       // Derive the observable for just the given touch
       //
-      var f = function (ev) {
+      var f = function (buf) {    // ({}) -> (TouchEvent) -> { pageX: Int, pageY: Int, _ev: event } or undefined
 
-        // tbd. Wasn't able to use normal array methods with 'ev.changedTouches'. We'd want '.find()'. AKa161215
-        //
-        for (var i=0; i<ev.changedTouches.length; i++) {
-          var touch = ev.changedTouches[i];
-          if (touch.identifier === n) {
-            return touch;
+        return function (ev) {
+          // tbd. Wasn't able to use normal array methods with 'ev.changedTouches'. We'd want '.find()'. AKa161215
+          //
+          for (var i=0; i<ev.changedTouches.length; i++) {
+            var touch = ev.changedTouches[i];
+            if (touch.identifier === n) {
+              // the fields that 'outerObs' is expecting of us (similar names to a mouse event)
+              //
+              // Note: Using a buffer object allocated by the caller, to reduce lots of temporary allocations. The stream
+              //      should always be bothered of the latest value only. AKa271215
+              //
+              buf.pageX = touch.pageX;
+              buf.pageY = touch.pageY;
+              buf._ev = ev;   // so 'outerObs' can prevent event default effects and bubbling up (*)
+
+              return buf;
+            }
           }
         }
       };
+
+      // (*) preventing default events may be a context-sensitive thing so we don't want to do it here. E.g. mousemove
+      //    events (for mouse, though) need to be default-prevented when dragging is occurring, but not if it's not.
+      //    This simply buys us more freedom. AKa271215
 
       // Prevent browser drag behaviour for touch #0
       //
@@ -201,10 +267,38 @@
         });
       }
 
-      var startObs = startAllObs.select(f);
-      var moveObs = moveAllObs.select(f);
-      var cancelObs = cancelAllObs.select(f);
-      var endObs = endAllObs.select(f);
+      // DEBUGGING
+      //
+      var tap = function (name) {
+        return function (ev) {
+          console.log( "TAPPING "+name );
+          console.log( ev );
+
+          var arr = [];
+
+          for (var i=0; i<ev.changedTouches.length; i++) {
+            var touch = ev.changedTouches[i];
+            arr.push( touch.identifier );
+          }
+          console.log(arr);
+        };
+      };
+
+      startAllObs.subscribe( tap("start") );
+      moveAllObs.subscribe( tap("move") );
+      cancelAllObs.subscribe( tap("cancel") );
+      endAllObs.subscribe( tap("end") );
+
+      // Just one buffer may be enough (if not, give each their own).
+      //
+      var buf = {};
+
+      // Note: RxJS does not seem to have what Scala calls '.collect': to both filter and convert.
+      //
+      var startObs = startAllObs.filterAndSelect(f(buf));
+      var moveObs = moveAllObs.filterAndSelect(f(buf));
+      var cancelObs = cancelAllObs.filterAndSelect(f(buf));
+      var endObs = endAllObs.filterAndSelect(f(buf));
 
       var cancelOrEndObs = Rx.Observable.merge( endObs, cancelObs );
 
