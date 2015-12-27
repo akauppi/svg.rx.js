@@ -1,3 +1,14 @@
+div#cradle {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  border: 1px solid red;
+}
+
+circle.mouse {
+  fill: blue;
+}
 circle.touch0 {
   fill: gray;
 }

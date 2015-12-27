@@ -23,29 +23,37 @@
   //    MouseEvent -> https://developer.mozilla.org/en-US/docs/Web/API/MouseEvent
   //    Touch -> https://developer.mozilla.org/en-US/docs/Web/API/Touch
   //
-  var outerObs = function (el, startObs, moveObs, endObs, debugName) {    // (SVG.Element, observable of MouseEvent or Touch, ...) -> observable of observable of {x:Int, y:Int}
+  var outerObs = function (el, startObs, moveObs, endObs, debugName) {    // (SVG.Element|SVG.G|SVG.Doc, observable of MouseEvent or Touch, ...) -> observable of observable of {x:Int, y:Int}
 
     debugName = debugName | "unknown";
 
     // Note: keep helper functions within the '.select()' function, since things like the positioning of the element,
     //      its transformation etc. may change during the lifespan of the observable.
 
+    var isElement = (el instanceof SVG.Element);  // SVG.Element
+    var isG = (el instanceof SVG.G);              // SVG.G
+    var isDoc = (el instanceof SVG.Doc);          // SVG.Doc
+
+    if (! (isElement || isG || isDoc)) {
+      throw "svg.rx.js does not support: "+ (typeof el);
+    }
+
     return startObs.
       select( function (oStart) {
         console.log( debugName +": Outer observable started" );
 
-        // Transform from screen to user coordinates. Take care of pointer and touch events having different
-        // inner structures.
+        // Transform from screen to user coordinates
         //
         var transformP = (function () {    // scope
 
-          // Note: local values are hidden in this scope.
+          // If 'el' is already the doc (or 'SVG.Nested', which we don't currently support), we can use that as the cradle
+          // for our point.
           //
-          var parent = /*el.parent(SVG.Nested) ||*/ el.parent(SVG.Doc);
+          var doc = isDoc ? el : /*el.parent(SVG.Nested) ||*/ el.parent(SVG.Doc);
 
           // tbd. Can we do these within 'svg.js', without using the '.node' (i.e. dropping to plain SVG APIs)?
-
-          var p = parent.node.createSVGPoint();     // point buffer (avoid reallocation per each coordinate change)
+          //
+          var p = doc.node.createSVGPoint();     // point buffer (avoid reallocation per each coordinate change)
           var m = el.node.getScreenCTM().inverse();
 
           return function (o /*, offset*/) {   // (MouseEvent or Touch) -> point
@@ -234,36 +242,3 @@
   });
 
 })();
-
-
-  /*** DISABLED - no 'root' in Safari. AKa251015
-  * Decide which events we observe.
-  *
-  * For any platform, it should be enough to just observe one kind of events, right? This part may need revising, e.g.
-  *
-  * - role of 'root.PointerEvent' - what is it, how is it connected with the normal mouse events?
-  *
-  var keys = null;
-
-  if (root.TouchEvent) {
-    keys = {
-      start: 'touchstart',
-      move: 'touchmove',
-      end: 'touchend'
-    };
-  } else if (root.PointerEvent) {   // TBD: not tested!!! (which browsers would have this, IE only?) AKa251015
-    keys = {
-      start: 'pointerstart',
-      move: 'pointermove',
-      end: 'pointerend'
-    };
-  } else {        // traditional mouse fallback
-    keys = {
-      start: 'mousedown',
-      move: 'mousemove',
-      end: 'mouseup'
-    };
-  }
-
-  return outerObs(keys);
-  ***/
