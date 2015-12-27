@@ -38,7 +38,7 @@
 
     return startObs.
       select( function (oStart) {
-        console.log( debugName +": Outer observable started" );
+        //console.log( debugName +": Outer observable started" );
 
         // Transform from screen to user coordinates
         //
@@ -54,6 +54,9 @@
           var p = doc.node.createSVGPoint();     // point buffer (avoid reallocation per each coordinate change)
           var m = el.node.getScreenCTM().inverse();
 
+          // 'o.pageX|Y' contain coordinates relative to the actual browser window (may be partly scrolled out),
+          // for both 'MouseEvent' and 'Touch' objects.
+          //
           return function (o /*, offset*/) {   // (MouseEvent or Touch) -> point
             p.x = o.pageX;  // - (offset || 0)
             p.y = o.pageY;
@@ -80,7 +83,13 @@
         }
         **/
 
+        console.log("move clientXY "+ oStart.clientX + " "+ oStart.clientY);
+        console.log("move pageXY "+ oStart.pageX + " "+ oStart.pageY);
+        console.log("move screenXY "+ oStart.screenX + " "+ oStart.screenY);
+
         var p0 = transformP(oStart /*, anchorOffset*/);
+
+        console.log("p0 "+ p0.x + " "+ p0.y);
 
         // With 'S.Doc', 'el.x()' and 'el.y()' are always 0 (well, unless viewport is used, likely..). Don't really
         // understand why the below is the right thing but it is. AKa271215
@@ -90,10 +99,10 @@
         var x_offset = isDoc ? 0 : p0.x - el.x(),
             y_offset = isDoc ? 0 : p0.y - el.y();
 
-        console.log("el "+ el.x() + " "+ el.y());
-        console.log("p0 "+ p0.x + " "+ p0.y);
-        console.log("x_offset "+ x_offset);
-        console.log("y_offset "+ y_offset);
+        //console.log("el "+ el.x() + " "+ el.y());
+        //console.log("p0 "+ p0.x + " "+ p0.y);
+        //console.log("x_offset "+ x_offset);
+        //console.log("y_offset "+ y_offset);
 
         var endSingleObs = endObs.take(1);    // tbd. is there any benefit of doing this '.take(1)'? We're using '.takeUntil()' below.
 
@@ -107,6 +116,9 @@
           console.log( debugName +": "+ o );
 
           var p = transformP(o);
+
+          //console.log( o );
+          //console.log( "move: "+ p.x +" "+ p.y );
 
           return {
             x: p.x - x_offset,

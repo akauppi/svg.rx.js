@@ -32,14 +32,18 @@
 
     var outerObs = (i<0) ? svg.rx_mouse() : svg.rx_touch(i);   // observable of observables of {x: Int, y: Int}; tracks touch id 'i'
 
-    outerObs.subscribe( function (dragObs) {
-
-        dragObs.subscribe( function (o) {
-          circle.center(o.x, o.y).show();
-        });
-
-      }, function () {  // end of drag
-        circle.hide();
+    outerObs.subscribe(
+      function (dragObs) {
+        dragObs.subscribe(
+          function (o) {
+            circle.center(o.x, o.y).show();
+          },
+          null,   // error handling
+          function () {  // end of drag
+            console.log( "end of drag" );
+            circle.hide();
+          }
+        );
       }
     );
 
