@@ -1,72 +1,86 @@
 /*
 * demo4.js
 *
-* Multi-touch demo.
+* Multi-touch demo #1
 *
-* Follow each finger touch with a circle of different colour, and tie them together in the order of the touches.
-*
-* Allow any touch to be removed while following.
+* For each touch, a circle will be created and following that touch.
 *
 * Credit:
 *   http://tomicloud.com/2012/03/multi-touch-demo
 */
+/*jshint devel: true */
 
 (function() {
-  var R=60;
+  "use strict";
+
+  var R=100;
+  var N=10;    // how many fingers to track (if the hardware is up to it, e.g. Nexus 7 is)
 
   var svg = SVG("cradle");
 
-  //var el = svg.circle(20).center(0,0);
+  // Note: jshint warns against functions in a loop, but we have it covered (taking copies within inner function scope). AKa271215
+  //
+/*jshint -W083 */
 
-  var genHandler = function (name) {
-    return function (ev) {
-      //console.log(name);
+  // Bringing also mouse in here - helps us with debugging
+  //
+  for( var iMaster=-1; iMaster<N; iMaster++ ) { (function () {   // scope for the inner values
+    var i = iMaster;
+    var c = (i<0) ? "mouse" : "touch"+i;
+    var circle = svg.circle(R).addClass(c).hide();
 
-      for( var i=0; i< ev.changedTouches.length; i++ ) {
-        var touch = ev.changedTouches[i];
-        var x = touch.clientX;
-        var y = touch.clientY;
-        console.log(name + " "+ touch.identifier + ": "+ x +" "+ y);
+    var outerObs = (i<0) ? svg.rx_mouse() : svg.rx_touch(i);   // observable of observables of {x: Int, y: Int}; tracks touch id 'i'
+
+    outerObs.subscribe(
+      function (dragObs) {
+        console.log( "Drag start: "+ i );
+        dragObs.subscribe(
+          function (o) {
+            console.log( "Dragging: "+ o.x + " "+ o.y );
+            circle.center(o.x, o.y).show();
+          },
+          null,   // error handling
+          function () {  // end of drag
+            console.log( "end of drag" );
+            circle.hide();
+          }
+        );
       }
-    }
-  }
+    );
 
-  svg.node.addEventListener("touchstart", genHandler("touchstart"), false);
-  svg.node.addEventListener("touchend", genHandler("touchend"), false);
-  svg.node.addEventListener("touchcancel", genHandler("touchcancel"), false);
-  svg.node.addEventListener("touchmove", genHandler("touchmove"), false);
-
-  /*** needs editing
-  /_*
-  * Helper to handle multitouch events
-  *
-  * i:  1..n (level of recursion) = Nth touch
-  *
-  * obs: observable of (observable of {x:Int,y:Int}, observable like 'obs' (recursively))
-  *_/
-  var handleMultiTouch = function (i, obs) {
-
-    obs.subscribe( function (obs1, obs2) {
-      // create a circle for the touch ('obs1' will move it around)
-      //
-      var circle = svg.circle(0,0).attr("level",i);
-
-      obs1.subscribe( function (o) {   // {x:Int,y:Int}
-          console.log( "Moving touch: "+i );
-          console.log(o);
-          circle.move(o.x,o.y);
-        },
-        function () {   // drag ended
-          console.log( "Out of touch: "+i );
-          circle.release();
-        }
-      )
-
-      handleMultiTouch(i+1, obs2);    // dig one level deeper (anticipate next touch)
-    });
-  };
-
-  handleMultiTouch( 1, svg.rx_multitouch() )
-  ***/
+  })(); }
+/*jshint +W083 */
 
 })();
+
+
+/***
+  // debugging
+  //
+  if (false) {
+    var genHandler = function (name) {
+      return function (ev) {
+        console.log(ev.changedTouches);
+
+        // Note: 'ev.changedTouches' does not work like an array, i.e. no '.map' and such. AKa131215
+        //
+        var s="";
+
+        for( var i=0; i< ev.changedTouches.length; i++ ) {
+          var touch = ev.changedTouches[i];
+          var x = touch.clientX;
+          var y = touch.clientY;
+          s += touch.identifier + ": "+ x +" "+ y + " ";
+        }
+
+        console.log(name + " "+ s);
+      }
+    }
+
+    svg.node.addEventListener("touchstart", genHandler("touchstart"), false);
+    svg.node.addEventListener("touchend", genHandler("touchend"), false);
+    svg.node.addEventListener("touchcancel", genHandler("touchcancel"), false);
+    svg.node.addEventListener("touchmove", genHandler("touchmove"), false);
+  }
+
+***/
