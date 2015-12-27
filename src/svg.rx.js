@@ -27,16 +27,14 @@
 
     debugName = debugName | "unknown";
 
-    // Note: keep helper functions within the '.select()' function, since things like the positioning of the element,
-    //      its transformation etc. may change during the lifespan of the observable.
+    var isDoc = (el instanceof SVG.Doc);
 
-    var isElement = (el instanceof SVG.Element);  // SVG.Element
-    var isG = (el instanceof SVG.G);              // SVG.G
-    var isDoc = (el instanceof SVG.Doc);          // SVG.Doc
-
-    if (! (isElement || isG || isDoc)) {
+    if (! ((el instanceof SVG.Element) || (el instanceof SVG.G) || isDoc)) {
       throw "svg.rx.js does not support: "+ (typeof el);
     }
+
+    // Note: keep helper functions within the '.select()' function, since things like the positioning of the element,
+    //      its transformation etc. may change during the lifespan of the observable.
 
     return startObs.
       select( function (oStart) {
@@ -84,8 +82,18 @@
 
         var p0 = transformP(oStart /*, anchorOffset*/);
 
-        var x_offset = p0.x - el.x(),
-            y_offset = p0.y - el.y();
+        // With 'S.Doc', 'el.x()' and 'el.y()' are always 0 (well, unless viewport is used, likely..). Don't really
+        // understand why the below is the right thing but it is. AKa271215
+        //
+        // Note: If the SVG element is slightly scrolled off window, the 0's don't work. AKa271215
+        //
+        var x_offset = isDoc ? 0 : p0.x - el.x(),
+            y_offset = isDoc ? 0 : p0.y - el.y();
+
+        console.log("el "+ el.x() + " "+ el.y());
+        console.log("p0 "+ p0.x + " "+ p0.y);
+        console.log("x_offset "+ x_offset);
+        console.log("y_offset "+ y_offset);
 
         var endSingleObs = endObs.take(1);    // tbd. is there any benefit of doing this '.take(1)'? We're using '.takeUntil()' below.
 
