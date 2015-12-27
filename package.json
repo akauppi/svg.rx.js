@@ -1,14 +1,26 @@
 {
   "": {
     "jhint reference": "http://jshint.com/docs/cli/",
-    "jshint options": "http://jshint.com/docs/options/"
+    "jshint options": "http://jshint.com/docs/options/",
+    "note": "Once RxJS 5.0 is available, switch to is. Currently:",
+    "note": "@reactivex/rxjs\": \">= 5.0.0-alpha.12"
   },
+  "name": "svg.rx.js",
+  "version": "0.0.0",
+  "description": "Bridge of SVG graphics (svg.js) and Reactive Extensions (rx.js).",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/akauppi/svg.rx.js"
+  },
+  "license": "MIT",
+  "files": ["src/"],
+  "keywords": ["svg","rx","streams","rxjs"],
+
   "dependencies": {
-    "@reactivex/rxjs": ">= 5.0.0-alpha.12",
+    "svg.js": "^2.2.4",
     "rx-lite": ">= 4.0.7"
   },
   "devDependencies": {
-    "svg.js": "^2.2.4",
     "gh-pages": "^0.5.0",
     "http-server": "^0.8.5",
     "jshint": "^2.8.0"

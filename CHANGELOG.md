@@ -2,6 +2,10 @@
 
 ## latest
 
+## 0.0.3
+
+- multitouch support
+- packaging for `npm` (Bye, bye Bower!)
 - rid of over-complex Makefile,  `npm` and `bower` are enough
 
 ## 0.0.2

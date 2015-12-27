@@ -1,6 +1,6 @@
 # svg.rx.js
 
-<font color=red>Currently, the master is broken. Working on the demo4 and multitouch. Will fix demos back once that works. Sorry. Check out a [previous tagged](https://github.com/akauppi/svg.rx.js/releases/tag/0.0.2) release for working stuff. AKa201215
+<font color=red>This README hasn't been revised for 0.0.3 changes, yet. Read ith caution. Demos should work. Have fun! AKa271215
 </font>
 
 Binding [RxJS](https://github.com/Reactive-Extensions/RxJS) with [svg.js](https://github.com/wout/svg.js).
@@ -91,6 +91,7 @@ outerObs.subscribe( function(dragObs) {
     dragObs.subscribe( function(o) {       // {x:Int,y:Int}
         rect.move(o.x, o.y);
     },
+    null, 	// no error handler
     function () {
         console.log("Drag ended");
 	} );
@@ -184,6 +185,7 @@ Features that have come after the last release are shown at the top of `CHANGELO
 - checking the code from `svg.js` point of view
   - are there `svg.js` APIs that could be used instead of `.node` (i.e. native SVG)?  
 - general testing on Windows platform (building and behaviour in IE versions)
+- see `TODO.md` and `BUGS.md`
 
 ---
 

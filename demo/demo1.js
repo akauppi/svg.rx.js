@@ -7,8 +7,8 @@
 (function() {
   "use strict";
 
-  var W= 100;
-  var CORNER_SIZE = 20;
+  var W= 200;
+  var CORNER_SIZE = 30;
   var CORNER_OFFSET = 5;
 
   var svg = SVG("cradle");
