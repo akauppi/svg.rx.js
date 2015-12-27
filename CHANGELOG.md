@@ -5,6 +5,7 @@
 ## 0.0.3
 
 - multitouch support
+- ability to follow events on the SVG document itself
 - packaging for `npm` (Bye, bye Bower!)
 - rid of over-complex Makefile,  `npm` and `bower` are enough
 
