@@ -1,11 +1,4 @@
-div#cradle {
-  _position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 500px;
-  border: 1px solid red;
-}
+@import url("demo.css");
 
 circle.mouse {
   fill: blue;
