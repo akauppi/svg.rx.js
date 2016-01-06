@@ -249,22 +249,30 @@
     },  // rx_touch
 
     //---
-    // Pointer (button 1) tracking for the element
+    // Mouse tracking for the element
     //
-    // Note: We currently only support button 1.
+    // Note: We currently only support button 1. Would be easy to support any mouse buttons, if needed, but we probably
+    //      should see it from the application point of view. Also, shift etc. might be as important as the different
+    //      buttons. AKa060116
     //
     rx_mouse: function () {
       var self = this;
 
       console.log("initialized rx_mouse");
 
-      var startObs =  Rx.Observable.fromEvent(self.node, "mousedown");
-      var moveObs =   Rx.Observable.fromEvent(window, "mousemove");
-      var endObs =    Rx.Observable.fromEvent(window, "mouseup");
+      // Just consider primary button
+      //
+      var f = function (ev) {   // (MouseEvent) -> Boolean
+        return ev.button === 0;
+      }
+
+      var startObs =  Rx.Observable.fromEvent(self.node, "mousedown").filter(f);
+      var moveObs =   Rx.Observable.fromEvent(window, "mousemove").filter(f);
+      var endObs =    Rx.Observable.fromEvent(window, "mouseup").filter(f);
 
       return startObs.select( function (ev) {   // (MouseEvent) -> observable of {x:Int, y:Int}
 
-        console.log( "Started"+ ev );
+        console.log( ev );
         return innerObs( self, ev, moveObs, endObs );
       } );
     },
