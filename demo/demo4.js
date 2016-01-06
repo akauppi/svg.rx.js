@@ -17,31 +17,26 @@
 
   var svg = SVG("cradle");
 
-  // tbd. Use that name only temporarily
-  //
-  var outerObs = svg.rx_mouseOrTouch();   // observable of observables of {x: Int, y: Int}
-
   var active= 0;   // count of ongoing drags
 
-  outerObs.subscribe(
-    function (dragObs) {
-      active = active + 1;
-      console.log( "Drag start: "+ active );
+  svg.rx_draggable().subscribe( function (dragObs) {
+    active++;
+    console.log( "Drag start: "+ active );
 
-      var circle = svg.circle(R).addClass("n"+active).hide();
+    var circle = svg.circle(R).addClass("n"+active).hide();
 
-      dragObs.subscribe(
-        function (o) {
-          console.log( "Dragging: "+ o.x + " "+ o.y );
-          circle.center(o.x, o.y).show();
-        },
-        null,   // error handling
-        function () {  // end of drag
-          console.log( "end of drag" );
-          circle.remove();    // remove from 'svg'
-        }
-      );
-    }
-  );
+    dragObs.subscribe(
+      function (o) {
+        console.log( "Dragging: "+ o.x + " "+ o.y );
+        circle.center(o.x, o.y).show();
+      },
+      null,   // error handling
+      function () {  // end of drag
+        console.log( "end of drag" );
+        circle.remove();    // remove from 'svg'
+        active--;
+      }
+    );
+  });
 
 })();

@@ -33,13 +33,28 @@
   //      but we only enable stuff that we actually test (manually). I.e. 'SVG.Nested', 'SVG.Use', 'SVG.Text' support
   //      remains disabled until we need it, and there are demos that exercise those things.
   //
-  var innerObs = function (el, oStart, moveObs, endObs) {    // (SVG.Element|SVG.G|SVG.Doc, MouseEvent or TouchEvent, observable of MouseEvent or Touch, observable of MouseEvent or Touch) -> observable of {x:Int, y:Int}
+  var innerObs = function (el, evStart, moveObs, endObs) {    // (SVG.Element|SVG.G|SVG.Doc, MouseEvent or TouchEvent, observable of MouseEvent or Touch, observable of MouseEvent or Touch) -> observable of {x:Int, y:Int}
 
     var isDoc = (el instanceof SVG.Doc);
 
     if (! ((el instanceof SVG.Element) || (el instanceof SVG.G) || isDoc)) {
       throw "svg.rx.js does not support: "+ (typeof el);
     }
+
+    // Prevent browser drag behavior
+    //
+    // On mouse:
+    //    makes sure text doesn't get "painted" when moving the cursor outside of the SVG cradle, on top of HTML text.
+    //
+    // On touch:
+    //    avoids scrolling the whole web page (Android, iOS)
+    //    avoids refresh gestures (Android) 
+    //
+    evStart.preventDefault();
+
+    // Prevent propagation to a parent that might also have dragging enabled (see demo1).
+    //
+    evStart.stopPropagation();
 
     // Transform from screen to user coordinates
     //
@@ -84,7 +99,7 @@
     }
     **/
 
-    var p0 = transformP(oStart /*, anchorOffset*/);
+    var p0 = transformP(evStart /*, anchorOffset*/);
 
     // With 'S.Doc', 'el.x()' and 'el.y()' are always 0 (well, unless viewport is used, likely..). Don't really
     // understand why the below is the right thing but it is. AKa271215
@@ -241,11 +256,15 @@
     rx_mouse: function () {
       var self = this;
 
+      console.log("initialized rx_mouse");
+
       var startObs =  Rx.Observable.fromEvent(self.node, "mousedown");
       var moveObs =   Rx.Observable.fromEvent(window, "mousemove");
       var endObs =    Rx.Observable.fromEvent(window, "mouseup");
 
-      startObs.select( function (ev) {   // (MouseEvent) -> observable of {x:Int, y:Int}
+      return startObs.select( function (ev) {   // (MouseEvent) -> observable of {x:Int, y:Int}
+
+        console.log( "Started"+ ev );
         return innerObs( self, ev, moveObs, endObs );
       } );
     },
