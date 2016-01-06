@@ -2,9 +2,7 @@
 
 - If the SVG area is scrolled partly out-of-bounds, the dragged circles (demo4) come in wrong places. AKa271215
 
-- The caching in demo4 does not work. (internal but still worth checking) AKa271215
-
-- In demo4, circles tend to remain on the screen. That should never happen. Try with multiple fingers for a while. AKa271215
+- In demo4, circles sometimes (now rare) remain on the screen. AKa271215, AKa060116
 
 
 ## Testing system
