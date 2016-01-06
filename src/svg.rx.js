@@ -198,10 +198,18 @@
 
       // Take easy way first - count on getting just one touch started.
       //
-      if (true) {
+      // Note: On iOS (9.2), simultaneous multiple-finger taps are really provided in the same "touchstart" TouchEvent.
+      //      On Android (6.0.1), each finger seems to get its own "touchstart" TouchEvent. AKa060116
+      //
+      if (true) {   // simple, but does not support multiple simultaneously starting touches
         return startAllObs.select( function (ev) {  // (TouchEvent) -> observable of {x:Int, y:Int}
 
-          assert( ev.changedTouches.length == 1, "Not prepared for 2 or more simultaneously starting touches" );
+          // It does happen on iOS
+          //
+          if (ev.changedTouches.length !== 1) {
+            console.log(ev.changedTouches);
+          }
+          assert( ev.changedTouches.length === 1, "Not prepared for 2 or more simultaneously starting touches" );
 
           return touchDragObs( ev, 0 );
         } );
