@@ -23,6 +23,16 @@
     return this.select(f).filter( function (x) { return x !== undefined; } );
   }
 
+  // JavaScript does not have an Array for range constructor.
+  //
+  function range( start, count ) {    // (Int,Int) -> Array of Int
+    var arr = [];
+    for (var i=0; i<count; i++ ) {
+      arr[i]= start+i;
+    }
+    return arr;
+  }
+
   // Inner stream of drags. Handles coordinate transforms etc.
   //
   // References:
@@ -33,7 +43,7 @@
   //      but we only enable stuff that we actually test (manually). I.e. 'SVG.Nested', 'SVG.Use', 'SVG.Text' support
   //      remains disabled until we need it, and there are demos that exercise those things.
   //
-  var innerObs = function (el, oStart, moveObs, endObs) {    // (SVG.Element|SVG.G|SVG.Doc, MouseEvent or Touch, observable of MouseEvent or Touch, observable of MouseEvent or Touch) -> observable of {x:Int, y:Int}
+  function innerObs (el, oStart, moveObs, endObs) {    // (SVG.Element|SVG.G|SVG.Doc, MouseEvent or Touch, observable of MouseEvent or Touch, observable of MouseEvent or Touch) -> observable of {x:Int, y:Int}
 
     var isDoc = (el instanceof SVG.Doc);
 
@@ -110,14 +120,14 @@
     } )
       .distinctUntilChanged()
       .takeUntil( endObs );
-  };  // innerObs
+  }  // innerObs
 
   /*
   * Prevent default behaviour for 'mousedown' and 'touchstart', and bubbling up of the event to the parents.
   *
   * Note: We're not having this with 'innerObs' since here the TouchEvent, not Touch, is needed.
   */
-  var preventDefault = function (evStart) {    // (MouseEvent or TouchEvent) ->
+  function preventDefault (evStart) {    // (MouseEvent or TouchEvent) ->
     // Prevent browser drag behavior
     //
     // On mouse:
@@ -132,7 +142,7 @@
     // Prevent propagation to a parent that might also have dragging enabled (see demo1).
     //
     evStart.stopPropagation();
-  };
+  }
 
 
   SVG.extend( SVG.Element, {
@@ -196,47 +206,17 @@
 
       }; // touchDragObs
 
-      // Take easy way first - count on getting just one touch started.
+      // Each "touchstart" event can start multiple drags. This actually happens on iOS (9.2) but not on Android (6.0.1).
       //
-      // Note: On iOS (9.2), simultaneous multiple-finger taps are really provided in the same "touchstart" TouchEvent.
-      //      On Android (6.0.1), each finger seems to get its own "touchstart" TouchEvent. AKa060116
+      // Note: the '.selectMany' means that we can spawn multiple (0..n) values from within this one event, unlike the
+      //      single one that '.select' would.
       //
-      if (true) {   // simple, but does not support multiple simultaneously starting touches
-        return startAllObs.select( function (ev) {  // (TouchEvent) -> observable of {x:Int, y:Int}
+      return startAllObs.selectMany( function (ev) {  // (TouchEvent) -> Array of observable of {x:Int, y:Int}
 
-          // It does happen on iOS
-          //
-          if (ev.changedTouches.length !== 1) {
-            console.log(ev.changedTouches);
-          }
-          assert( ev.changedTouches.length === 1, "Not prepared for 2 or more simultaneously starting touches" );
-
-          return touchDragObs( ev, 0 );
+        return range( 0, ev.changedTouches.length ).map( function (i) {
+          return touchDragObs( ev, i );
         } );
-
-      } else {
-        // tbd. How to transfer 1..n-1 observables of {x,y}
-        //
-        // Note: It is possible (though unlikely) that the same TouchEvent would start multiple touch chains. We'll keep
-        //        that possibility available in the code, though (it's the right thing to do). AK060116
-        //
-        var f = function (ev) {  // (TouchEvent) -> Array(observable of {x:Int, y:Int}, ...)
-
-          // tbd. Could use '.map' for this instead of i looping. But 'ev.changedTouches' is not a true Array. AKa060116
-          //
-          var arr = [];
-
-          for (var i=0; i<ev.changedTouches.length; i++) {
-            arr.push( touchDragObs( ev, i ) );   // dragging observable for that particular touch
-          }
-
-          // tbd. How should we now (or in the loop above) push all the dragObs's to this observable?
-          //
-          return arr;
-        };
-
-        return startAllObs.flatMap(f);    // flatMap, selectMany, ... which should it be?
-      }
+      });
     },  // rx_touch
 
     //---

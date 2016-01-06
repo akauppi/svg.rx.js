@@ -4,12 +4,9 @@
 
 - Animation of demo 4, using CSS
 
-- Demo 4 to work right (circles under the fingers) even when scrolled.	
 - Clean up the code and documentation
 
 - Package for npm (not Bower!)
-
-- Maybe: Making `demo1` support multiple touch (pan, resize from multiple corners) at once?
 
 ## Features
 
