@@ -48,7 +48,7 @@
     //
     // On touch:
     //    avoids scrolling the whole web page (Android, iOS)
-    //    avoids refresh gestures (Android) 
+    //    avoids refresh gestures (Android)
     //
     evStart.preventDefault();
 
@@ -116,17 +116,9 @@
     //      '.distinctUntilChanged()'.
     //
     return moveObs.select( function (o) {
-      //console.log( debugName +": "+ o );
-
-      // When moving outside of SVG area, shouldn't paint text. (not sure if this works for that; anyways a rather
-      // marginal issue). AKa271215
-      //
-      //eatUp(o);
-
       var p = transformP(o);
 
-      //console.log( o );
-      //console.log( "move: "+ p.x +" "+ p.y );
+      //console.log( "Move: "+ p.x +" "+ p.y );
 
       return {
         x: p.x - x_offset,
@@ -155,36 +147,12 @@
 
       var self = this;    // to be used within further inner functions
 
-      /*** Code below did not really work - 'remember' remembers nada. tbd. fix it. AKa271215
-      ***/
-      // Return an observable for certain touch events for the element. Also remember the observable for later calls
-      // (only one is ever created, for a certain element and 'evName').
-      //
-      var cache = function (evName) {   // (String) -> observable of touchEvent
-        var key = "svg.rx.js."+evName;
+      var startAllObs = Rx.Observable.fromEvent( self, "touchstart" );
+      var moveAllObs = Rx.Observable.fromEvent( window, "touchmove" );
+      var cancelAllObs = Rx.Observable.fromEvent( window, "touchcancel" );
+      var endAllObs = Rx.Observable.fromEvent( window, "touchend" );
 
-        var obs = self.remember(obs);
-        if (!obs) {
-          obs = Rx.Observable.fromEvent(self, evName);
-          self.remember(key,obs);
-          console.log( "cached: "+evName+" for "+ self );
-        } else {
-          console.log( "found from cache: "+ evName +" for "+self )
-        }
-        return obs;
-      };
-      /***
-      var cache = function (evName) {   // temporary
-        return Rx.Observable.fromEvent(self,evName);
-      }
-      ***/
-
-      var startAllObs = cache( "touchstart" );
-      var moveAllObs = cache( "touchmove" );
-      var cancelAllObs = cache( "touchcancel" );
-      var endAllObs = cache( "touchend" );
-
-      var touchDragObs = function (ev, wanted) {      // (TouchEvent, /*touchId*/ Int) -> observable of {x:Int, y:Int}
+      var touchDragObs = function (evStart, wanted) {      // (TouchEvent, /*touchId*/ Int) -> observable of {x:Int, y:Int}
 
         /* Pick the 'wanted' move, cancel and end events to track
         */
@@ -193,6 +161,7 @@
             var touch = ev.changedTouches[i];
 
             if (touch.identifier === wanted) {
+              //console.log( "Found wanted", touch );
               return touch;
             }
           }
@@ -207,45 +176,64 @@
 
         var cancelOrEndObs = Rx.Observable.merge( endObs, cancelObs );
 
-        return innerObs( self, ev, moveObs, cancelOrEndObs );
+        return innerObs( self, evStart, moveObs, cancelOrEndObs )
 
       }; // touchDragObs
 
-      // tbd.
-      //
-      // 'startAllObs' gets events for every new touch start.
-      // Each of such events creates 1..n-1 observables of {x,y}
-      // How do we map this into a single observable of observables of {x,y}?
-      //
+      // DEBUGGING
+      /***
+      startAllObs.subscribe( function (ev) {
+        console.log( "EV:", ev );
+      });
+      ***/
 
-      // tbd. How to transfer 1..n-1 observables of {x,y}
+      // Take easy way first - count on getting just one touch started.
       //
-      // Note: It is possible (though unlikely) that the same TouchEvent would start multiple touch chains. We'll keep
-      //        that possibility available in the code, though (it's the right thing to do). AK060116
-      //
-      var outerObs = startAllObs.selectMany( function (ev) {  // (TouchEvent) -> Array(observable of {x:Int, y:Int}, ...)
+      if (true) {
+        return startAllObs.select( function (ev) {  // (TouchEvent) -> observable of {x:Int, y:Int}
 
-        // tbd. Could use '.map' for this instead of i looping. But 'ev.changedTouches' is not a true Array. AKa060116
-        //
-        var arr = [];
+          assert( ev.changedTouches.length == 1, "Not prepared for 2 or more simultaneously starting touches" );
 
-        for (var i=0; i<ev.changedTouches.length; i++) {
-          var touch = ev.changedTouches[i];
+          var touch = ev.changedTouches[0];
 
           // Note: 'touch.identifier' can be a 0..N-1 number (Android) or a freely running counter (iOS); we treat it as
           //      an opaque identifier to find the matching further move/cancel/end events.
           //
           var wanted = touch.identifier;
 
-          arr.push( touchDragObs( ev, wanted ) );   // dragging observable for that particular touch
-        }
+          return touchDragObs( ev, wanted );
+        } );
 
-        // tbd. How should we now (or in the loop above) push all the dragObs's to this observable?
+      } else {
+        // tbd. How to transfer 1..n-1 observables of {x,y}
         //
-        return arr;
-      } );
+        // Note: It is possible (though unlikely) that the same TouchEvent would start multiple touch chains. We'll keep
+        //        that possibility available in the code, though (it's the right thing to do). AK060116
+        //
+        var f = function (ev) {  // (TouchEvent) -> Array(observable of {x:Int, y:Int}, ...)
 
-      return outerObs;
+          // tbd. Could use '.map' for this instead of i looping. But 'ev.changedTouches' is not a true Array. AKa060116
+          //
+          var arr = [];
+
+          for (var i=0; i<ev.changedTouches.length; i++) {
+            var touch = ev.changedTouches[i];
+
+            // Note: 'touch.identifier' can be a 0..N-1 number (Android) or a freely running counter (iOS); we treat it as
+            //      an opaque identifier to find the matching further move/cancel/end events.
+            //
+            var wanted = touch.identifier;
+
+            arr.push( touchDragObs( ev, wanted ) );   // dragging observable for that particular touch
+          }
+
+          // tbd. How should we now (or in the loop above) push all the dragObs's to this observable?
+          //
+          return arr;
+        };
+
+        return startAllObs.flatMap(f);    // flatMap, selectMany, ... which should it be?
+      }
     },  // rx_touch
 
     //---
@@ -255,7 +243,7 @@
     //      should see it from the application point of view. Also, shift etc. might be as important as the different
     //      buttons. AKa060116
     //
-    rx_mouse: function () {
+    rx_mouse: function () {   // () -> observable of observables of {x:Int, y:Int}
       var self = this;
 
       console.log("initialized rx_mouse");
@@ -271,8 +259,6 @@
       var endObs =    Rx.Observable.fromEvent(window, "mouseup").filter(f);
 
       return startObs.select( function (ev) {   // (MouseEvent) -> observable of {x:Int, y:Int}
-
-        console.log( ev );
         return innerObs( self, ev, moveObs, endObs );
       } );
     },

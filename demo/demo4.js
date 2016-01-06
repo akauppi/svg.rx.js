@@ -14,27 +14,25 @@
   "use strict";
 
   var R=100;
+  var COLORS=10;    // 0..9 in the CSS
 
   var svg = SVG("cradle");
 
-  var active= 0;   // count of ongoing drags
+  var c= -1;   // next CSS color to use
 
   svg.rx_draggable().subscribe( function (dragObs) {
-    active++;
-    console.log( "Drag start: "+ active );
+    c = (c+1) % COLORS;
 
-    var circle = svg.circle(R).addClass("n"+active).hide();
+    var circle = svg.circle(R).addClass("n"+c).hide();
 
     dragObs.subscribe(
       function (o) {
-        console.log( "Dragging: "+ o.x + " "+ o.y );
+        //console.log( "Dragging: "+ o.x + " "+ o.y );
         circle.center(o.x, o.y).show();
       },
       null,   // error handling
       function () {  // end of drag
-        console.log( "end of drag" );
         circle.remove();    // remove from 'svg'
-        active--;
       }
     );
   });
