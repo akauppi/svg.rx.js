@@ -8,7 +8,8 @@
 
 - Package for npm (not Bower!)
 
- 
+- Maybe: Making `demo1` support multiple touch (pan, resize from multiple corners) at once?
+
 ## Features
 
 - In demo3, make the line between the knob and the base follow moves declaratively. Also, make constraints (in angles) for the movement of the knob, declaratively.

@@ -1,35 +1,35 @@
 @import url("demo.css");
 
-circle.mouse {
+circle.n0 {
   fill: blue;
 }
-circle.touch0 {
+circle.n1 {
   fill: gray;
 }
-circle.touch1 {
+circle.n2 {
   fill: blue;
 }
-circle.touch2 {
+circle.n3 {
   fill: purple;
 }
-circle.touch3 {
+circle.n4 {
   fill: red;
 }
-circle.touch4 {
+circle.n5 {
   fill: green;
 }
-circle.touch5 {
+circle.n6 {
   fill: orange;
 }
-circle.touch6 {
+circle.n7 {
   fill: yellow;
 }
-circle.touch7 {
+circle.n8 {
   fill: magenta;
 }
-circle.touch8 {
+circle.n9 {
   fill: aqua;
 }
-circle.touch9 {
+circle.n10 {
   fill: purple;
 }

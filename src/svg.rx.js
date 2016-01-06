@@ -17,6 +17,7 @@
       throw ("Assert failed" + (msg ? ": "+msg : ""))
     }
   }
+  assert(true);   // just use it up (jshint)
 
   // Note: RxJS does not seem to have what Scala calls '.collect': to both filter and convert.
   //
@@ -251,7 +252,9 @@
       if (n===0) {
         startAllObs.subscribe( function (ev) {     // (TouchEvent)
 
-          // prevent browser drag behavior (eg. pulling shadow and refresh gestures on Android)
+          // prevent browser drag behavior
+          //  - scrolling the whole web page (Android, iOS)
+          //  - refresh gestures (Android)
           //
           ev.preventDefault();
 
@@ -259,30 +262,6 @@
           //
           ev.stopPropagation();
         });
-      }
-
-      // DEBUGGING
-      //
-      if (false) {
-        var tap = function (name) {
-          return function (ev) {
-            console.log( "TAPPING "+name );
-            console.log( ev );
-
-            var arr = [];
-
-            for (var i=0; i<ev.changedTouches.length; i++) {
-              var touch = ev.changedTouches[i];
-              arr.push( touch.identifier );
-            }
-            console.log(arr);
-          };
-        };
-
-        startAllObs.subscribe( tap("start") );
-        moveAllObs.subscribe( tap("move") );
-        cancelAllObs.subscribe( tap("cancel") );
-        endAllObs.subscribe( tap("end") );
       }
 
       // Just one buffer seems to be enough (keep like this until tested on multiple platforms).
@@ -317,8 +296,8 @@
       //
       startObs.subscribe( function (ev) {     // (MouseEvent)
 
-        // prevent browser drag behavior (this eg. makes sure text doesn't get "painted" when moving the cursor
-        // outside of the SVG cradle, on top of HTML text).
+        // prevent browser drag behavior
+        //  - Makes sure text doesn't get "painted" when moving the cursor outside of the SVG cradle, on top of HTML text.
         //
         ev.preventDefault();
 

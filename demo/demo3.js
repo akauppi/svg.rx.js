@@ -8,8 +8,11 @@
 (function() {
   "use strict";
 
-  var W= 80;
-  var GAP=150;
+  var X1= 50;
+  var Y1= 50;
+  var W= 160;
+  var X2= X1 + 250;
+  var Y2= Y1;
 
   var svg = SVG("cradle");
 
@@ -39,6 +42,7 @@
   * Simple rectangle
   */
   var rect1= svg.rect( W, W )
+              .move(X1,Y1)
               .addClass("simple");
 
   dragIt(rect1);
@@ -47,7 +51,7 @@
   * Rectangle with a twist (tests that transforms are properly handled).
   */
   var rect2= svg.rect( W, W )
-              .move(GAP,0)
+              .move(X2,Y2)
               .addClass("transformed");
 
   // Note: because order of transforms matter, they cannot be given in the same object.
