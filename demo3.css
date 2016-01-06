@@ -1,3 +1,5 @@
+@import url("demo.css");
+
 rect.simple {
   fill: blue;
   fill-opacity: 0.8;
