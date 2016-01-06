@@ -1,7 +1,5 @@
 # TODO
 
-- Check through the README
-
 - Animation of demo 4, using CSS
 
 - Clean up the code and documentation
@@ -25,7 +23,7 @@
 ## Optimizations
  
 - How to optimize so that only the last event would ever be shipped, if multiple have gathered, i.e. we only need the last coordinates. AKa071015
- 
+
 - i.e. if the drag produces more coordinates than the subscriber can handle, we'd be okay always skipping to the latest one. How to formulate this in RxJS? (ask in StackOverflow) AKa251015
  
 ## Packaging

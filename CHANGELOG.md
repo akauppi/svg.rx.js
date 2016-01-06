@@ -2,6 +2,8 @@
 
 ## latest
 
+- iOS support (using touch identifiers as opaque id's)
+
 ## 0.0.3
 
 - multitouch support
