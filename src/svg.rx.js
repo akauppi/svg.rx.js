@@ -33,28 +33,13 @@
   //      but we only enable stuff that we actually test (manually). I.e. 'SVG.Nested', 'SVG.Use', 'SVG.Text' support
   //      remains disabled until we need it, and there are demos that exercise those things.
   //
-  var innerObs = function (el, evStart, moveObs, endObs) {    // (SVG.Element|SVG.G|SVG.Doc, MouseEvent or TouchEvent, observable of MouseEvent or Touch, observable of MouseEvent or Touch) -> observable of {x:Int, y:Int}
+  var innerObs = function (el, oStart, moveObs, endObs) {    // (SVG.Element|SVG.G|SVG.Doc, MouseEvent or Touch, observable of MouseEvent or Touch, observable of MouseEvent or Touch) -> observable of {x:Int, y:Int}
 
     var isDoc = (el instanceof SVG.Doc);
 
     if (! ((el instanceof SVG.Element) || (el instanceof SVG.G) || isDoc)) {
       throw "svg.rx.js does not support: "+ (typeof el);
     }
-
-    // Prevent browser drag behavior
-    //
-    // On mouse:
-    //    makes sure text doesn't get "painted" when moving the cursor outside of the SVG cradle, on top of HTML text.
-    //
-    // On touch:
-    //    avoids scrolling the whole web page (Android, iOS)
-    //    avoids refresh gestures (Android)
-    //
-    evStart.preventDefault();
-
-    // Prevent propagation to a parent that might also have dragging enabled (see demo1).
-    //
-    evStart.stopPropagation();
 
     // Transform from screen to user coordinates
     //
@@ -99,10 +84,10 @@
     }
     **/
 
-    var p0 = transformP(evStart /*, anchorOffset*/);
+    var p0 = transformP(oStart /*, anchorOffset*/);
 
-    // With 'S.Doc', 'el.x()' and 'el.y()' are always 0 (well, unless viewport is used, likely..). Don't really
-    // understand why the below is the right thing but it is. AKa271215
+    // With 'S.Doc', 'el.x()' and 'el.y()' are always 0. Don't really understand why the below is the right thing
+    // but it is. AKa271215
     //
     // Note: If the SVG element is slightly scrolled off window, the 0's don't work. AKa271215
     //
@@ -118,8 +103,6 @@
     return moveObs.select( function (o) {
       var p = transformP(o);
 
-      //console.log( "Move: "+ p.x +" "+ p.y );
-
       return {
         x: p.x - x_offset,
         y: p.y - y_offset
@@ -128,6 +111,28 @@
       .distinctUntilChanged()
       .takeUntil( endObs );
   };  // innerObs
+
+  /*
+  * Prevent default behaviour for 'mousedown' and 'touchstart', and bubbling up of the event to the parents.
+  *
+  * Note: We're not having this with 'innerObs' since here the TouchEvent, not Touch, is needed.
+  */
+  var preventDefault = function (evStart) {    // (MouseEvent or TouchEvent) ->
+    // Prevent browser drag behavior
+    //
+    // On mouse:
+    //    makes sure text doesn't get "painted" when moving the cursor outside of the SVG cradle, on top of HTML text.
+    //
+    // On touch:
+    //    avoids scrolling the whole web page (Android, iOS)
+    //    avoids refresh gestures (Android)
+    //
+    evStart.preventDefault();
+
+    // Prevent propagation to a parent that might also have dragging enabled (see demo1).
+    //
+    evStart.stopPropagation();
+  };
 
 
   SVG.extend( SVG.Element, {
@@ -152,7 +157,19 @@
       var cancelAllObs = Rx.Observable.fromEvent( window, "touchcancel" );
       var endAllObs = Rx.Observable.fromEvent( window, "touchend" );
 
-      var touchDragObs = function (evStart, wanted) {      // (TouchEvent, /*touchId*/ Int) -> observable of {x:Int, y:Int}
+      // 'index': 0..n-1 (probably always 0); index to the starting touch
+      //
+      var touchDragObs = function (evStart, index) {      // (TouchEvent, Int) -> observable of {x:Int, y:Int}
+
+        preventDefault(evStart);
+
+        var touchStart = evStart.changedTouches[index];
+
+        // Note: 'touch.identifier' is 0..N-1 number on Android (reusing id's once a touch has ended); on iOS it is a
+        //        freely running counter. Just treat it as an opaque id between the start and the other (move/cancel/end)
+        //        touch events.
+        //
+        var wanted = touchStart.identifier;
 
         /* Pick the 'wanted' move, cancel and end events to track
         */
@@ -161,7 +178,6 @@
             var touch = ev.changedTouches[i];
 
             if (touch.identifier === wanted) {
-              //console.log( "Found wanted", touch );
               return touch;
             }
           }
@@ -176,16 +192,9 @@
 
         var cancelOrEndObs = Rx.Observable.merge( endObs, cancelObs );
 
-        return innerObs( self, evStart, moveObs, cancelOrEndObs )
+        return innerObs( self, touchStart, moveObs, cancelOrEndObs )
 
       }; // touchDragObs
-
-      // DEBUGGING
-      /***
-      startAllObs.subscribe( function (ev) {
-        console.log( "EV:", ev );
-      });
-      ***/
 
       // Take easy way first - count on getting just one touch started.
       //
@@ -194,14 +203,7 @@
 
           assert( ev.changedTouches.length == 1, "Not prepared for 2 or more simultaneously starting touches" );
 
-          var touch = ev.changedTouches[0];
-
-          // Note: 'touch.identifier' can be a 0..N-1 number (Android) or a freely running counter (iOS); we treat it as
-          //      an opaque identifier to find the matching further move/cancel/end events.
-          //
-          var wanted = touch.identifier;
-
-          return touchDragObs( ev, wanted );
+          return touchDragObs( ev, 0 );
         } );
 
       } else {
@@ -217,14 +219,7 @@
           var arr = [];
 
           for (var i=0; i<ev.changedTouches.length; i++) {
-            var touch = ev.changedTouches[i];
-
-            // Note: 'touch.identifier' can be a 0..N-1 number (Android) or a freely running counter (iOS); we treat it as
-            //      an opaque identifier to find the matching further move/cancel/end events.
-            //
-            var wanted = touch.identifier;
-
-            arr.push( touchDragObs( ev, wanted ) );   // dragging observable for that particular touch
+            arr.push( touchDragObs( ev, i ) );   // dragging observable for that particular touch
           }
 
           // tbd. How should we now (or in the loop above) push all the dragObs's to this observable?
@@ -246,8 +241,6 @@
     rx_mouse: function () {   // () -> observable of observables of {x:Int, y:Int}
       var self = this;
 
-      console.log("initialized rx_mouse");
-
       // Just consider primary button
       //
       var f = function (ev) {   // (MouseEvent) -> Boolean
@@ -259,6 +252,7 @@
       var endObs =    Rx.Observable.fromEvent(window, "mouseup").filter(f);
 
       return startObs.select( function (ev) {   // (MouseEvent) -> observable of {x:Int, y:Int}
+        preventDefault(ev);
         return innerObs( self, ev, moveObs, endObs );
       } );
     },
