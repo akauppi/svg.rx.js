@@ -106,8 +106,6 @@
     var x_offset = isDoc ? 0 : p0.x - el.x(),
         y_offset = isDoc ? 0 : p0.y - el.y();
 
-    // tbd. Should start the stream with 'p0'
-
     // Note: some events actually come with the same x,y values (at least on Safari OS X) - removed by the
     //      '.distinctUntilChanged()'.
     //
@@ -123,6 +121,7 @@
         y: p.y - y_offset
       };
     } )
+      .startWith( { x: p0.x, y: p0.y } )
       .distinctUntilChanged()
       .takeUntil( endObs );
   }  // innerObs
