@@ -58,8 +58,8 @@
 
     // tbd. Can we do these within 'svg.js', without using the '.node' (i.e. dropping to plain SVG APIs)?
     //
-    var buf = doc.node.createSVGPoint();            // point buffer (allocated just once per drag)
-    var matrix = el.node.getScreenCTM().inverse();  // calculated just once per drag
+    var buf = doc.node.createSVGPoint();             // point buffer (allocated just once per drag)
+    var matrix = el.node.getScreenCTM().inverse();    // calculated just once per drag
 
     // Transform from screen to user coordinates
     //
@@ -67,8 +67,8 @@
     // for both 'MouseEvent' and 'Touch' objects.
     //
     var transformP = function (o /*, offset*/) {   // (MouseEvent or Touch) -> point
-      buf.x = o.pageX;  // - (offset || 0)
-      buf.y = o.pageY;
+      buf.x = o.clientX;  // - (offset || 0)
+      buf.y = o.clientY;
 
       return buf.matrixTransform(matrix);
     };
@@ -95,10 +95,8 @@
 
     // tbd. Fix the page offset calculation.
 
-    // With 'S.Doc', 'el.x()' and 'el.y()' are always 0. Don't really understand why the below is the right thing
-    // but it is. AKa271215
-    //
-    // Note: If the SVG element is slightly scrolled off window, the 0's don't work. AKa271215
+    // Offset from the touch/point location to the origin of the target element. We're providing the drag coordinates
+    // in the observable, not the actual mouse/touch coordinates (tbd. maybe we should provide both). AKa080116
     //
     var x_offset = isDoc ? 0 : p0.x - el.x(),
         y_offset = isDoc ? 0 : p0.y - el.y();
@@ -106,9 +104,9 @@
     // Note: some events actually come with the same x,y values (at least on Safari OS X) - removed by the
     //      '.distinctUntilChanged()'.
     //
-    // Note: A '.debounce' for getting just the last value isn't really needed. The browser event triggering takes
-    //      care of emitting events in a meaningful fashion (roughly 60 times a second, some web sites say). We simply
-    //      need to direct those events correctly.
+    // Note: A '.debounce' for getting just the last value isn't needed. The browser event triggering takes care of
+    //      emitting events in a meaningful fashion (roughly 60 times a second, some web sites say). We simply need to
+    //      direct those events correctly.
     //
     return moveObs.select( function (o) {
       var p = transformP(o);
@@ -118,7 +116,7 @@
         y: p.y - y_offset
       };
     } )
-      .startWith( { x: p0.x, y: p0.y } )
+      .startWith( { x: p0.x - x_offset, y: p0.y - y_offset } )
       .distinctUntilChanged()
       .takeUntil( endObs );
   }  // innerObs

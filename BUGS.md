@@ -1,6 +1,6 @@
 # BUGS
 
-- If the SVG area is scrolled partly out-of-bounds, the dragged circles (demo4) come in wrong places. AKa271215
+- in demo2, the knob does not follow the mouse precisely. This is because the drag stream gets the element x,y coordinates but moving the element is done with cx,cy.
 
 <!-- Probably got this fixed today? AKa060116
 - In demo4, circles sometimes (now rare) remain on the screen. AKa271215, AKa060116
@@ -18,3 +18,4 @@ jugglinmike
 
 This may be the expected behaviour, but may be worth checking. (give them link to this repo). AKa271215
 
+<br />
