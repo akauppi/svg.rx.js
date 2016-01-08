@@ -51,30 +51,27 @@
       throw "svg.rx.js does not support: "+ (typeof el);
     }
 
+    // If 'el' is already the doc (or 'SVG.Nested', which we don't currently support), we can use that as the cradle
+    // for our point.
+    //
+    var doc = isDoc ? el : /*el.parent(SVG.Nested) ||*/ el.parent(SVG.Doc);
+
+    // tbd. Can we do these within 'svg.js', without using the '.node' (i.e. dropping to plain SVG APIs)?
+    //
+    var buf = doc.node.createSVGPoint();            // point buffer (allocated just once per drag)
+    var matrix = el.node.getScreenCTM().inverse();  // calculated just once per drag
+
     // Transform from screen to user coordinates
     //
-    var transformP = (function () {    // scope
+    // 'o.pageX|Y' contain coordinates relative to the actual browser window (may be partly scrolled out),
+    // for both 'MouseEvent' and 'Touch' objects.
+    //
+    var transformP = function (o /*, offset*/) {   // (MouseEvent or Touch) -> point
+      buf.x = o.pageX;  // - (offset || 0)
+      buf.y = o.pageY;
 
-      // If 'el' is already the doc (or 'SVG.Nested', which we don't currently support), we can use that as the cradle
-      // for our point.
-      //
-      var doc = isDoc ? el : /*el.parent(SVG.Nested) ||*/ el.parent(SVG.Doc);
-
-      // tbd. Can we do these within 'svg.js', without using the '.node' (i.e. dropping to plain SVG APIs)?
-      //
-      var p = doc.node.createSVGPoint();     // point buffer (avoid reallocation per each coordinate change)
-      var m = el.node.getScreenCTM().inverse();
-
-      // 'o.pageX|Y' contain coordinates relative to the actual browser window (may be partly scrolled out),
-      // for both 'MouseEvent' and 'Touch' objects.
-      //
-      return function (o /*, offset*/) {   // (MouseEvent or Touch) -> point
-        p.x = o.pageX;  // - (offset || 0)
-        p.y = o.pageY;
-
-        return p.matrixTransform(m);
-      };
-    })();
+      return buf.matrixTransform(matrix);
+    };
 
     /** DISABLED text element support not needed, yet
     var anchorOffset;
