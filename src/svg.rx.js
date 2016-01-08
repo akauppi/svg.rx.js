@@ -51,30 +51,27 @@
       throw "svg.rx.js does not support: "+ (typeof el);
     }
 
+    // If 'el' is already the doc (or 'SVG.Nested', which we don't currently support), we can use that as the cradle
+    // for our point.
+    //
+    var doc = isDoc ? el : /*el.parent(SVG.Nested) ||*/ el.parent(SVG.Doc);
+
+    // tbd. Can we do these within 'svg.js', without using the '.node' (i.e. dropping to plain SVG APIs)?
+    //
+    var buf = doc.node.createSVGPoint();             // point buffer (allocated just once per drag)
+    var matrix = el.node.getScreenCTM().inverse();    // calculated just once per drag
+
     // Transform from screen to user coordinates
     //
-    var transformP = (function () {    // scope
+    // 'o.pageX|Y' contain coordinates relative to the actual browser window (may be partly scrolled out),
+    // for both 'MouseEvent' and 'Touch' objects.
+    //
+    var transformP = function (o /*, offset*/) {   // (MouseEvent or Touch) -> point
+      buf.x = o.clientX;  // - (offset || 0)
+      buf.y = o.clientY;
 
-      // If 'el' is already the doc (or 'SVG.Nested', which we don't currently support), we can use that as the cradle
-      // for our point.
-      //
-      var doc = isDoc ? el : /*el.parent(SVG.Nested) ||*/ el.parent(SVG.Doc);
-
-      // tbd. Can we do these within 'svg.js', without using the '.node' (i.e. dropping to plain SVG APIs)?
-      //
-      var p = doc.node.createSVGPoint();     // point buffer (avoid reallocation per each coordinate change)
-      var m = el.node.getScreenCTM().inverse();
-
-      // 'o.pageX|Y' contain coordinates relative to the actual browser window (may be partly scrolled out),
-      // for both 'MouseEvent' and 'Touch' objects.
-      //
-      return function (o /*, offset*/) {   // (MouseEvent or Touch) -> point
-        p.x = o.pageX;  // - (offset || 0)
-        p.y = o.pageY;
-
-        return p.matrixTransform(m);
-      };
-    })();
+      return buf.matrixTransform(matrix);
+    };
 
     /** DISABLED text element support not needed, yet
     var anchorOffset;
@@ -96,19 +93,20 @@
 
     var p0 = transformP(oStart /*, anchorOffset*/);
 
-    // With 'S.Doc', 'el.x()' and 'el.y()' are always 0. Don't really understand why the below is the right thing
-    // but it is. AKa271215
-    //
-    // Note: If the SVG element is slightly scrolled off window, the 0's don't work. AKa271215
+    // tbd. Fix the page offset calculation.
+
+    // Offset from the touch/point location to the origin of the target element. We're providing the drag coordinates
+    // in the observable, not the actual mouse/touch coordinates (tbd. maybe we should provide both). AKa080116
     //
     var x_offset = isDoc ? 0 : p0.x - el.x(),
         y_offset = isDoc ? 0 : p0.y - el.y();
 
-    // tbd. How to optimize so that only the last event would ever be shipped, if multiple have gathered, i.e.
-    //      we only need the last coordinates. AKa071015
-    //
     // Note: some events actually come with the same x,y values (at least on Safari OS X) - removed by the
     //      '.distinctUntilChanged()'.
+    //
+    // Note: A '.debounce' for getting just the last value isn't needed. The browser event triggering takes care of
+    //      emitting events in a meaningful fashion (roughly 60 times a second, some web sites say). We simply need to
+    //      direct those events correctly.
     //
     return moveObs.select( function (o) {
       var p = transformP(o);
@@ -118,6 +116,7 @@
         y: p.y - y_offset
       };
     } )
+      .startWith( { x: p0.x - x_offset, y: p0.y - y_offset } )
       .distinctUntilChanged()
       .takeUntil( endObs );
   }  // innerObs
