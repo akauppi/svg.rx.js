@@ -96,6 +96,8 @@
 
     var p0 = transformP(oStart /*, anchorOffset*/);
 
+    // tbd. Fix the page offset calculation.
+
     // With 'S.Doc', 'el.x()' and 'el.y()' are always 0. Don't really understand why the below is the right thing
     // but it is. AKa271215
     //
@@ -104,10 +106,14 @@
     var x_offset = isDoc ? 0 : p0.x - el.x(),
         y_offset = isDoc ? 0 : p0.y - el.y();
 
+    // tbd. Should start the stream with 'p0'
+
     // Note: some events actually come with the same x,y values (at least on Safari OS X) - removed by the
     //      '.distinctUntilChanged()'.
     //
-    // Note: The debounce time window is not emperical - just something to get going (could be a setting). AKa070116
+    // Note: A '.debounce' for getting just the last value isn't really needed. The browser event triggering takes
+    //      care of emitting events in a meaningful fashion (roughly 60 times a second, some web sites say). We simply
+    //      need to direct those events correctly.
     //
     return moveObs.select( function (o) {
       var p = transformP(o);
@@ -118,7 +124,6 @@
       };
     } )
       .distinctUntilChanged()
-      .debounce(10)           // potentially limit number of events (value is in ms); introduces a delay
       .takeUntil( endObs );
   }  // innerObs
 
