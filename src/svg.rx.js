@@ -59,7 +59,7 @@
     // tbd. Can we do these within 'svg.js', without using the '.node' (i.e. dropping to plain SVG APIs)?
     //
     var buf = doc.node.createSVGPoint();             // point buffer (allocated just once per drag)
-    var matrix = el.node.getScreenCTM().inverse();    // calculated just once per drag
+    var matrix = el.screenCTM().inverse();          // calculated just once per drag
 
     // Transform from screen to user coordinates
     //
@@ -70,7 +70,7 @@
       buf.x = o.clientX;  // - (offset || 0)
       buf.y = o.clientY;
 
-      return buf.matrixTransform(matrix);
+      return buf.matrixTransform( matrix.native() );
     };
 
     /** DISABLED text element support not needed, yet
