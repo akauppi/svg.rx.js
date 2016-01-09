@@ -1,5 +1,7 @@
 # svg.rx.js
 
+[![Join the chat at https://gitter.im/akauppi/svg.rx.js](https://badges.gitter.im/akauppi/svg.rx.js.svg)](https://gitter.im/akauppi/svg.rx.js?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+
 Binds [RxJS](https://github.com/Reactive-Extensions/RxJS) with [svg.js](https://github.com/wout/svg.js), for handling user interactions.
 
 Allows SVG applications to be crafted without callbacks or events, using `RX.Observable`s instead.
