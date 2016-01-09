@@ -117,7 +117,6 @@
       };
     } )
       .startWith( { x: p0.x - x_offset, y: p0.y - y_offset } )
-      .sample(20)  // ms
       .distinctUntilChanged()
       .takeUntil( endObs );
   }  // innerObs
