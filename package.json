@@ -6,25 +6,15 @@
     "note": "@reactivex/rxjs\": \">= 5.0.0-alpha.12"
   },
   "name": "svg.rx.js",
-  "version": "0.0.0",
-  "description": "Bridge of SVG graphics (svg.js) and Reactive Extensions (rx.js).",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/akauppi/svg.rx.js"
-  },
+  "version": "0.0.4",
+  "description": "Bridge of SVG graphics (svg.js) and Reactive Extensions (rx-lite or rxjs).",
+  "keywords": ["svg","rx","rxjs"],
+  "homepage": "https://github.com/akauppi/svg.rx.js",
+  "bugs": "https://github.com/akauppi/svg.rx.js/issues",
   "license": "MIT",
   "files": ["src/"],
-  "keywords": ["svg","rx","streams","rxjs"],
+  "repository": "github:akauppi/svg.rx.js",
 
-  "dependencies": {
-    "svg.js": "^2.2.4",
-    "rx-lite": ">= 4.0.7"
-  },
-  "devDependencies": {
-    "gh-pages": "^0.5.0",
-    "http-server": "^0.8.5",
-    "jshint": "^2.8.0"
-  },
   "scripts": {
     "": "Don't use script name 'publish' - 'npm install' seems to get entangled with 'prepublish', for some reason. AKa241215",
     "gh-pages": "node_modules/.bin/gh-pages -d demo",
@@ -33,6 +23,16 @@
     "preserve": "npm run jshint",
     "pregh-pages": "npm run jshint"
   },
+  "devDependencies": {
+    "gh-pages": "^0.5.0",
+    "http-server": "^0.8.5",
+    "jshint": "^2.8.0"
+  },
+  "peerDependencies": {
+    "svg.js": "^2.2.4",
+    "rx-lite": "^4.0.7"
+  },
+
   "jshintConfig": {
     "strict": "global"
   }
