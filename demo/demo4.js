@@ -26,7 +26,8 @@
   //
   //      Tried all the suggested approaches; none of them work.
   //
-  //        - '.throttleFirst' simply didn't seem to be there as 'dragObs's method
+  //        - 'dragObs.throttleFirst' simply didn't exist (should be there!)
+  //        - with '.sample', we got "triggerObs.onNext is not a function" (but it should be!)
   //
   //      Using '.sample' with a trigger managed here on the application side is probably the best approach, but didn't
   //      get even that to work (see below).
@@ -46,24 +47,27 @@
 
     // Handle back pressure by getting new entries only in response to our triggers.
     //
-    //var triggerObs = new Rx.Subject();    //.startWith(true);
-
-    //triggerObs.onNext(true);
+    var triggerObs = new Rx.Subject().startWith(true);
 
     // tbd. What, there's no '.throttleFirst'? AKa090116
     //
     //console.log(dragObs.throttleFirst);
 
-    dragObs.sample(20)
+    // BUG: 'triggerObs.onNext' does not exist
+    //
+    console.log( triggerObs.onNext );   // undefined
+
+    dragObs.sample(triggerObs)
       .subscribe(
         function (o) {
           //console.log( "Dragging: "+ o.x + " "+ o.y );
           circle.center(o.x, o.y).show();
-          //triggerObs.onNext(true);   // ready for the next value
+          triggerObs.onNext(true);   // ready for the next value
         },
         null,   // error handling
         function () {  // end of drag
           circle.remove();    // remove from 'svg'
+          triggerObs.dispose();
         }
       );
   });
