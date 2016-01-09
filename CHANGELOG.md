@@ -2,6 +2,10 @@
 
 ## latest
 
+- ...
+
+## 0.0.4
+
 - iOS support (using touch identifiers as opaque id's)
 
 ## 0.0.3
