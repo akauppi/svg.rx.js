@@ -18,7 +18,7 @@
 
   "dependencies": {
     "svg.js": "^2.2.4",
-    "rx-lite": ">= 4.0.7"
+    "rx-lite": "^4.0.7"
   },
   "devDependencies": {
     "gh-pages": "^0.5.0",
