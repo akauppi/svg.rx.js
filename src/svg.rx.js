@@ -56,9 +56,11 @@
     //
     var doc = isDoc ? el : /*el.parent(SVG.Nested) ||*/ el.parent(SVG.Doc);
 
-    // tbd. Can we do these within 'svg.js', without using the '.node' (i.e. dropping to plain SVG APIs)?
+    // Note: svg.js handles points using '[Int, Int]'; it doesn't have an abstraction over the SVG native point
+    //      class. Also, it does not seem to provide a way to actually apply the 'SVG.Matrix' on a pair of points.
+    //      See -> https://github.com/wout/svg.js/issues/437
     //
-    var buf = doc.node.createSVGPoint();             // point buffer (allocated just once per drag)
+    var buf = doc.node.createSVGPoint();            // point buffer (allocated just once per drag)
     var matrix = el.screenCTM().inverse();          // calculated just once per drag
 
     // Transform from screen to user coordinates
