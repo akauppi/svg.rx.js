@@ -56,23 +56,29 @@
     //
     var doc = isDoc ? el : /*el.parent(SVG.Nested) ||*/ el.parent(SVG.Doc);
 
-    // Note: svg.js handles points using '[Int, Int]'; it doesn't have an abstraction over the SVG native point
-    //      class. Also, it does not seem to provide a way to actually apply the 'SVG.Matrix' on a pair of points.
-    //      See -> https://github.com/wout/svg.js/issues/437
+    // Note: svg.js doesn't have an abstraction for applying a matrix transform. This kind of makes sense - such a
+    //      transform uses SVGPoint structure specifically allocated for this purpose and handling the life span of
+    //      such an object may be crucial for keeping drag behaviour optimal. So we are fine diving down to native
+    //      SVG API (using '.node' and '.native') here. It's an implementation detail, anyways (does not show in the
+    //      svg.rx.js API). AKa100116
     //
-    var buf = doc.node.createSVGPoint();            // point buffer (allocated just once per drag)
-    var matrix = el.screenCTM().inverse();          // calculated just once per drag
+    //      See -> https://github.com/wout/svg.js/issues/437
+    //             https://github.com/wout/svg.js/issues/403
+    //
+    var buf = doc.node.createSVGPoint();          // point buffer (allocated just once per drag)
+    var m = el.screenCTM().inverse().native();    // calculated just once per drag
 
     // Transform from screen to user coordinates
     //
-    // 'o.pageX|Y' contain coordinates relative to the actual browser window (may be partly scrolled out),
-    // for both 'MouseEvent' and 'Touch' objects.
+    // Note: This gets called a lot, so should be swift, and not create new objects.
     //
-    var transformP = function (o /*, offset*/) {   // (MouseEvent or Touch) -> point
+    // Note: The returned value is kept in 'buf' and will be overwritten on next call. Not to be forwarded further
+    //      by the caller.
+    //
+    var transformP = function (o /*, offset*/) {   // (MouseEvent or Touch) -> SVGPoint (which has '.x' and '.y')
       buf.x = o.clientX;  // - (offset || 0)
       buf.y = o.clientY;
-
-      return buf.matrixTransform( matrix.native() );
+      return buf.matrixTransform(m);
     };
 
     /** DISABLED text element support not needed, yet
@@ -94,8 +100,6 @@
     **/
 
     var p0 = transformP(oStart /*, anchorOffset*/);
-
-    // tbd. Fix the page offset calculation.
 
     // Offset from the touch/point location to the origin of the target element. We're providing the drag coordinates
     // in the observable, not the actual mouse/touch coordinates (tbd. maybe we should provide both). AKa080116
