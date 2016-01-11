@@ -123,6 +123,7 @@
       };
     } )
       .startWith( { x: p0.x - x_offset, y: p0.y - y_offset } )
+      //.throttle( 1, Scheduler.requestAnimationFrame )   // that did not work (not giving anything in demo4) AKa110116
       .distinctUntilChanged()
       .takeUntil( endObs );
   }  // innerObs
