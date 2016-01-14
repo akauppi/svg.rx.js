@@ -46,29 +46,25 @@
     var circle = svg.circle(R).addClass("n"+c).hide();
     var fresh = true;
 
-    // Handle back pressure by getting new entries only in response to our triggers.
+    // Handle back pressure by getting new entries only in response to our triggers (when the earlier value has been
+    // processed).
     //
-    var triggerObs = new Rx.Subject().startWith(true);
-
-    // tbd. What, there's no '.throttleFirst'? AKa090116
+    // BUG: This does not work. For some reason, the 'sub.onNext' does not open the gate for further events. AKa140116
     //
-    //console.log(dragObs.throttleFirst);
-
-    // BUG: 'triggerObs.onNext' does not exist
-    //
-    console.log( triggerObs.onNext );   // undefined
+    var sub = new Rx.Subject();
+    var triggerObs = sub.startWith(true);
 
     dragObs.sample(triggerObs)
       .subscribe(
         function (o) {
-          //console.log( "Dragging: "+ o.x + " "+ o.y );
+          console.log( "Dragging: "+ o.x + " "+ o.y );
           circle.center(o.x, o.y);
 
           if (fresh) {
             circle.show();
             fresh = false;
           }
-          triggerObs.onNext(true);   // ready for the next value
+          sub.onNext(true);   // ready for the next value
         },
         null,   // error handling
         function () {  // end of drag
