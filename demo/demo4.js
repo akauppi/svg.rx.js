@@ -44,6 +44,7 @@
     c = (c+1) % COLORS;
 
     var circle = svg.circle(R).addClass("n"+c).hide();
+    var fresh = true;
 
     // Handle back pressure by getting new entries only in response to our triggers.
     //
@@ -61,7 +62,12 @@
       .subscribe(
         function (o) {
           //console.log( "Dragging: "+ o.x + " "+ o.y );
-          circle.center(o.x, o.y).show();
+          circle.center(o.x, o.y);
+
+          if (fresh) {
+            circle.show();
+            fresh = false;
+          }
           triggerObs.onNext(true);   // ready for the next value
         },
         null,   // error handling

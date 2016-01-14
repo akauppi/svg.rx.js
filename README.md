@@ -174,32 +174,24 @@ $ npm run gh-pages
 This removes any previous contents of the `gh-pages` branch and replaces them with what's in `demo/` folder. 
 
 
+<!-- This does not really need to be public. At least not now. Think about once we are actually pulling svg.rx.js via npm, ourselves. AKa090116
+
 ## Packaging
 
-Going to be packaging for `npm` - at some point.
+The project is published via `npm`.
 
-<!-- disabled AKa060116
-We're only packaging for [Bower](http://bower.io). Enough to keep one package system happy.
+```
+$ npm publish
+```
 
-The package has been registered with the `svg.rx.js` Bower name. Bower has a first-come-first-served naming policy.
-
-### Notes on `bower.json`
-
-We're omitting dependencies by purpose. We first downloaded `svg.js` via bower, but it turned out to be less reliable / easy to use than `npm`. So now all dependencies come from `npm`.
-
-The package still needs `svg.js` and `rx.lite.js` (or equivalent) to run, but since especially RxJS can be built in many variants, we presume the application to separately fetch both in the way that best suits it. Carrying those with `svg.rx.js` is unnecessary.
+The package is then visible [here](https://www.npmjs.com/package/svg.rx.js). You need to be properly registered with `npm` in order to publish packages.
 
 ### Adding versions
 
-Bower uses semver tags. Just
-
-- edit `CHANGELOG.md` and commit
-- `git tag <x.y.z>`
-- `git push --tags`
-
-Features that have come after the last release are shown at the top of `CHANGELOG.md` under `"..."`, i.e. no version number.
+- Check that `CHANGELOG.md` is up to date
+- Check that all manual demos work
+- Check that the version in `package.json` is correct
 -->
-
 
 ## Help requested!!
 
