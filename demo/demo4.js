@@ -50,11 +50,20 @@
     // processed).
     //
     // BUG: This does not work. For some reason, the 'sub.onNext' does not open the gate for further events. AKa140116
+    //      - likely the trigger simply comes too early, and it's not "stored" by sample... :/
     //
     var sub = new Rx.Subject();
     var triggerObs = sub.startWith(true);
 
-    dragObs.sample(triggerObs)
+    triggerObs.subscribe( function (v) {    // DEBUGGING
+      console.log(v);
+    });
+
+    dragObs.subscribe( function (v) {    // DEBUGGING
+      console.log(v);
+    });
+
+    dragObs.sample( triggerObs /*, Rx.Scheduler.requestAnimationFrame*/ )
       .subscribe(
         function (o) {
           console.log( "Dragging: "+ o.x + " "+ o.y );
