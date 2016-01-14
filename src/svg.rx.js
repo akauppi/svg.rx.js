@@ -110,9 +110,18 @@
     // Note: some events actually come with the same x,y values (at least on Safari OS X) - removed by the
     //      '.distinctUntilChanged()'.
     //
-    // Note: A '.debounce' for getting just the last value isn't needed. The browser event triggering takes care of
-    //      emitting events in a meaningful fashion (roughly 60 times a second, some web sites say). We simply need to
-    //      direct those events correctly.
+    // Note: There does not seem to be a good way to introduce throttling (removing extraneous events from the stream).
+    //      The browser emits a reasonable (roughly 60 times a second, some web sites say) event stream. The application
+    //      code tries to keep up with this, but may take longer than the 16ms to process the draws (especially on
+    //      multiple fingers on the Nexus 7 tablet). This causes a drag-behind effect where the circles (demo4) are
+    //      following the fingers with a delay.
+    //
+    //      Neither '.debounce' or '.throttle( 1, Rx.Scheduler.requestAnimationFrame )' helps with this - they would
+    //      simply drop the frame rate of all movements; we don't want that.
+    //
+    //      What we want is proper back pressure, where the application can signal itself, when it's ready for receiving
+    //      the next drag event. Let's implement this on the application side (demo4) for now, since most cases would
+    //      not need it. AKa140116
     //
     return moveObs.select( function (o) {
       var p = transformP(o);
@@ -123,7 +132,6 @@
       };
     } )
       .startWith( { x: p0.x - x_offset, y: p0.y - y_offset } )
-      //.throttle( 1, Scheduler.requestAnimationFrame )   // that did not work (not giving anything in demo4) AKa110116
       .distinctUntilChanged()
       .takeUntil( endObs );
   }  // innerObs
