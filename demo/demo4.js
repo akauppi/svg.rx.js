@@ -52,8 +52,11 @@
     // BUG: This does not work. For some reason, the 'sub.onNext' does not open the gate for further events. AKa140116
     //      - likely the trigger simply comes too early, and it's not "stored" by sample... :/
     //
+    // NOTE: What we need is not '.sample' but '.throttleFirst', but that does not seem to exist in RxJS 4.x! AKa150116
+    //      See -> http://stackoverflow.com/questions/34696818/introducing-back-pressure-to-rxjs-stream-of-drag-coordinates/34701284#34701284
+    //
     var sub = new Rx.Subject();
-    var triggerObs = sub.startWith(true);
+    var triggerObs = sub; //.startWith(true);
 
     triggerObs.subscribe( function (v) {    // DEBUGGING
       console.log(v);
@@ -63,7 +66,13 @@
       console.log(v);
     });
 
-    dragObs.sample( triggerObs /*, Rx.Scheduler.requestAnimationFrame*/ )
+    // Note: '.throttleFirst' would be the right way (only way?) to introduce backpressure. But it's not there in
+    //      RxJS 4.x code. AKa150116
+    //
+    //    See -> http://reactivex.io/documentation/operators/sample.html
+    //        -> https://github.com/Reactive-Extensions/RxJS/issues/1094
+    //
+    dragObs   //.throttleFirst( triggerObs /*, Rx.Scheduler.requestAnimationFrame*/ )
       .subscribe(
         function (o) {
           console.log( "Dragging: "+ o.x + " "+ o.y );
