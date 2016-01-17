@@ -11,9 +11,13 @@
 
   var svg = SVG("cradle");
 
-  var p1= new SVG.Rx.Constraints.Point(100,100);
-  var p2= new SVG.Rx.Constraints.Point( p1, function (o) {   // ({x:Num,y:Num}) -> {x:Num,y:Num}
-    return { x: o.x + 50, y: o.y - 10 };
+  var p2;
+
+  var p1= new SVG.Rx.Point(100,100).constrain( p2, function () {
+    return p2.sub( 50,-10 );
+  } );
+  p2= new SVG.Rx.Point().constrain( p1, function () {   // () -> SVG.Rx.Point or falsy
+    return p1.add( 50,-10 );
   } );
 
   var c1= svg.rx_circle(p1).addClass("first");

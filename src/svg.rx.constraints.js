@@ -21,13 +21,57 @@
     throw "Access to this method not supported in 'svg.rx.js'";
   }
 
-  //--- SVG.Rx.Constraints.Point ---
+  SVG.Rx = SVG.Rx || {};
+
+  //--- SVG.Rx.Dist ---
   //
-  assert( typeof SVG.Rx === "undefined" );
+  //  .value: Num
+  //
+  // ... tbd ...
 
-  SVG.Rx = {};
-
+  //--- SVG.Rx.Point ---
+  //
+  //  .x: Num
+  //  .y: Num
+  //
   SVG.Rx.Point = SVG.invent({
+    // Initialize node
+    create: function (a,b) {    // () or (x:Num, y:Num) or (p2: SVG.Rx.Point, () -> {x:Num, y:Num})) or (d: SVG.Rx.Dist, (d:Num) -> {x:Num, y:Num}))
+
+      var ta = typeof a;
+      var tb = typeof b;
+
+      if (args.length === 0)) {
+        this.x = this._y = Number.NaN;
+
+      if ((args.length === 2) && (ta === "number") && (tb === "number")) {
+        this.x = a;
+        this.y = b;
+
+      } else if ((args.length === 2) && (a instanceof SVG.Rx.Point) && (tb === "function")) {
+        new Rx.Constraint( this, a, b );
+        val o = b()
+
+      } else {
+        throw "Unexpected params to 'SVG.Rx.Conststraints.Point': " + args;
+      }
+    },
+
+    // Add class methods
+    extend: {
+      fix: function () {
+        assert(false);
+      },
+      constrain: function (p2, f) {   // (SVG.Point, (SVG.Point, SVG.Point) -> ???) -> ???
+        assert(false);
+      }
+    }
+
+  });
+
+  //--- SVG.Rx.Constraint ---
+  //
+  SVG.Rx.Constraint = SVG.invent({
     // Initialize node
     create: function (a,b) {    // () or (x:Int, y:Int) or (pb: Point, ({x:Int, y:Int}) -> {x:Int, y:Int})
 
