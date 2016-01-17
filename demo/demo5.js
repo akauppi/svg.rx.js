@@ -11,12 +11,15 @@
 
   var svg = SVG("cradle");
 
-  var c1= svg.rx_circle( new SVG.Rx.Point(100,100) ,R).addClass("first");
-  var c2= svg.rx_circle( new SVG.Rx.Point(150,90), R).addClass("second");
+  var p1= new SVG.Rx.Point(100,100);
+  var p2= new SVG.Rx.Point(150,90);
+
+  var c1= svg.rx_circle(p1,R).addClass("first");
+  var c2= svg.rx_circle(p2,R).addClass("second");
 
   // tbd. uncomment while circles work AKa170116
   //
-  //svg.rx_line(c1.center(),c2.center()).addClass("connector").front();
+  svg.rx_line(c1.center(),c2.center()).addClass("connector").front();
 
   // Just the normal dragging - however the line follows dynamically
 

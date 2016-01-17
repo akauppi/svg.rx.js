@@ -15,8 +15,10 @@
 
   // A function used when hiding out svg.js methods
   //
-  function notSupported () {
-    throw "Access to this method not supported in 'svg.rx.js'";
+  function notSupported (s) {   // (String) -> () -> never returns
+    return function () {
+      throw "Access to method '"+s+"' not supported in 'svg.rx.js'";
+    }
   }
 
   SVG.Rx = SVG.Rx || {};
@@ -34,31 +36,40 @@
     create: function (a) {    // () or (d:Num) or (SVG.Rx.Dist)
       var ta = typeof a;
 
-      this._sub = new Rx.Subject();
-      this._obsDistinct = this._sub.distinctUntilChanged();
-
       if (arguments.length === 0) {
         this.value = Number.NaN;    // no emission
 
       } else if ((arguments.length === 1) && (ta === "number")) {
-        this.set(a);
+        this.value = a;
 
       } else if ((arguments.length === 1) && (a instanceof SVG.Rx.Dist)) {
-        this.set(a.value);
+        this.value = a.value;
 
       } else {
         throw "Unexpected params to 'SVG.Rx.Dist': " + arguments;
       }
+
+      this._sub = new Rx.Subject();
+      this._obsDistinct = this._sub.distinctUntilChanged();
     },
 
     // Add class methods
     extend: {
       set: function (v) {   // (v:Num) ->
+        this.value = v;
         this._sub.onNext(v);
       },
 
       subscribe: function (f) {   // ( ({x:Num,y:Num} ->) -> subscription
-        return this._obsDistinct.subscribe(f);
+        var subscription = this._obsDistinct.subscribe(f);
+
+        // Emit the current values, if there are any (what 'BehaviorSubject' would do by default).
+        //
+        if (!isNaN(this.value)) {
+          this._sub.onNext(this.value);
+        }
+
+        return subscription;
       }
     }
 
@@ -70,7 +81,8 @@
   //  .x: Num
   //  .y: Num
   //
-  //  ._sub: subject of {x:Num,y:Num}    // only changed values are emitted
+  //  ._sub: subject of {x:Num,y:Num}
+  //  ._obs: observable of {x:Num,y:Num}    // only changed values are emitted
   //
   SVG.Rx.Point = SVG.invent({
     // Initialize node
@@ -80,42 +92,61 @@
       var ta = typeof a;
       var tb = typeof b;
 
-      // tbd. Make so that setting to existing value will not cause new emissions. However, '.distinctUntilChanged'
-      //    probably compares the values by reference, and would therefore not notice that our '.x' and '.y' have
-      //    changed. AKa170116
-
-      this._sub = new Rx.Subject();
-
       if (arguments.length === 0) {
-        this.x = this._y = Number.NaN;    // no emission
+        this.x = Number.NaN;
+        this.y = Number.NaN;
 
       } else if ((arguments.length === 2) && (ta === "number") && (tb === "number")) {
-        this.set.call(this,a,b);
+        this.x = a;
+        this.y = b;
 
       } else if ((arguments.length === 1) && (a instanceof SVG.Rx.Point)) {
-        this.set(a.x, a.y);
+        this.x = a.x;
+        this.y = a.y;
 
       } else {
         throw "Unexpected params to 'SVG.Rx.Point': " + arguments;
       }
+
+      // tbd. Make so that setting to existing value will not cause new emissions. However, '.distinctUntilChanged'
+      //    probably compares the values by reference, and would therefore not notice that our '.x' and '.y' have
+      //    changed. AKa170116
+
+      // Note: 'Rx.BehaviorSubject' would give a nice starting value, but for the 'SVG.Rx.Point()' constructor, we
+      //      don't want that. So this is a bit more elaborate. Note that any values emitted before the caller
+      //      actually subscribes, are lost.
+
+      this._sub = new Rx.Subject();
     },
 
     // Add class methods
     extend: {
+      // Setting the values once it is possible someone's subscribed
+      //
       set: function (cx,cy) {   // (cx:Num,cy:Num) ->
-        //console.log( this );
-        assert( this );
 
         // Note: Do change detection here (instead of using '.distinctUntilChanged') since '.distinctUntilChanged' might
         //      not see multiple emissions of the same object (with different fields) as distinct. Or does it? Haven't tried. tbd. AKa170116
         //
         if ((cx !== this.x) || (cy !== this.y)) {
+          this.x = cx;
+          this.y = cy;
+          console.log( this, "onNext", cx, cy );
           this._sub.onNext(this);
         }
       },
 
       subscribe: function (f) {   // ( ({x:Num,y:Num} ->) -> subscription
-        return this._sub.subscribe(f);    // this call runs the things within the observable constructor
+        console.log( "subscribed" );
+        var subscription= this._sub.subscribe(f);    // this call runs the things within the observable constructor
+
+        // Emit the current values, if there are any (what 'BehaviorSubject' would do by default).
+        //
+        if (!isNaN(this.x)) {
+          this._sub.onNext(this);
+        }
+
+        return subscription;
       }
     }
 
@@ -132,27 +163,28 @@
   SVG.Rx.Circle = SVG.invent({
     create: function (cp,r) {   // ([SVG.Rx.Point [, r:SVG.Rx.Dist or Num]]) ->
       var self= this;
+
+      this.constructor.call(this, SVG.create('circle'))
+
       this._cp = cp || new SVG.Rx.Point();
       this._r = r instanceof SVG.Rx.Dist ? r
                   : new SVG.Rx.Dist( typeof r === "number" ? r : 10 );
 
       this._cp.subscribe( function (o) {
+        console.log( "Heard point changed", o );
         self.attr('cx',o.x).attr('cy',o.y);        // Note: bypass 'svg.js' code by purpose - it would simply do this
       });
 
       this._r.subscribe( function (r) {
+        console.log( "Heard radius changed", r );
         self.attr('r',r);
       });
-
-      this.constructor.call(this, SVG.create('circle'))
     },
     inherit: SVG.Circle,
 
     construct: {          // parent method to create these
       rx_circle: function (cp,r) {   // (SVG.Rx.Point [,SVG.Rx.Dist or Num]) -> SVG.Rx.Circle
 
-        // tbd. Can we provide parameters to the 'create' function? AKa170116
-        //
         return this.put(new SVG.Rx.Circle(cp,r));
       }
     },
@@ -180,9 +212,9 @@
         }
       },
 
-      move: notSupported,
-      cx: notSupported,
-      cy: notSupported
+      move: notSupported('move'),
+      cx: notSupported('cx'),
+      cy: notSupported('cy')
     }
   });
 
@@ -225,13 +257,13 @@
           return this;
 
         } else {
-          notSupported();
+          throw "'.plot' with these parameters not supported in 'svg.rx.js': "+ arguments;
         }
       },
 
-      array: notSupported,
-      move: notSupported,
-      size: notSupported
+      array: notSupported('array'),
+      move: notSupported('move'),
+      size: notSupported('size')
     }
   });
 

@@ -1,2 +1,8 @@
 @import url("demo.css");
 
+circle.first {
+  fill: blue;
+}
+circle.second {
+  fill: red;
+}
