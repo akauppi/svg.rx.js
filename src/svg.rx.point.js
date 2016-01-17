@@ -75,7 +75,7 @@
   SVG.Rx.Point = SVG.invent({
     // Initialize node
     create: function (a,b) {    // () or (x:Num, y:Num) or (SVG.Rx.Point)
-      var self = this;
+      //var self = this;
 
       var ta = typeof a;
       var tb = typeof b;
@@ -131,27 +131,28 @@
   //
   SVG.Rx.Circle = SVG.invent({
     create: function (cp,r) {   // ([SVG.Rx.Point [, r:SVG.Rx.Dist or Num]]) ->
+      var self= this;
       this._cp = cp || new SVG.Rx.Point();
-      this._r =
-        r instanceof SVG.Rx.Dist ? r
-          : new SVG.Rx.Dist( typeof r === "number" ? r : 10 );
+      this._r = r instanceof SVG.Rx.Dist ? r
+                  : new SVG.Rx.Dist( typeof r === "number" ? r : 10 );
 
       this._cp.subscribe( function (o) {
-        this.attr('cx',o.x).attr('cy',o.y);        // Note: bypass 'svg.js' code by purpose - it would simply do this
+        self.attr('cx',o.x).attr('cy',o.y);        // Note: bypass 'svg.js' code by purpose - it would simply do this
       });
 
       this._r.subscribe( function (r) {
-        this.attr('r',r);
+        self.attr('r',r);
       });
 
       this.constructor.call(this, SVG.create('circle'))
     },
-
     inherit: SVG.Circle,
 
     construct: {          // parent method to create these
       rx_circle: function (cp,r) {   // (SVG.Rx.Point [,SVG.Rx.Dist or Num]) -> SVG.Rx.Circle
 
+        // tbd. Can we provide parameters to the 'create' function? AKa170116
+        //
         return this.put(new SVG.Rx.Circle(cp,r));
       }
     },
