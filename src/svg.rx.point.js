@@ -194,6 +194,7 @@
     extend: {
       center: function (cx,cy) {   // (cx:Num,cy:Num) -> this or () -> SVG.Rx.Point
         if (arguments.length === 2) {
+          console.log("Going to set _cp");
           this._cp.set(cx,cy);      // distributes the knowledge to possible other users of the point
           return this;
 
@@ -212,9 +213,13 @@
         }
       },
 
-      move: notSupported('move'),
       cx: notSupported('cx'),
-      cy: notSupported('cy')
+      cy: notSupported('cy'),
+      x: notSupported('x'),
+      y: notSupported('y'),
+      width: notSupported('width'),
+      height: notSupported('height'),
+      move: notSupported('move')
     }
   });
 

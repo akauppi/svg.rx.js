@@ -104,8 +104,29 @@
     // Offset from the touch/point location to the origin of the target element. We're providing the drag coordinates
     // in the observable, not the actual mouse/touch coordinates (tbd. maybe we should provide both). AKa080116
     //
-    var x_offset = isDoc ? 0 : p0.x - el.x(),
-        y_offset = isDoc ? 0 : p0.y - el.y();
+    var x_offset, y_offset;
+
+    // tbd. We might be better off not doing any of this here, but in the application code. AKa170116
+
+    if (isDoc) {
+      x_offset = y_offset = 0;
+
+    } else if ((el instanceof SVG.Circle) || (el instanceof SVG.Ellipse)) {   // 'SVG.Circle', 'SVG.Ellipse' or 'SVG.Rx.Circle'
+      //
+      // Do not access '.x' or '.y' on a circle - they are not needed, and 'SVG.Rx.Circle' does not implement them.
+
+      var center = el.center();   // {x:Num,y:Num}
+
+      x_offset = p0.x - center.x;   // we are providing center's coordinates to the circle / ellipse being dragged
+      y_offset = p0.y - center.y;
+
+    } else if (typeof el.x === "function") {    // normal 'svg.js' elements (all have '.x' and '.y', even the circle
+      x_offset = p0.x - el.x();
+      y_offset = p0.y - el.y();
+
+    } else {
+      throw "Unknown element: "+ typeof el;
+    }
 
     // Note: some events actually come with the same x,y values (at least on Safari OS X) - removed by the
     //      '.distinctUntilChanged()'.
