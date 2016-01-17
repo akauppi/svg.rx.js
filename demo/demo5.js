@@ -1,7 +1,7 @@
 /*
 * demo5.js
 *
-* Constraints
+* SVG.Rx.Point
 */
 
 (function() {
@@ -12,17 +12,14 @@
   var svg = SVG("cradle");
 
   var p1= new SVG.Rx.Point(100,100);
-  var p2= new SVG.Rx.Point().constrain( p1, function (p1_candidate,p2_candidate) {   // (SVG.Rx.Point, SVG.Rx.Point) -> Boolean
+  var p2= new SVG.Rx.Point(150,90);
 
-    // Don't let the points go too far
-    //
-    return (p1_candidate.distTo(p2_candidate) <= 100);
-  } );
+  var line = svg.rx_line(p1,p2).addClass("connector");
 
   var c1= svg.rx_circle(p1).addClass("first");
   var c2= svg.rx_circle(p2).addClass("second");
 
-  // Just the normal dragging from now on - however dragging past constraints will not move the coordinates.
+  // Just the normal dragging - however the line follows dynamically
 
   dragIt(c1);
   dragIt(c2);

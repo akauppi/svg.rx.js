@@ -1,12 +1,10 @@
 /*
-* svg.rx.constraints.js
+* svg.rx.point.js
 */
 /*jshint devel:true */
 
 (function () {
   "use strict";
-
-  var UNCOMFORTABLE = "uncomfortable";
 
   function assert(b,msg) {    // (boolish, String) =>
     if (!b) {
@@ -23,16 +21,20 @@
 
   SVG.Rx = SVG.Rx || {};
 
+
   //--- SVG.Rx.Dist ---
   //
   //  .value: Num
   //
   // ... tbd ...
 
+
   //--- SVG.Rx.Point ---
   //
   //  .x: Num
   //  .y: Num
+  //
+  //  ._obs: observable of {x:Num,y:Num}
   //
   SVG.Rx.Point = SVG.invent({
     // Initialize node
@@ -53,75 +55,61 @@
         this.y = a.y;
 
       } else {
-        throw "Unexpected params to 'SVG.Rx.Conststraints.Point': " + args;
+        throw "Unexpected params to 'SVG.Rx.Point': " + args;
       }
+
+      this._obs = Rx.Observable.create( function (obs) {
+        if (!this.x.isNan) {
+          obs.onNext(this);   // initial value
+        }
+        this._secretObs = obs;    // tbd. unnecessary if also 'this._obs' be used for '.onNext' AKa170116
+
+        //return undefined;   // no cleanup
+      })
     },
 
     // Add class methods
     extend: {
-      constrain: function () {   // (SVG.Rx.Point or SVG.Rx.Dist, ..., (SVG.Rx.Point or SVG.Rx.Dist, ...) -> Boolean) -> SVG.Rx.Constraint
-
-        ...
-      }
-    }
-
-  });
-
-  //--- SVG.Rx.Constraint ---
-  //
-  SVG.Rx.Constraint = SVG.invent({
-    // Initialize node
-    create: function (a,b) {    // () or (x:Int, y:Int) or (pb: Point, ({x:Int, y:Int}) -> {x:Int, y:Int})
-
-      var ta = typeof a;
-      var tb = typeof b;
-
-      if (args.length === 0)) {
-        this._x = 0;
-        this._y = 0;
-
-      if ((args.length === 2) && (ta === "number") && (tb === "number")) {
-        this._x = a;
-        this._y = b;
-
-      } else if ((args.length === 2) && (a instanceof SVG.Rx.Constraints.Point) && (tb === "function")) {
-        ...
-
-      } else {
-        throw "Unexpected params to 'SVG.Rx.Conststraints.Point': " + args;
-      }
-    },
-
-    // Add class methods
-    extend: {
-      fix: function () {
-        assert(false);
+      set: function (cx,cy) {   // (cx:Num,cy:Num) ->
+        this._obs.onNext({x:cx,y:cy});
       },
-      constrain: function (p2, f) {   // (SVG.Point, (SVG.Point, SVG.Point) -> ???) -> ???
-        assert(false);
+
+      subscribe: function (f) {   // ( ({x:Num,y:Num} ->) -> subscription
+        return this._obs.subscribe(f);
       }
     }
 
   });
+
 
   //--- SVG.Rx.Circle ---
   //
-  var oldSVGCircle = SVG.Circle;      // the earlier constructor
-
-  var oldSVGCircleMethod = SVG.prototype.circle;
-
+  //  ._cp: SVG.Rx.Point
+  //  ._r: SVG.Rx.Dist
+  //
+  // Note: Unlike 'svg.js', we use the second parameter as a radius (not diameter).
+  //
   SVG.Rx.Circle = SVG.invent({
     create: function (cp,r) {   // ([SVG.Rx.Point [, r:SVG.Rx.Dist]]) ->
       this._cp = cp || new SVG.Rx.Point();
       this._r = r || new SVG.Rx.Dist(10);
 
-      this.constructor.call(this, element)
+      this._cp.subscribe( function (o) {
+        this.attr('cx',o.x).attr('cy',o.y);        // Note: bypass 'svg.js' code by purpose - it would simply do this
+      });
+
+      this._r.subscribe( function (r) {
+        this.attr('r',r);
+      });
+
+      // tbd. do we need such?
+      //this.constructor.call(this, ...)
     },
 
     inherit: SVG.Circle,
 
     construct: {          // parent method to create these
-      rx_circle: function (cp,r) {   // (SVG.Rx.Point [, r:SVG.Rx.Dist]) -> SVG.Circle
+      rx_circle: function (cp,r) {   // (SVG.Rx.Point [,SVG.Rx.Dist]) -> SVG.Rx.Circle
 
         return this.put(new SVG.Rx.Circle(cp,r));
       }
@@ -135,21 +123,21 @@
     extend: {
       center: function (cx,cy) {   // (cx:Num,cy:Num) -> this or () -> SVG.Rx.Point
         if (args.length === 2) {
-          this._cp.trySet(cx,cy,this);
+          this._cp.set(cx,cy);      // distributes the knowledge to possible other users of the point
           return this;
 
         } else {
-          throw "tbd. What exactly should we return here?";
+          return this._cp;
         }
       },
 
-      r: function (r) {    // (r:Num) -> this or () -> SVG.Rx.Dist
+      radius: function (r) {    // (Num) -> this or () -> SVG.Rx.Dist
         if (args.length === 1) {
-          this._r.set(r,this);
+          this._r.set(r);
           return this;
 
         } else {
-          throw "tbd. What exactly should we return here?";
+          return this._r;
         }
       },
 
