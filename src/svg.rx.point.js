@@ -131,13 +131,13 @@
         if ((cx !== this.x) || (cy !== this.y)) {
           this.x = cx;
           this.y = cy;
-          console.log( this, "onNext", cx, cy );
+          //console.log( this, "onNext", cx, cy );
           this._sub.onNext(this);
         }
       },
 
       subscribe: function (f) {   // ( ({x:Num,y:Num} ->) -> subscription
-        console.log( "subscribed" );
+        //console.log( "subscribed" );
         var subscription= this._sub.subscribe(f);    // this call runs the things within the observable constructor
 
         // Emit the current values, if there are any (what 'BehaviorSubject' would do by default).
@@ -164,19 +164,19 @@
     create: function (cp,r) {   // ([SVG.Rx.Point [, r:SVG.Rx.Dist or Num]]) ->
       var self= this;
 
-      this.constructor.call(this, SVG.create('circle'))
+      this.constructor.call(this, SVG.create('circle'));
 
       this._cp = cp || new SVG.Rx.Point();
       this._r = r instanceof SVG.Rx.Dist ? r
                   : new SVG.Rx.Dist( typeof r === "number" ? r : 10 );
 
       this._cp.subscribe( function (o) {
-        console.log( "Heard point changed", o );
+        //console.log( "Heard point changed", o );
         self.attr('cx',o.x).attr('cy',o.y);        // Note: bypass 'svg.js' code by purpose - it would simply do this
       });
 
       this._r.subscribe( function (r) {
-        console.log( "Heard radius changed", r );
+        //console.log( "Heard radius changed", r );
         self.attr('r',r);
       });
     },
@@ -194,7 +194,7 @@
     extend: {
       center: function (cx,cy) {   // (cx:Num,cy:Num) -> this or () -> SVG.Rx.Point
         if (arguments.length === 2) {
-          console.log("Going to set _cp");
+          //console.log("Going to set _cp");
           this._cp.set(cx,cy);      // distributes the knowledge to possible other users of the point
           return this;
 
@@ -230,10 +230,20 @@
   //
   SVG.Rx.Line = SVG.invent({
     create: function (a,b) {   // (SVG.Rx.Point, SVG.Rx.Point) ->
+      var self = this;
+
+      this.constructor.call(this, SVG.create('line'));
+
       this._pa = a;
       this._pb = b;
 
-      this.constructor.call(this, SVG.create('line'))
+      this._pa.subscribe( function (o) {
+        self.attr('x1',o.x).attr('y1',o.y);     // Note: bypass 'svg.js' code by purpose - it would simply do this
+      });
+
+      this._pb.subscribe( function (o) {
+        self.attr('x2',o.x).attr('y2',o.y);     // Note: bypass 'svg.js' code by purpose - it would simply do this
+      });
     },
 
     inherit: SVG.Line,

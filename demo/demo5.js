@@ -17,8 +17,6 @@
   var c1= svg.rx_circle(p1,R).addClass("first");
   var c2= svg.rx_circle(p2,R).addClass("second");
 
-  // tbd. uncomment while circles work AKa170116
-  //
   svg.rx_line(c1.center(),c2.center()).addClass("connector").front();
 
   // Just the normal dragging - however the line follows dynamically
