@@ -56,23 +56,29 @@
     //
     var doc = isDoc ? el : /*el.parent(SVG.Nested) ||*/ el.parent(SVG.Doc);
 
-    // Note: svg.js handles points using '[Int, Int]'; it doesn't have an abstraction over the SVG native point
-    //      class. Also, it does not seem to provide a way to actually apply the 'SVG.Matrix' on a pair of points.
-    //      See -> https://github.com/wout/svg.js/issues/437
+    // Note: svg.js doesn't have an abstraction for applying a matrix transform. This kind of makes sense - such a
+    //      transform uses SVGPoint structure specifically allocated for this purpose and handling the life span of
+    //      such an object may be crucial for keeping drag behaviour optimal. So we are fine diving down to native
+    //      SVG API (using '.node' and '.native') here. It's an implementation detail, anyways (does not show in the
+    //      svg.rx.js API). AKa100116
     //
-    var buf = doc.node.createSVGPoint();            // point buffer (allocated just once per drag)
-    var matrix = el.screenCTM().inverse();          // calculated just once per drag
+    //      See -> https://github.com/wout/svg.js/issues/437
+    //             https://github.com/wout/svg.js/issues/403
+    //
+    var buf = doc.node.createSVGPoint();          // point buffer (allocated just once per drag)
+    var m = el.screenCTM().inverse().native();    // calculated just once per drag
 
     // Transform from screen to user coordinates
     //
-    // 'o.pageX|Y' contain coordinates relative to the actual browser window (may be partly scrolled out),
-    // for both 'MouseEvent' and 'Touch' objects.
+    // Note: This gets called a lot, so should be swift, and not create new objects.
     //
-    var transformP = function (o /*, offset*/) {   // (MouseEvent or Touch) -> point
+    // Note: The returned value is kept in 'buf' and will be overwritten on next call. Not to be forwarded further
+    //      by the caller.
+    //
+    var transformP = function (o /*, offset*/) {   // (MouseEvent or Touch) -> SVGPoint (which has '.x' and '.y')
       buf.x = o.clientX;  // - (offset || 0)
       buf.y = o.clientY;
-
-      return buf.matrixTransform( matrix.native() );
+      return buf.matrixTransform(m);
     };
 
     /** DISABLED text element support not needed, yet
@@ -95,20 +101,48 @@
 
     var p0 = transformP(oStart /*, anchorOffset*/);
 
-    // tbd. Fix the page offset calculation.
-
     // Offset from the touch/point location to the origin of the target element. We're providing the drag coordinates
     // in the observable, not the actual mouse/touch coordinates (tbd. maybe we should provide both). AKa080116
     //
-    var x_offset = isDoc ? 0 : p0.x - el.x(),
-        y_offset = isDoc ? 0 : p0.y - el.y();
+    var x_offset, y_offset;
+
+    // tbd. We might be better off not doing any of this here, but in the application code. AKa170116
+
+    if (isDoc) {
+      x_offset = y_offset = 0;
+
+    } else if ((el instanceof SVG.Circle) || (el instanceof SVG.Ellipse)) {   // 'SVG.Circle', 'SVG.Ellipse' or 'SVG.Rx.Circle'
+      //
+      // Do not access '.x' or '.y' on a circle - they are not needed, and 'SVG.Rx.Circle' does not implement them.
+
+      var center = el.center();   // {x:Num,y:Num}
+
+      x_offset = p0.x - center.x;   // we are providing center's coordinates to the circle / ellipse being dragged
+      y_offset = p0.y - center.y;
+
+    } else if (typeof el.x === "function") {    // normal 'svg.js' elements (all have '.x' and '.y', even the circle
+      x_offset = p0.x - el.x();
+      y_offset = p0.y - el.y();
+
+    } else {
+      throw "Unknown element: "+ typeof el;
+    }
 
     // Note: some events actually come with the same x,y values (at least on Safari OS X) - removed by the
     //      '.distinctUntilChanged()'.
     //
-    // Note: A '.debounce' for getting just the last value isn't needed. The browser event triggering takes care of
-    //      emitting events in a meaningful fashion (roughly 60 times a second, some web sites say). We simply need to
-    //      direct those events correctly.
+    // Note: There does not seem to be a good way to introduce throttling (removing extraneous events from the stream).
+    //      The browser emits a reasonable (roughly 60 times a second, some web sites say) event stream. The application
+    //      code tries to keep up with this, but may take longer than the 16ms to process the draws (especially on
+    //      multiple fingers on the Nexus 7 tablet). This causes a drag-behind effect where the circles (demo4) are
+    //      following the fingers with a delay.
+    //
+    //      Neither '.debounce' or '.throttle( 1, Rx.Scheduler.requestAnimationFrame )' helps with this - they would
+    //      simply drop the frame rate of all movements; we don't want that.
+    //
+    //      What we want is proper back pressure, where the application can signal itself, when it's ready for receiving
+    //      the next drag event. Let's implement this on the application side (demo4) for now, since most cases would
+    //      not need it. AKa140116
     //
     return moveObs.select( function (o) {
       var p = transformP(o);
