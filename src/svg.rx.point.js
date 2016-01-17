@@ -26,18 +26,16 @@
   //
   //  .value: Num
   //
-  //  ._obs: observable of Num    // only changed values are emitted
+  //  ._sub: subject of Num
+  //  ._obsDistinct: observable of Num  // only changed values are emitted
   //
   SVG.Rx.Dist = SVG.invent({
     // Initialize node
     create: function (a) {    // () or (d:Num) or (SVG.Rx.Dist)
       var ta = typeof a;
 
-      this._obs = Rx.Observable.create( function (obs) {
-        this._secretObs = obs;    // tbd. unnecessary if also 'this._obs' be used for '.onNext' AKa170116
-
-        //return undefined;   // no cleanup
-      }).distinctUntilChanged();
+      this._sub = new Rx.Subject();
+      this._obsDistinct = this._sub.distinctUntilChanged();
 
       if (arguments.length === 0) {
         this.value = Number.NaN;    // no emission
@@ -56,11 +54,11 @@
     // Add class methods
     extend: {
       set: function (v) {   // (v:Num) ->
-        this._obs.onNext(v);
+        this._sub.onNext(v);
       },
 
       subscribe: function (f) {   // ( ({x:Num,y:Num} ->) -> subscription
-        return this._obs.subscribe(f);
+        return this._obsDistinct.subscribe(f);
       }
     }
 
@@ -72,7 +70,7 @@
   //  .x: Num
   //  .y: Num
   //
-  //  ._sub: observable of {x:Num,y:Num}    // only changed values are emitted
+  //  ._sub: subject of {x:Num,y:Num}    // only changed values are emitted
   //
   SVG.Rx.Point = SVG.invent({
     // Initialize node
@@ -86,11 +84,7 @@
       //    probably compares the values by reference, and would therefore not notice that our '.x' and '.y' have
       //    changed. AKa170116
 
-      this._obs = Rx.Observable.create( function (obs) {
-        self._secretObs = obs;    // tbd. unnecessary if also 'this._obs' be used for '.onNext' AKa170116
-
-        //return undefined;   // no cleanup
-      });
+      this._sub = new Rx.Subject();
 
       if (arguments.length === 0) {
         this.x = this._y = Number.NaN;    // no emission
@@ -109,19 +103,19 @@
     // Add class methods
     extend: {
       set: function (cx,cy) {   // (cx:Num,cy:Num) ->
-        console.log( this );
+        //console.log( this );
         assert( this );
 
         // Note: Do change detection here (instead of using '.distinctUntilChanged') since '.distinctUntilChanged' might
         //      not see multiple emissions of the same object (with different fields) as distinct. Or does it? Haven't tried. tbd. AKa170116
         //
         if ((cx !== this.x) || (cy !== this.y)) {
-          this._secretObs.onNext(this);
+          this._sub.onNext(this);
         }
       },
 
       subscribe: function (f) {   // ( ({x:Num,y:Num} ->) -> subscription
-        return this._obs.subscribe(f);
+        return this._sub.subscribe(f);    // this call runs the things within the observable constructor
       }
     }
 
@@ -150,8 +144,7 @@
         this.attr('r',r);
       });
 
-      // tbd. do we need such?
-      //this.constructor.call(this, ...)
+      this.constructor.call(this, SVG.create('circle'))
     },
 
     inherit: SVG.Circle,
@@ -202,8 +195,7 @@
       this._pa = a;
       this._pb = b;
 
-      // tbd. do we need such?
-      //this.constructor.call(this, ...)
+      this.constructor.call(this, SVG.create('line'))
     },
 
     inherit: SVG.Line,
@@ -236,7 +228,9 @@
         }
       },
 
-      array: notSupported
+      array: notSupported,
+      move: notSupported,
+      size: notSupported
     }
   });
 
