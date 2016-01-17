@@ -26,7 +26,45 @@
   //
   //  .value: Num
   //
-  // ... tbd ...
+  //  ._obs: observable of Num    // only changed values are emitted
+  //
+  SVG.Rx.Dist = SVG.invent({
+    // Initialize node
+    create: function (a) {    // () or (d:Num) or (SVG.Rx.Dist)
+      var ta = typeof a;
+
+      this._obs = Rx.Observable.create( function (obs) {
+        this._secretObs = obs;    // tbd. unnecessary if also 'this._obs' be used for '.onNext' AKa170116
+
+        //return undefined;   // no cleanup
+      }).distinctUntilChanged();
+
+      if (arguments.length === 0) {
+        this.value = Number.NaN;    // no emission
+
+      } else if ((arguments.length === 1) && (ta === "number")) {
+        this.set(a);
+
+      } else if ((arguments.length === 1) && (a instanceof SVG.Rx.Dist)) {
+        this.set(a.value);
+
+      } else {
+        throw "Unexpected params to 'SVG.Rx.Dist': " + arguments;
+      }
+    },
+
+    // Add class methods
+    extend: {
+      set: function (v) {   // (v:Num) ->
+        this._obs.onNext(v);
+      },
+
+      subscribe: function (f) {   // ( ({x:Num,y:Num} ->) -> subscription
+        return this._obs.subscribe(f);
+      }
+    }
+
+  });
 
 
   //--- SVG.Rx.Point ---
@@ -34,48 +72,52 @@
   //  .x: Num
   //  .y: Num
   //
-  //  ._obs: observable of {x:Num,y:Num}
+  //  ._sub: observable of {x:Num,y:Num}    // only changed values are emitted
   //
   SVG.Rx.Point = SVG.invent({
     // Initialize node
     create: function (a,b) {    // () or (x:Num, y:Num) or (SVG.Rx.Point)
+      var self = this;
 
       var ta = typeof a;
       var tb = typeof b;
-
-      if (arguments.length === 0) {
-        this.x = this._y = Number.NaN;
-
-      } else if ((arguments.length === 2) && (ta === "number") && (tb === "number")) {
-        this.x = a;
-        this.y = b;
-
-      } else if ((arguments.length === 1) && (a instanceof SVG.Rx.Point)) {
-        this.x = a.x;
-        this.y = a.y;
-
-      } else {
-        throw "Unexpected params to 'SVG.Rx.Point': " + arguments;
-      }
 
       // tbd. Make so that setting to existing value will not cause new emissions. However, '.distinctUntilChanged'
       //    probably compares the values by reference, and would therefore not notice that our '.x' and '.y' have
       //    changed. AKa170116
 
       this._obs = Rx.Observable.create( function (obs) {
-        if (!this.x.isNan) {
-          obs.onNext(this);   // initial value
-        }
-        this._secretObs = obs;    // tbd. unnecessary if also 'this._obs' be used for '.onNext' AKa170116
+        self._secretObs = obs;    // tbd. unnecessary if also 'this._obs' be used for '.onNext' AKa170116
 
         //return undefined;   // no cleanup
       });
+
+      if (arguments.length === 0) {
+        this.x = this._y = Number.NaN;    // no emission
+
+      } else if ((arguments.length === 2) && (ta === "number") && (tb === "number")) {
+        this.set.call(this,a,b);
+
+      } else if ((arguments.length === 1) && (a instanceof SVG.Rx.Point)) {
+        this.set(a.x, a.y);
+
+      } else {
+        throw "Unexpected params to 'SVG.Rx.Point': " + arguments;
+      }
     },
 
     // Add class methods
     extend: {
       set: function (cx,cy) {   // (cx:Num,cy:Num) ->
-        this._obs.onNext({x:cx,y:cy});
+        console.log( this );
+        assert( this );
+
+        // Note: Do change detection here (instead of using '.distinctUntilChanged') since '.distinctUntilChanged' might
+        //      not see multiple emissions of the same object (with different fields) as distinct. Or does it? Haven't tried. tbd. AKa170116
+        //
+        if ((cx !== this.x) || (cy !== this.y)) {
+          this._secretObs.onNext(this);
+        }
       },
 
       subscribe: function (f) {   // ( ({x:Num,y:Num} ->) -> subscription
