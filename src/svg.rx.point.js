@@ -43,20 +43,24 @@
       var ta = typeof a;
       var tb = typeof b;
 
-      if (args.length === 0)) {
+      if (arguments.length === 0) {
         this.x = this._y = Number.NaN;
 
-      if ((args.length === 2) && (ta === "number") && (tb === "number")) {
+      } else if ((arguments.length === 2) && (ta === "number") && (tb === "number")) {
         this.x = a;
         this.y = b;
 
-      } else if ((args.length === 1) && (a instanceof SVG.Rx.Point)) {
+      } else if ((arguments.length === 1) && (a instanceof SVG.Rx.Point)) {
         this.x = a.x;
         this.y = a.y;
 
       } else {
-        throw "Unexpected params to 'SVG.Rx.Point': " + args;
+        throw "Unexpected params to 'SVG.Rx.Point': " + arguments;
       }
+
+      // tbd. Make so that setting to existing value will not cause new emissions. However, '.distinctUntilChanged'
+      //    probably compares the values by reference, and would therefore not notice that our '.x' and '.y' have
+      //    changed. AKa170116
 
       this._obs = Rx.Observable.create( function (obs) {
         if (!this.x.isNan) {
@@ -65,7 +69,7 @@
         this._secretObs = obs;    // tbd. unnecessary if also 'this._obs' be used for '.onNext' AKa170116
 
         //return undefined;   // no cleanup
-      })
+      });
     },
 
     // Add class methods
@@ -90,9 +94,11 @@
   // Note: Unlike 'svg.js', we use the second parameter as a radius (not diameter).
   //
   SVG.Rx.Circle = SVG.invent({
-    create: function (cp,r) {   // ([SVG.Rx.Point [, r:SVG.Rx.Dist]]) ->
+    create: function (cp,r) {   // ([SVG.Rx.Point [, r:SVG.Rx.Dist or Num]]) ->
       this._cp = cp || new SVG.Rx.Point();
-      this._r = r || new SVG.Rx.Dist(10);
+      this._r =
+        r instanceof SVG.Rx.Dist ? r
+          : new SVG.Rx.Dist( typeof r === "number" ? r : 10 );
 
       this._cp.subscribe( function (o) {
         this.attr('cx',o.x).attr('cy',o.y);        // Note: bypass 'svg.js' code by purpose - it would simply do this
@@ -109,20 +115,17 @@
     inherit: SVG.Circle,
 
     construct: {          // parent method to create these
-      rx_circle: function (cp,r) {   // (SVG.Rx.Point [,SVG.Rx.Dist]) -> SVG.Rx.Circle
+      rx_circle: function (cp,r) {   // (SVG.Rx.Point [,SVG.Rx.Dist or Num]) -> SVG.Rx.Circle
 
         return this.put(new SVG.Rx.Circle(cp,r));
       }
     },
 
-    // Override the setting functions
-    //
-    // With 'svg.rx.js', if setting a value does not please the constraints, the value remains unchanged, and the
-    // element becomes tagged with "uncomfortable" class - until the constraint is pleased, again.
+    // Override the setting/access functions
     //
     extend: {
       center: function (cx,cy) {   // (cx:Num,cy:Num) -> this or () -> SVG.Rx.Point
-        if (args.length === 2) {
+        if (arguments.length === 2) {
           this._cp.set(cx,cy);      // distributes the knowledge to possible other users of the point
           return this;
 
@@ -132,7 +135,7 @@
       },
 
       radius: function (r) {    // (Num) -> this or () -> SVG.Rx.Dist
-        if (args.length === 1) {
+        if (arguments.length === 1) {
           this._r.set(r);
           return this;
 
@@ -143,9 +146,56 @@
 
       move: notSupported,
       cx: notSupported,
-      cy: notSupported,
-      radius: notSupported
+      cy: notSupported
     }
-  })
+  });
+
+  //--- SVG.Rx.Line ---
+  //
+  //  ._pa: SVG.Rx.Point
+  //  ._pb: SVG.Rx.Point
+  //
+  SVG.Rx.Line = SVG.invent({
+    create: function (a,b) {   // (SVG.Rx.Point, SVG.Rx.Point) ->
+      this._pa = a;
+      this._pb = b;
+
+      // tbd. do we need such?
+      //this.constructor.call(this, ...)
+    },
+
+    inherit: SVG.Line,
+
+    construct: {          // parent method to create these
+      rx_line: function (a,b) {   // (SVG.Rx.Point, SVG.Rx.Point) -> SVG.Rx.Line
+
+        return this.put(new SVG.Rx.Line(a,b));
+      }
+    },
+
+    // Override the access functions
+    //
+    extend: {
+      // Note: We do not support the "point string", "point array" and 'SVG.PointArray' variants of 'svg.js'.
+      //
+      plot: function (ax,ay,bx,by) {   // (ax:Num,ay:Num,bx:Num,by:Num) -> this
+        var tax = typeof ax;
+        var tay = typeof ay;
+        var tbx = typeof bx;
+        var tby = typeof by;
+
+        if ((arguments.length === 4) && (tax === "number") && (tay === "number") && (tbx === "number") && (tby === "number")) {
+          this._pa.set(ax,ay);
+          this._pb.set(bx,by);
+          return this;
+
+        } else {
+          notSupported();
+        }
+      },
+
+      array: notSupported
+    }
+  });
 
 })();
