@@ -26,7 +26,6 @@
 
   function dragIt( el ) {     // (SVGElement) ->
     el.rx_draggable().subscribe( function (dragObs) {
-      console.log( "dragging starts" );
 
       dragObs.subscribe( function (o) {
         el.center( o.x, o.y );
