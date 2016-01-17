@@ -36,7 +36,7 @@
   //
   SVG.Rx.Point = SVG.invent({
     // Initialize node
-    create: function (a,b) {    // () or (x:Num, y:Num) or (p2: SVG.Rx.Point, () -> {x:Num, y:Num})) or (d: SVG.Rx.Dist, (d:Num) -> {x:Num, y:Num}))
+    create: function (a,b) {    // () or (x:Num, y:Num) or (SVG.Rx.Point)
 
       var ta = typeof a;
       var tb = typeof b;
@@ -48,9 +48,9 @@
         this.x = a;
         this.y = b;
 
-      } else if ((args.length === 2) && (a instanceof SVG.Rx.Point) && (tb === "function")) {
-        new Rx.Constraint( this, a, b );
-        val o = b()
+      } else if ((args.length === 1) && (a instanceof SVG.Rx.Point)) {
+        this.x = a.x;
+        this.y = a.y;
 
       } else {
         throw "Unexpected params to 'SVG.Rx.Conststraints.Point': " + args;
@@ -59,11 +59,9 @@
 
     // Add class methods
     extend: {
-      fix: function () {
-        assert(false);
-      },
-      constrain: function (p2, f) {   // (SVG.Point, (SVG.Point, SVG.Point) -> ???) -> ???
-        assert(false);
+      constrain: function () {   // (SVG.Rx.Point or SVG.Rx.Dist, ..., (SVG.Rx.Point or SVG.Rx.Dist, ...) -> Boolean) -> SVG.Rx.Constraint
+
+        ...
       }
     }
 

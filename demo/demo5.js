@@ -11,13 +11,12 @@
 
   var svg = SVG("cradle");
 
-  var p2;
+  var p1= new SVG.Rx.Point(100,100);
+  var p2= new SVG.Rx.Point().constrain( p1, function (p1_candidate,p2_candidate) {   // (SVG.Rx.Point, SVG.Rx.Point) -> Boolean
 
-  var p1= new SVG.Rx.Point(100,100).constrain( p2, function () {
-    return p2.sub( 50,-10 );
-  } );
-  p2= new SVG.Rx.Point().constrain( p1, function () {   // () -> SVG.Rx.Point or falsy
-    return p1.add( 50,-10 );
+    // Don't let the points go too far
+    //
+    return (p1_candidate.distTo(p2_candidate) <= 100);
   } );
 
   var c1= svg.rx_circle(p1).addClass("first");
