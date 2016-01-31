@@ -13,6 +13,11 @@
   }
   assert(true);   // just use it up (jshint)
 
+  // Especially with RxJS5 coming up, we want to ensure our expectations.
+  //
+  assert( typeof Rx.Observable.fromEvent === "function" );
+  assert( typeof Rx.Observable.merge === "function" );
+
   // Note: RxJS does not seem to have what Scala calls '.collect': to both filter and convert.
   //
   // Ref. https://xgrommx.github.io/rx-book/content/guidelines/implementations/index.html#implement-new-operators-by-composing-existing-operators

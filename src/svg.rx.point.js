@@ -13,6 +13,10 @@
   }
   assert(true);   // just use it up (jshint)
 
+  // Check the things we will use of 'Rx' (for RxJS5)
+  //
+  assert( typeof Rx.Subject === "function" );
+
   // A function used when hiding out svg.js methods
   //
   function notSupported (s) {   // (String) -> () -> never returns

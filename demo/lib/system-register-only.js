@@ -1,0 +1,1 @@
+../../node_modules/systemjs/dist/system-register-only.js
