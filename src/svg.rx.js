@@ -31,7 +31,9 @@
   // tbd. Is it true RxJS does not have a built-in operator for this? Ask at StackOverflow (pointing to this line). AKa271215
   //    ^-- ask about RxJS5 in particular AKa310116
   //
-  Rx.Observable.prototype.filterAndSelect = function (f) {
+  assert( typeof Rx.Observable.prototype.collect === "undefined" );
+
+  Rx.Observable.prototype.mapAndFilterUndefinedOut = function (f) {
     if (RxJS5) {
       return this.map(f).filter( function (x) { return x !== undefined; } );
     } else {
@@ -247,9 +249,9 @@
 
         // Note: RxJS does not seem to have what Scala calls '.collect': to both filter and convert.
         //
-        var moveObs = moveAllObs.filterAndSelect(f);
-        var cancelObs = cancelAllObs.filterAndSelect(f);
-        var endObs = endAllObs.filterAndSelect(f);
+        var moveObs = moveAllObs.mapAndFilterUndefinedOut(f);
+        var cancelObs = cancelAllObs.mapAndFilterUndefinedOut(f);
+        var endObs = endAllObs.mapAndFilterUndefinedOut(f);
 
         var cancelOrEndObs = Rx.Observable.merge( endObs, cancelObs );
 
