@@ -13,6 +13,12 @@
   }
   assert(true);   // just use it up (jshint)
 
+  var RxJS5 = (function() {   // tbd. can autodetect this if we want to support both RxJS4 and 5
+    var sub = new Rx.Subject();
+    (sub.unsubscribe || sub.dispose)();
+    return !!sub.unsubscribe;
+  })();
+
   // Especially with RxJS5 coming up, we want to ensure our expectations.
   //
   assert( typeof Rx.Observable.fromEvent === "function" );
@@ -23,9 +29,14 @@
   // Ref. https://xgrommx.github.io/rx-book/content/guidelines/implementations/index.html#implement-new-operators-by-composing-existing-operators
   //
   // tbd. Is it true RxJS does not have a built-in operator for this? Ask at StackOverflow (pointing to this line). AKa271215
+  //    ^-- ask about RxJS5 in particular AKa310116
   //
   Rx.Observable.prototype.filterAndSelect = function (f) {
-    return this.select(f).filter( function (x) { return x !== undefined; } );
+    if (RxJS5) {
+      return this.map(f).filter( function (x) { return x !== undefined; } );
+    } else {
+      return this.select(f).filter( function (x) { return x !== undefined; } );
+    }
   }
 
   // JavaScript does not have an Array for range constructor.
@@ -149,7 +160,7 @@
     //      the next drag event. Let's implement this on the application side (demo4) for now, since most cases would
     //      not need it. AKa140116
     //
-    return moveObs.select( function (o) {
+    return (moveObs.select /*RxJS4*/ || moveObs.map).call( moveObs, function (o) {
       var p = transformP(o);
 
       return {
@@ -251,12 +262,21 @@
       // Note: the '.selectMany' means that we can spawn multiple (0..n) values from within this one event, unlike the
       //      single one that '.select' would.
       //
-      return startAllObs.selectMany( function (ev) {  // (TouchEvent) -> Array of observable of {x:Int, y:Int}
+      if (RxJS5) {
+        return startAllObs.mergeMap( function (ev) {  // (TouchEvent) -> Array of observable of {x:Int, y:Int}
 
-        return range( 0, ev.changedTouches.length ).map( function (i) {
-          return touchDragObs( ev, i );
-        } );
-      });
+          return range( 0, ev.changedTouches.length ).map( function (i) {
+            return touchDragObs( ev, i );
+          } );
+        });
+      } else {
+        return startAllObs.selectMany( function (ev) {  // (TouchEvent) -> Array of observable of {x:Int, y:Int}
+
+          return range( 0, ev.changedTouches.length ).map( function (i) {
+            return touchDragObs( ev, i );
+          } );
+        });
+      }
     },  // rx_touch
 
     //---
@@ -279,10 +299,18 @@
       var moveObs =   Rx.Observable.fromEvent(window, "mousemove").filter(f);
       var endObs =    Rx.Observable.fromEvent(window, "mouseup").filter(f);
 
-      return startObs.select( function (ev) {   // (MouseEvent) -> observable of {x:Int, y:Int}
-        preventDefault(ev);
-        return innerObs( self, ev, moveObs, endObs );
-      } );
+      if (RxJS5) {
+        return startObs.map( function (ev) {   // (MouseEvent) -> observable of {x:Int, y:Int}
+          preventDefault(ev);
+          return innerObs( self, ev, moveObs, endObs );
+        } );
+
+      } else {  // RxJS4
+        return startObs.select( function (ev) {   // (MouseEvent) -> observable of {x:Int, y:Int}
+          preventDefault(ev);
+          return innerObs( self, ev, moveObs, endObs );
+        } );
+      }
     },
 
     //---

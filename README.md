@@ -17,6 +17,8 @@ The API is tremendously simple, but powerful in the RxJS fashion. All drags are 
 
 - [src/svg.rx.js](src/svg.rx.js)
 
+The code is currently using [RxJS 5.0.0 beta1](https://github.com/ReactiveX/RxJS), but still carries compatibility to older RxJS4 as well. However, the older use is not tested and is expected to be removed once RxJS5 has become official. AKa310116
+
 ## Demos
 
 - [sources](demo/)
