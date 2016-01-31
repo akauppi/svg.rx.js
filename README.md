@@ -11,8 +11,6 @@ The API is tremendously simple, but powerful in the RxJS fashion. All drags are 
 - mouse is not very different from touch
 - any touch is treated the same (enables multiuser touch UIs on a big tablet / table)
 
-
-
 ## Code
 
 - [src/svg.rx.js](src/svg.rx.js)

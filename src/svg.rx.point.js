@@ -21,7 +21,7 @@
     return !!sub.unsubscribe;
   })();
 
-  // Check the things we will use of 'Rx' (for RxJS5)
+  // Check the things we will use of 'Rx'
   //
   assert( typeof Rx.Subject === "function" );
 

@@ -19,7 +19,7 @@
     return !!sub.unsubscribe;
   })();
 
-  // Especially with RxJS5 coming up, we want to ensure our expectations.
+  // Check the things we will use of 'Rx'
   //
   assert( typeof Rx.Observable.fromEvent === "function" );
   assert( typeof Rx.Observable.merge === "function" );
