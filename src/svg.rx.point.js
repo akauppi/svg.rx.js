@@ -13,6 +13,18 @@
   }
   assert(true);   // just use it up (jshint)
 
+  // tbd. Could get this from main 'svg.rx.js' in some way (non-DRY) AKa310116
+  //
+  var RxJS5 = (function() {
+    var sub = new Rx.Subject();
+    (sub.unsubscribe || sub.dispose)();
+    return !!sub.unsubscribe;
+  })();
+
+  // Check the things we will use of 'Rx' (for RxJS5)
+  //
+  assert( typeof Rx.Subject === "function" );
+
   // A function used when hiding out svg.js methods
   //
   function notSupported (s) {   // (String) -> () -> never returns
@@ -57,7 +69,11 @@
     extend: {
       set: function (v) {   // (v:Num) ->
         this.value = v;
-        this._sub.onNext(v);
+        if (RxJS5) {
+          this._sub.next(v);
+        } else {
+          this._sub.onNext(v);  // RxJS4
+        }
       },
 
       subscribe: function (f) {   // ( ({x:Num,y:Num} ->) -> subscription
@@ -66,7 +82,11 @@
         // Emit the current values, if there are any (what 'BehaviorSubject' would do by default).
         //
         if (!isNaN(this.value)) {
-          this._sub.onNext(this.value);
+          if (RxJS5) {
+            this._sub.next(this.value);
+          } else {
+            this._sub.onNext(this.value);
+          }
         }
 
         return subscription;
@@ -132,7 +152,11 @@
           this.x = cx;
           this.y = cy;
           //console.log( this, "onNext", cx, cy );
-          this._sub.onNext(this);
+          if (RxJS5) {
+            this._sub.next(this);
+          } else {
+            this._sub.onNext(this);
+          }
         }
       },
 
@@ -143,7 +167,11 @@
         // Emit the current values, if there are any (what 'BehaviorSubject' would do by default).
         //
         if (!isNaN(this.x)) {
-          this._sub.onNext(this);
+          if (RxJS5) {
+            this._sub.next(this);
+          } else {
+            this._sub.onNext(this);
+          }
         }
 
         return subscription;
