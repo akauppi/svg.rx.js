@@ -24,15 +24,12 @@
   assert( typeof Rx.Observable.fromEvent === "function" );
   assert( typeof Rx.Observable.merge === "function" );
 
-  // Note: RxJS does not seem to have what Scala calls '.collect': to both filter and convert.
+  // Note: RxJS does not have what Scala calls '.collect': to both filter and convert.
   //
-  // Ref. https://xgrommx.github.io/rx-book/content/guidelines/implementations/index.html#implement-new-operators-by-composing-existing-operators
+  // Ref.
+  //  -> http://stackoverflow.com/questions/35118707/rxjs5-how-to-map-and-filter-on-one-go-like-collect-in-scala
+  //  -> https://xgrommx.github.io/rx-book/content/guidelines/implementations/index.html#implement-new-operators-by-composing-existing-operators
   //
-  // tbd. Is it true RxJS does not have a built-in operator for this? Ask at StackOverflow (pointing to this line). AKa271215
-  //    ^-- ask about RxJS5 in particular AKa310116
-  //
-  assert( typeof Rx.Observable.prototype.collect === "undefined" );
-
   Rx.Observable.prototype.mapAndFilterUndefinedOut = function (f) {
     if (RxJS5) {
       return this.map(f).filter( function (x) { return x !== undefined; } );
