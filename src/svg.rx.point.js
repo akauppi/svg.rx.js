@@ -15,11 +15,7 @@
 
   // tbd. Could get this from main 'svg.rx.js' in some way (non-DRY) AKa310116
   //
-  var RxJS5 = (function() {
-    var sub = new Rx.Subject();
-    (sub.unsubscribe || sub.dispose)();
-    return !!sub.unsubscribe;
-  })();
+  var RxJS5 = !!Rx.Subscriber;
 
   // Check the things we will use of 'Rx'
   //

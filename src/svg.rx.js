@@ -13,11 +13,7 @@
   }
   assert(true);   // just use it up (jshint)
 
-  var RxJS5 = (function() {   // tbd. can autodetect this if we want to support both RxJS4 and 5
-    var sub = new Rx.Subject();
-    (sub.unsubscribe || sub.dispose)();
-    return !!sub.unsubscribe;
-  })();
+  var RxJS5 = !!Rx.Subscriber;
 
   // Check the things we will use of 'Rx'
   //
