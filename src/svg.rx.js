@@ -13,14 +13,29 @@
   }
   assert(true);   // just use it up (jshint)
 
-  // Note: RxJS does not seem to have what Scala calls '.collect': to both filter and convert.
+  var RxJS5 = (function() {   // tbd. can autodetect this if we want to support both RxJS4 and 5
+    var sub = new Rx.Subject();
+    (sub.unsubscribe || sub.dispose)();
+    return !!sub.unsubscribe;
+  })();
+
+  // Check the things we will use of 'Rx'
   //
-  // Ref. https://xgrommx.github.io/rx-book/content/guidelines/implementations/index.html#implement-new-operators-by-composing-existing-operators
+  assert( typeof Rx.Observable.fromEvent === "function" );
+  assert( typeof Rx.Observable.merge === "function" );
+
+  // Note: RxJS does not have what Scala calls '.collect': to both filter and convert.
   //
-  // tbd. Is it true RxJS does not have a built-in operator for this? Ask at StackOverflow (pointing to this line). AKa271215
+  // Ref.
+  //  -> http://stackoverflow.com/questions/35118707/rxjs5-how-to-map-and-filter-on-one-go-like-collect-in-scala
+  //  -> https://xgrommx.github.io/rx-book/content/guidelines/implementations/index.html#implement-new-operators-by-composing-existing-operators
   //
-  Rx.Observable.prototype.filterAndSelect = function (f) {
-    return this.select(f).filter( function (x) { return x !== undefined; } );
+  Rx.Observable.prototype.mapAndFilterUndefinedOut = function (f) {
+    if (RxJS5) {
+      return this.map(f).filter( function (x) { return x !== undefined; } );
+    } else {
+      return this.select(f).filter( function (x) { return x !== undefined; } );
+    }
   }
 
   // JavaScript does not have an Array for range constructor.
@@ -104,8 +119,29 @@
     // Offset from the touch/point location to the origin of the target element. We're providing the drag coordinates
     // in the observable, not the actual mouse/touch coordinates (tbd. maybe we should provide both). AKa080116
     //
-    var x_offset = isDoc ? 0 : p0.x - el.x(),
-        y_offset = isDoc ? 0 : p0.y - el.y();
+    var x_offset, y_offset;
+
+    // tbd. We might be better off not doing any of this here, but in the application code. AKa170116
+
+    if (isDoc) {
+      x_offset = y_offset = 0;
+
+    } else if ((el instanceof SVG.Circle) || (el instanceof SVG.Ellipse)) {   // 'SVG.Circle', 'SVG.Ellipse' or 'SVG.Rx.Circle'
+      //
+      // Do not access '.x' or '.y' on a circle - they are not needed, and 'SVG.Rx.Circle' does not implement them.
+
+      var center = el.center();   // {x:Num,y:Num}
+
+      x_offset = p0.x - center.x;   // we are providing center's coordinates to the circle / ellipse being dragged
+      y_offset = p0.y - center.y;
+
+    } else if (typeof el.x === "function") {    // normal 'svg.js' elements (all have '.x' and '.y', even the circle
+      x_offset = p0.x - el.x();
+      y_offset = p0.y - el.y();
+
+    } else {
+      throw "Unknown element: "+ typeof el;
+    }
 
     // Note: some events actually come with the same x,y values (at least on Safari OS X) - removed by the
     //      '.distinctUntilChanged()'.
@@ -123,7 +159,7 @@
     //      the next drag event. Let's implement this on the application side (demo4) for now, since most cases would
     //      not need it. AKa140116
     //
-    return moveObs.select( function (o) {
+    return (moveObs.select /*RxJS4*/ || moveObs.map).call( moveObs, function (o) {
       var p = transformP(o);
 
       return {
@@ -210,9 +246,9 @@
 
         // Note: RxJS does not seem to have what Scala calls '.collect': to both filter and convert.
         //
-        var moveObs = moveAllObs.filterAndSelect(f);
-        var cancelObs = cancelAllObs.filterAndSelect(f);
-        var endObs = endAllObs.filterAndSelect(f);
+        var moveObs = moveAllObs.mapAndFilterUndefinedOut(f);
+        var cancelObs = cancelAllObs.mapAndFilterUndefinedOut(f);
+        var endObs = endAllObs.mapAndFilterUndefinedOut(f);
 
         var cancelOrEndObs = Rx.Observable.merge( endObs, cancelObs );
 
@@ -225,12 +261,21 @@
       // Note: the '.selectMany' means that we can spawn multiple (0..n) values from within this one event, unlike the
       //      single one that '.select' would.
       //
-      return startAllObs.selectMany( function (ev) {  // (TouchEvent) -> Array of observable of {x:Int, y:Int}
+      if (RxJS5) {
+        return startAllObs.mergeMap( function (ev) {  // (TouchEvent) -> Array of observable of {x:Int, y:Int}
 
-        return range( 0, ev.changedTouches.length ).map( function (i) {
-          return touchDragObs( ev, i );
-        } );
-      });
+          return range( 0, ev.changedTouches.length ).map( function (i) {
+            return touchDragObs( ev, i );
+          } );
+        });
+      } else {
+        return startAllObs.selectMany( function (ev) {  // (TouchEvent) -> Array of observable of {x:Int, y:Int}
+
+          return range( 0, ev.changedTouches.length ).map( function (i) {
+            return touchDragObs( ev, i );
+          } );
+        });
+      }
     },  // rx_touch
 
     //---
@@ -253,10 +298,18 @@
       var moveObs =   Rx.Observable.fromEvent(window, "mousemove").filter(f);
       var endObs =    Rx.Observable.fromEvent(window, "mouseup").filter(f);
 
-      return startObs.select( function (ev) {   // (MouseEvent) -> observable of {x:Int, y:Int}
-        preventDefault(ev);
-        return innerObs( self, ev, moveObs, endObs );
-      } );
+      if (RxJS5) {
+        return startObs.map( function (ev) {   // (MouseEvent) -> observable of {x:Int, y:Int}
+          preventDefault(ev);
+          return innerObs( self, ev, moveObs, endObs );
+        } );
+
+      } else {  // RxJS4
+        return startObs.select( function (ev) {   // (MouseEvent) -> observable of {x:Int, y:Int}
+          preventDefault(ev);
+          return innerObs( self, ev, moveObs, endObs );
+        } );
+      }
     },
 
     //---

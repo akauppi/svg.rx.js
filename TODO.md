@@ -12,10 +12,7 @@
 
 - Would someone with Microsoft devices (using `pointerdown` etc.) want to suggest PR's? See -> [Issue #2](https://github.com/akauppi/svg.rx.js/issues/2)
 
-- use [RxJS 5.0](https://github.com/ReactiveX/RxJS) when appropriate. It e.g. binds together with the ES7 built-in Observable Spec.
-
-  - or tie directly to the ES7 `Observable`s (if they are enough for us)
-  - make this first as a branch, `master` remains ExJS 4.x until 5.0 is stable and available via npm
+- Once ES7 `Observable`s are out, check if they are enough for us (i.e. would we still need/benefit from RxJS)
 
 - is there a case to support mouse buttons other than the first?
 

@@ -1,35 +1,31 @@
 {
-  "": "-- note: Once RxJS 5.0 is available, switch to it.",
-  "": "--       Currently it can be used with \"@reactivex/rxjs\": \">= 5.0.0-alpha.12\"",
   "": "",
   "name": "svg.rx.js",
   "version": "0.0.4",
   "description": "Bridge of SVG graphics (svg.js) and Reactive Extensions (rx-lite or rxjs).",
-  "keywords": ["svg","rx","rxjs"],
+  "keywords": [
+    "svg",
+    "rx",
+    "rxjs"
+  ],
   "homepage": "https://github.com/akauppi/svg.rx.js",
   "bugs": "https://github.com/akauppi/svg.rx.js/issues",
   "license": "MIT",
-  "files": ["src/"],
+  "files": [
+    "src/"
+  ],
   "repository": "github:akauppi/svg.rx.js",
-
-  "": "-- These are as dependencies so that demo symbolic links will get them.",
-  "": "-- 'peerDependencies' did not actually download them.",
-  "": "-- 'devDependencies' would download but it gives the wrong impression. They are needed for using the code, but",
-  "": "--   we don't really want to carry them over in the 'svg.rx.js' packaging. The user should inject them via some",
-  "": "--   other means. tbd. What's the best way to describe this in npm packaging? AKa100116",
-  "": "",
   "dependencies": {
+    "@reactivex/rxjs": "^5.0.0-beta.1",
     "svg.js": "^2.2.4",
-    "rx-lite": "^4.0.7"
+    "systemjs": "^0.19.17"
   },
   "devDependencies": {
     "gh-pages": "^0.5.0",
     "http-server": "^0.8.5",
     "jshint": "^2.8.0"
   },
-
   "scripts": {
-    "": "-- Don't use script name 'publish' - it's reserved for pushing the npm package to npm repo.",
     "": "",
     "gh-pages": "node_modules/.bin/gh-pages -d demo",
     "serve": "node_modules/.bin/http-server demo -p 8080",
@@ -37,10 +33,6 @@
     "preserve": "npm run jshint",
     "pregh-pages": "npm run jshint"
   },
-
-  "": "-- jshint reference: http://jshint.com/docs/cli/",
-  "": "-- jshint options: http://jshint.com/docs/options/",
-  "": "",
   "jshintConfig": {
     "strict": "global"
   }

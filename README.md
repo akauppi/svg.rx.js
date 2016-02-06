@@ -11,11 +11,11 @@ The API is tremendously simple, but powerful in the RxJS fashion. All drags are 
 - mouse is not very different from touch
 - any touch is treated the same (enables multiuser touch UIs on a big tablet / table)
 
-
-
 ## Code
 
 - [src/svg.rx.js](src/svg.rx.js)
+
+The code is currently using [RxJS 5.0.0 beta1](https://github.com/ReactiveX/RxJS), but still carries compatibility to older RxJS4 as well. However, the older use is not tested and is expected to be removed once RxJS5 has become official. AKa310116
 
 ## Demos
 
