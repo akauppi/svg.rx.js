@@ -17,14 +17,6 @@
   //
   var RxJS5 = !!Rx.Subscriber;
 
-  // A function used when hiding out svg.js methods
-  //
-  function notSupported (s) {   // (String) -> () -> never returns
-    return function () {
-      throw "Access to method '"+s+"' not supported in 'svg.rx.js'";
-    }
-  }
-
   SVG.Rx = SVG.Rx || {};
 
 

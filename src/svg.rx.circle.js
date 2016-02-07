@@ -27,6 +27,8 @@
 
   SVG.Rx = SVG.Rx || {};
 
+  assert( SVG.Rx.Point && SVG.Rx.Dist );    // what we need (until we get some module system up)
+
   //--- SVG.Rx.Circle ---
   //
   //  ._cp: SVG.Rx.Point
