@@ -1,0 +1,15 @@
+@import url("demo.css");
+
+/** remove
+circle.first {
+  fill: blue;
+}
+circle.second {
+  fill: red;
+}
+
+line.connector {
+  stroke-width: 10px;
+  stroke: yellow;
+}
+**/

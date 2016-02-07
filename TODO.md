@@ -1,5 +1,7 @@
 # TODO
 
+- demo-triangle further
+
 - Animation of demo 4, using CSS
 
 - Clean up the code and documentation
