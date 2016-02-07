@@ -2,22 +2,37 @@
 * demo-triangles.js
 */
 
+function assert(b,msg) {    // (boolish, String) =>
+  if (!b) {
+    throw ("Assert failed" + (msg ? ": "+msg : ""))
+  }
+}
+assert(true);   // just use it up (jshint)
+
 /*
 * A custom SVG component
 */
 (function() {
   "use strict";
 
+  assert( SVG.Rx.Point && SVG.Rx.Angle );
+
+  var R= 30;
+
+  // A function used when hiding out svg.js methods
+  //
+  function notSupported (s) {   // (String) -> () -> never returns
+    return function () {
+      throw "Access to method '"+s+"' not supported in 'svg.rx.js'";
+    }
+  }
+
   //--- SVG.Rx.MyTriangle ---
   //
   //  ._cp: SVG.Rx.Point
-  //  ._r: SVG.Rx.Dist
   //  ._angle: SVG.Rx.Angle
   //
-  //  ._obs
   //  ._locked: Boolean
-  //  ._joinedFromObs: Array of Observable of [{x:Num, y:Num, rad:Num}]
-  //  ._joinedToObs: Array of Observable of [{x:Num, y:Num, rad:Num}]
   //
   //  .lock(Boolean)
   //  .isLocked()
@@ -25,19 +40,21 @@
   //  .tieTo( Observable of {x:Num, y:Num, angle:Num} )
   //
   SVG.Rx.MyTriangle = SVG.invent({
-    create: function (cp,r,angle) {   // ({x:Num,y:Num}, Num, Num) ->
+    create: function (cp,angle) {   // (SVG.Rx.Point, SVG.Rx.Angle) ->
       var self= this;
 
-      //this.constructor.call(this, SVG.create('g'));
+      this.constructor.call(this, SVG.create('g'));
 
-      this._cp = new SVG.Rx.Point(cp.x, cp.y);
-      this._r = new SVG.Rx.Dist(r);
-      this._angle = new SVG.Rx.Angle(angle);
+      this._cp = cp;
+      this._angle = angle;
 
-      // Merge the location and angle into one Observable
+      this._locked = false;
+
+      /***
+      // Combine the location and angle into one Observable
       //
       this._obs = this._cp.subscribe().combineLatest(
-        this._angle.subscribe(),
+        this._angle.subscribeRad(),
         function (cp,rad) {
           return {
             x: cp.x,
@@ -46,36 +63,55 @@
           };
         }
       )
-
-      this._locked = false;
-      this._joinedFromObs = [];
-      this._joinedToObs = [];
+      ***/
 
       // Path via the tips: (r,0), (-r/2,(± r*sqrt(3)/2)
       //
-      var b= r*Math.sqrt(3)/2;
+      var b= R*Math.sqrt(3)/2;
 
-      var path = "M0,"+r+
-        "L"+(-r/2)+","+b+
+      var path = "M"+R+",0"+
+        "L"+(-R/2)+","+b+
         "l0,-"+(2*b)+
         "z";
 
-      this.center(cp.x, cp.y);
+      console.log(path);
       this.path(path);
-      this.rotate(angle);
+
+      this.addClass("my_triangle");
+
+      /* handle moves via the 'SVG.Rx.Point'
+      */
+      this._cp.subscribe( function (o) {   // ({x:Num,y:Num}) ->
+        self.attr( {                      // what 'svg.js' would do (but separately for 'x' and 'y')
+          "x": o.x - self.width() / 2,
+          "y": o.y - self.height() / 2
+        });
+      } );
+
+      /* handle rotation via the 'SVG.Rx.Angle'
+      */
+      this._angle.subscribeDeg( function (deg) {    // (Num) ->
+
+        self.transform({ rotation: deg, cx: self._cp.x, cy: self._cp.y });    // what 'svg.js' rotate would do
+      } );
 
     },
-    inherit: SVG.Rx.Group,
+    inherit: SVG.G,
 
     construct: {          // parent method to create these
-      my_triangle: function (cp,r,rad) {   // ({x:Num,y:Num}, Num, Num) -> SVG.Rx.MyTriangle
+      my_triangle: function (cp,rad) {   // ([{x:Num,y:Num}], [Num]) -> SVG.Rx.MyTriangle
 
-        return this.put(new SVG.Rx.MyTriangle(cp,r,rad));
+        var cp2 = cp ? new SVG.Rx.Point(cp.x, cp.y) : new SVG.Rx.Point();
+        var angle = new SVG.Rx.Angle(rad || 0);
+
+        var ret= this.put(new SVG.Rx.MyTriangle(cp2, angle));
+
+        if (!cp2) { ret.hide(); }
+        return ret;
       }
     },
 
     extend: {
-/***
       // Lock the triangle so it won't move or rotate (either when directly manipulated or via changes in the
       // connecting paths.
       //
@@ -86,10 +122,9 @@
 
       // Check if the triangle is locked
       //
-      isLocked: function (b) {    // () -> Boolean
+      isLocked: function () {    // () -> Boolean
         return this._locked;
-      } //,
-***/
+      },
 
 /***
       // Add an incoming connection (there may be 0,1 or 2 in real application)
@@ -113,6 +148,22 @@
         return this;
       }
 ***/
+
+      // Overrides of 'SVG.G' and 'SVG.Element'
+      //
+      x: notSupported('x'),
+      y: notSupported('y'),
+      cx: notSupported('cx'),
+      cy: notSupported('cy'),
+      move: notSupported('move'),
+      center: function (cx,cy) {    // (Num,Num) -> this
+        this._cp.set(cx,cy);        // sets the position, but also broadcasts it to any observers
+        return this;
+      },
+      rotate: function (deg) {      // (Num) -> this
+        this._angle.set( this._angle.asDeg() + deg );
+      }
+      // note: Not sure if we should ban setting width, height, and size. AKa070216
     }
   });
 
@@ -124,22 +175,61 @@
 (function() {
   "use strict";
 
-  var R= 30;
-
   var svg = SVG("cradle");
 
   function degToRad(deg) {
     return deg * (Math.PI/180.0);
   }
 
-  var function my_triangle( ) {   // (x:Num, y:Num, r:Num, rad:Num)
-  }
-
-  var t1 = svg.my_triangle( 100,100, R, 0 );
-  var t2 = svg.my_triangle( 200,150, R, degToRad(-90) );
-  var t3 = svg.my_triangle( 300,200, R, 0 );
+  var t1 = svg.my_triangle( {x:100,y:100}, 0 );
+  var t2 = svg.my_triangle( {x:200,y:150}, degToRad(-90) );
+  var t3 = svg.my_triangle( {x:300,y:200}, 0 );
 
   //t1.tieTo(t2);
   //t2.tieTo(t3);
+
+  dragIt(t1);
+  dragIt(t2);
+  dragIt(t3);
+
+  function dragIt( el ) {     // (SVGElement) ->
+    el.rx_draggable().subscribe( function (dragObs) {
+      dragObs.subscribe( function (o) {
+        el.move( o.x, o.y );
+      });
+    });
+  }
+
+  // Allow creation of new triangles
+  //
+  svg.rx_draggable().subscribe( function (dragObs) {
+
+    var t= svg.my_triangle();   // ready, hidden
+    var circle= svg.circle(10);   // ready, hidden
+    var rect= svg.rect().width(2*30).height(2*30).addClass("debug");
+
+    var fresh = true;
+
+    dragObs.subscribe(
+      function (o) {
+        //console.log( "Dragging: "+ o.x + " "+ o.y );
+        t.center(o.x, o.y);     // 'x','y' are the actual touch/pointer coords, because we are tracking 'svg'
+        circle.center(o.x,o.y).show();
+        rect.center(o.x,o.y);
+
+        if (fresh) {
+          t.show();
+          fresh = false;
+        }
+      },
+      null,   // error handling
+      function () {  // end of drag
+        // leave the triangle there, but allow dragging it later
+        dragIt(t);
+        circle.remove();
+        rect.remove();
+      }
+    );
+  });
 
 })();

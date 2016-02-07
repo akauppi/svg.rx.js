@@ -22,7 +22,7 @@
 
   //--- SVG.Rx.Dist ---
   //
-  //  .value: Num
+  //  .value: Num                   // note: We might be able to do without this, just taking the latest from '._obsDistinct'
   //
   //  ._sub: subject of Num
   //  ._obsDistinct: observable of Num  // only changed values are emitted
@@ -31,21 +31,24 @@
     // Initialize node
     create: function (a) {    // () or (d:Num) or (SVG.Rx.Dist)
       var ta = typeof a;
+      var init;
 
       if (arguments.length === 0) {
-        this.value = Number.NaN;    // no emission
+        init = Number.NaN;    // no emission
 
       } else if ((arguments.length === 1) && (ta === "number")) {
-        this.value = a;
+        init = a;
 
       } else if ((arguments.length === 1) && (a instanceof SVG.Rx.Dist)) {
-        this.value = a.value;
+        init = a.value;
 
       } else {
         throw "Unexpected params to 'SVG.Rx.Dist': " + arguments;
       }
+      this.value = init;
 
       this._sub = new Rx.Subject();
+
       this._obsDistinct = this._sub.distinctUntilChanged();
     },
 
@@ -61,19 +64,12 @@
       },
 
       subscribe: function (f) {   // ( ({x:Num,y:Num} ->) -> subscription
-        var subscription = this._obsDistinct.subscribe(f);
 
         // Emit the current values, if there are any (what 'BehaviorSubject' would do by default).
         //
-        if (!isNaN(this.value)) {
-          if (RxJS5) {
-            this._sub.next(this.value);
-          } else {
-            this._sub.onNext(this.value);
-          }
-        }
+        var obs = isNaN(this.value) ? this._obsDistinct : this._obsDistinct.startWith(this.value);
 
-        return subscription;
+        return obs.subscribe(f);
       }
     }
 

@@ -1,15 +1,21 @@
 @import url("demo.css");
 
-/** remove
-circle.first {
+g.my_triangle {
   fill: blue;
-}
-circle.second {
-  fill: red;
 }
 
 line.connector {
   stroke-width: 10px;
-  stroke: yellow;
+  stroke: black;
 }
-**/
+line.connector.constrained {
+  stroke: red;
+}
+
+/* DEBUG
+*/
+rect.debug {
+  stroke-width: 1px;
+  stroke: red;
+  fill-opacity: 0;
+}

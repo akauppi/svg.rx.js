@@ -23,6 +23,7 @@
 
   SVG.Rx = SVG.Rx || {};
 
+  var RAD_TO_DEG = (180.0/Math.PI);   // multiple rad to get deg; divide deg to get rad
 
   //--- SVG.Rx.Angle ---
   //
@@ -44,7 +45,7 @@
         this._rad = rad;
 
       } else if ((arguments.length === 1) && (trad instanceof SVG.Rx.Angle)) {
-        this._rad = a._rad;
+        this._rad = trad._rad;
 
       } else {
         throw "Unexpected params to 'SVG.Rx.Angle': " + arguments;
@@ -62,19 +63,33 @@
       },
 
       setDeg: function (v) {   // (v:Num) ->
-        this.setRad( v * (Math.PI/180.0) );
+        this.setRad( v / RAD_TO_DEG );
       },
 
-      subscribe: function (f) {   // ((rad:Num) ->) -> subscription
-        var subscription = this._obsDistinct.subscribe(f);
+      asRad: function () {   // () -> Num
+        return this._rad;
+      },
+
+      asDeg: function () {   // () -> Num
+        return this.asRad() * RAD_TO_DEG;
+      },
+
+      _obsWithInitialValueRad: function () {    // () -> Observable of Num
 
         // Emit the current values, if there are any (what 'BehaviorSubject' would do by default).
         //
-        if (!isNaN(this._rad)) {
-          this._sub.next(this._rad);
-        }
+        var obs = isNaN(this._rad) ? this._obsDistinct : this._obsDistinct.startWith(this._rad);
+        return obs;
+      },
 
-        return subscription;
+      subscribeRad: function (f) {   // ((rad:Num) ->) -> subscription
+        return this._obsWithInitialValueRad().subscribe(f);
+      },
+
+      subscribeDeg: function (f) {   // ((deg:Num) ->) -> subscription
+        return this._obsWithInitialValueRad()
+                    .map( function (rad) { return rad * RAD_TO_DEG; } )
+                    .subscribe(f);
       }
     }
 

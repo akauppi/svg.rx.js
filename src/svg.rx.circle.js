@@ -13,10 +13,6 @@
   }
   assert(true);   // just use it up (jshint)
 
-  // tbd. Could get this from main 'svg.rx.js' in some way (non-DRY) AKa310116
-  //
-  var RxJS5 = !!Rx.Subscriber;
-
   // A function used when hiding out svg.js methods
   //
   function notSupported (s) {   // (String) -> () -> never returns
