@@ -2,7 +2,8 @@
 
 - demo-triangle further
 
-- Animation of demo 4, using CSS
+- Using streams for an animation API
+  - test with demo 4, at least
 
 - Clean up the code and documentation
 

@@ -15,7 +15,7 @@ assert(true);   // just use it up (jshint)
 (function() {
   "use strict";
 
-  assert( SVG.Rx.Point && SVG.Rx.Angle );
+  assert( SVG.Rx.Point && SVG.Rx.Dist && SVG.Rx.Angle );
 
   var R= 30;
 
@@ -30,6 +30,7 @@ assert(true);   // just use it up (jshint)
   //--- SVG.Rx.MyTriangle ---
   //
   //  ._cp: SVG.Rx.Point
+  //  ._r: SVG.Rx.Dist
   //  ._angle: SVG.Rx.Angle
   //
   //  ._locked: Boolean
@@ -46,6 +47,7 @@ assert(true);   // just use it up (jshint)
       this.constructor.call(this, SVG.create('g'));
 
       this._cp = cp;
+      this._r = SVG.Rx.Dist(R);
       this._angle = angle;
 
       this._locked = false;
@@ -65,7 +67,7 @@ assert(true);   // just use it up (jshint)
       )
       ***/
 
-      // Path via the tips: (r,0), (-r/2,(± r*sqrt(3)/2)
+      // Path via the tips: (r,0), (-r/2,(± r*sqrt(3)/2))
       //
       var b= R*Math.sqrt(3)/2;
 
@@ -79,12 +81,16 @@ assert(true);   // just use it up (jshint)
 
       this.addClass("my_triangle");
 
+      /* change the transformation matrix so that the rotational center becomes the group's x,y.
+      */
+      //self.translate(-R/2,-b);
+
       /* handle moves via the 'SVG.Rx.Point'
       */
-      this._cp.subscribe( function (o) {   // ({x:Num,y:Num}) ->
+      this._cp.subscribe( function (o) {  // ({x:Num,y:Num}) ->
         self.attr( {                      // what 'svg.js' would do (but separately for 'x' and 'y')
-          "x": o.x - self.width() / 2,
-          "y": o.y - self.height() / 2
+          "x": o.x,
+          "y": o.y
         });
       } );
 
@@ -92,21 +98,21 @@ assert(true);   // just use it up (jshint)
       */
       this._angle.subscribeDeg( function (deg) {    // (Num) ->
 
-        self.transform({ rotation: deg, cx: self._cp.x, cy: self._cp.y });    // what 'svg.js' rotate would do
+        self.rotateDeg(deg);    // what 'svg.js' rotate would do
       } );
 
     },
     inherit: SVG.G,
 
     construct: {          // parent method to create these
-      my_triangle: function (cp,rad) {   // ([{x:Num,y:Num}], [Num]) -> SVG.Rx.MyTriangle
+      my_triangle: function (cp,rad) {   // ([{x:Num,y:Num}], [Num]) -> SVG.Rx.MyTriangle    | this = parent
 
         var cp2 = cp ? new SVG.Rx.Point(cp.x, cp.y) : new SVG.Rx.Point();
         var angle = new SVG.Rx.Angle(rad || 0);
 
         var ret= this.put(new SVG.Rx.MyTriangle(cp2, angle));
 
-        if (!cp2) { ret.hide(); }
+        if (!cp) { ret.hide(); }
         return ret;
       }
     },
@@ -156,14 +162,24 @@ assert(true);   // just use it up (jshint)
       cx: notSupported('cx'),
       cy: notSupported('cy'),
       move: notSupported('move'),
+
+      // note: 'width', 'height' and 'size' are constant, since we handle all movement and rotation via the transforms.
+      //      There is no real need for them. The radius should be used, instead. AKa070216,AKa140216
+      width: notSupported('width'),
+      height: notSupported('height'),
+      size: notSupported('size'),
+
       center: function (cx,cy) {    // (Num,Num) -> this
         this._cp.set(cx,cy);        // sets the position, but also broadcasts it to any observers
         return this;
       },
-      rotate: function (deg) {      // (Num) -> this
-        this._angle.set( this._angle.asDeg() + deg );
-      }
-      // note: Not sure if we should ban setting width, height, and size. AKa070216
+      rotateDeg: function (deg) {      // (Num) -> this
+        this._angle.setDeg( this._angle.asDeg() + deg );
+      },
+      rotateRad: function (rad) {      // (Num) -> this
+        this._angle.setRad( this._angle.asRad() + rad );
+      },
+      rotate: notSupported('rotate (use \'rotateDeg\' or \'rotateRad\'')
     }
   });
 
@@ -188,6 +204,7 @@ assert(true);   // just use it up (jshint)
   //t1.tieTo(t2);
   //t2.tieTo(t3);
 
+  /*** disabled
   dragIt(t1);
   dragIt(t2);
   dragIt(t3);
@@ -231,5 +248,6 @@ assert(true);   // just use it up (jshint)
       }
     );
   });
+  ***/
 
 })();
