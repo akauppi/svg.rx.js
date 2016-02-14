@@ -77,8 +77,8 @@
     //    - if with 'el.parent()', demo-triangles works, but demo2 doesn't
     //  AKa140216
     //
-    //was: var m = el.screenCTM().inverse().native();    // calculated just once per drag
-    var m = (isDoc ? doc : el.parent()).screenCTM().inverse().native();    // calculated just once per drag
+    var m = el.screenCTM().inverse().native();    // calculated just once per drag
+    //var m = (isDoc ? doc : el.parent()).screenCTM().inverse().native();    // calculated just once per drag
 
     // Transform from screen to user coordinates
     //

@@ -5,23 +5,28 @@ rect.simple {
   fill-opacity: 0.8;
 }
 
-rect.transformed {
-  fill: purple;
+.transformed {
   fill-opacity: 0.8;
   stroke: brown;
   stroke-width: 3 px;
 }
 
-rect.dynamic {
-  fill: red;
-  fill-opacity: 0.3;
-}
-
-rect.corner {
-  fill: yellow;
-  fill-opacity: 0.5;
-}
-rect {
+rect.transformed {
   fill: purple;
 }
 
+g.transformed {
+  fill: yellow;
+}
+
+svg.transformed {   /* nested SVG */
+  fill: gray;
+}
+
+use.transformed {
+  fill: lightgreen;
+}
+
+circle {
+  fill: red;
+}

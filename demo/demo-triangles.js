@@ -52,7 +52,10 @@
 
       this.path(path);
 
-      this.translate(r/2,B);   // make rotational center the group's origin
+      //this.translate(r/2,B);   // make rotational center the group's origin
+
+      this._dx = r/2;
+      this._dy = B;
 
       this.addClass("my_triangle");
     },
@@ -107,22 +110,23 @@
 
       // Overrides of 'SVG.G' and 'SVG.Element'
       //
-      /***
       x: notSupported('x'),
       y: notSupported('y'),
+
       move: function (x,y) {      // (Num,Num) -> this
         // SVG 'g' element does not seem to observe its 'x' and 'y' attributes. Just the translation.
         //
         this.translate(x,y);
 
-        /_***
+        /***
         this.attr({        // what svg.js would do (but separately for 'x' and 'y')
           x: x+ "px",
           y: y+ "px"
         });
-        ***_/
+        ***/
+
+        return this;
       },
-      ***/
 
       cx: notSupported('cx'),
       cy: notSupported('cy'),
@@ -157,8 +161,8 @@
 
   var t1 = svg.my_triangle(R).move(100,100);
   var t2 = svg.my_triangle(R).move(200,150).rotate(-90);
-  var t2b = svg.my_triangle(R).move(200,150).rotate(-90).rotate(0);        // should be same as above
-  var t2c = svg.my_triangle(R).move(200,150).rotate(-90).move(200,150);    // should be in same place as above
+    //svg.my_triangle(R).move(200,150).rotate(-90).rotate(0);        // should be same as above
+    svg.my_triangle(R).move(200,150).rotate(-90).move(200,150);    // should be in same place as above
   var t3 = svg.my_triangle(R).move(300,200);
 
   // Note: svg.js 2.x transform methods are absolute, but the 3.0 version will make them relative.
