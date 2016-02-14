@@ -16,8 +16,8 @@
   ],
   "repository": "github:akauppi/svg.rx.js",
   "dependencies": {
-    "@reactivex/rxjs": "^5.0.0-beta.1",
-    "svg.js": "^2.2.4",
+    "@reactivex/rxjs": "^5.0.0-beta.2",
+    "svg.js": "^2.2.5",
     "systemjs": "^0.19.17"
   },
   "devDependencies": {
