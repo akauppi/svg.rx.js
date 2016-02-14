@@ -71,7 +71,14 @@
     //             https://github.com/wout/svg.js/issues/403
     //
     var buf = doc.node.createSVGPoint();          // point buffer (allocated just once per drag)
-    var m = el.screenCTM().inverse().native();    // calculated just once per drag
+
+    // TBD. Need to think where we want to apply the '.screenCTM()'.
+    //    - if with 'el', demo2 works but demo-triangles doesn't
+    //    - if with 'el.parent()', demo-triangles works, but demo2 doesn't
+    //  AKa140216
+    //
+    //was: var m = el.screenCTM().inverse().native();    // calculated just once per drag
+    var m = (isDoc ? doc : el.parent()).screenCTM().inverse().native();    // calculated just once per drag
 
     // Transform from screen to user coordinates
     //
@@ -80,7 +87,11 @@
     // Note: The returned value is kept in 'buf' and will be overwritten on next call. Not to be forwarded further
     //      by the caller.
     //
+    // Note: Use '.client[XY]' (not '.screen[XY]') so that the position of the SVG cradle does not affect (the difference
+    //      becomes visible only when dragging is applied on 'svg' background, like in demo4).
+    //
     var transformP = function (o /*, offset*/) {   // (MouseEvent or Touch) -> SVGPoint (which has '.x' and '.y')
+      console.log(o);
       buf.x = o.clientX;  // - (offset || 0)
       buf.y = o.clientY;
       return buf.matrixTransform(m);

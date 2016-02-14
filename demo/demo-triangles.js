@@ -157,7 +157,17 @@
 
   var t1 = svg.my_triangle(R).move(100,100);
   var t2 = svg.my_triangle(R).move(200,150).rotate(-90);
+  var t2b = svg.my_triangle(R).move(200,150).rotate(-90).rotate(0);        // should be same as above
+  var t2c = svg.my_triangle(R).move(200,150).rotate(-90).move(200,150);    // should be in same place as above
   var t3 = svg.my_triangle(R).move(300,200);
+
+  // Note: svg.js 2.x transform methods are absolute, but the 3.0 version will make them relative.
+  //      We can take that approach with svg.rx.js already now. AKa140216
+  //
+  //      See -> https://github.com/wout/svg.js/blob/master/CHANGELOG.md
+  //
+  //var r1 = svg.rect(100,10).move(500,100);
+  //var r1b = svg.rect(100,10).move(500,100).rotate(-90).rotate(-45);
 
   //t1.tieTo(t2);
   //t2.tieTo(t3);
@@ -170,7 +180,7 @@
     el.rx_draggable().subscribe( function (dragObs) {
       dragObs.subscribe( function (o) {
         console.log(o);
-        //el.move( o.x, o.y );
+        el.move( o.x, o.y );
       });
     });
   }
