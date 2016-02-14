@@ -1,11 +1,13 @@
 # TODO
 
-- demo-triangle further
+- demo-triangles further
 
 - Using streams for an animation API
   - test with demo 4, at least
 
 - Clean up the code and documentation
+
+- Consider if svg.js could be left out (direct access to browser's SVG API)
 
 - Package for npm (not Bower!)
 
