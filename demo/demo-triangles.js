@@ -1,7 +1,8 @@
 /*
 * demo-triangles.js
 */
-/* globals assert */
+/*jshint devel: true */
+/*globals assert */
 
 /*
 * A custom SVG component
@@ -17,6 +18,8 @@
       throw "Access to method '"+s+"' not supported in 'svg.rx.js'";
     }
   }
+
+  SVG.Rx = SVG.Rx || {};
 
   //--- SVG.Rx.MyTriangle ---
   //
@@ -166,7 +169,8 @@
   function dragIt( el ) {     // (SVGElement) ->
     el.rx_draggable().subscribe( function (dragObs) {
       dragObs.subscribe( function (o) {
-        el.move( o.x, o.y );
+        console.log(o);
+        //el.move( o.x, o.y );
       });
     });
   }

@@ -56,7 +56,7 @@
 
   // Note: because order of transforms matter, they cannot be given in the same object.
   //
-  rect2.transform({ scale: 0.5 }).transform({ rotation:45 });
+  rect2.transform({ scale: 0.7 }).transform({ rotation:15 });
 
   dragIt(rect2);
 })();
