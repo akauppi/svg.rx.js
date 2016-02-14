@@ -59,24 +59,4 @@
   rect2.transform({ scale: 0.5 }).transform({ rotation:45 });
 
   dragIt(rect2);
-
-  /*** Note: rect3 disabled since changing the translation matrix (rotates, sizing) during a drag is probably
-  *           not a very real world problem. If it becomes one, let's solve it. AKa241015
-  *
-
-  /_*
-  * Rectangle with a twist (dynamic behaviour).
-  *_/
-  var rect3= svg.rect( W, W ).translate(W/2,W/2)
-              .move(2*GAP,0)
-              .addClass("dynamic");
-
-  rect3.transform({ scale: 0.5 }).transform({ rotation:20 });
-
-  dragIt(rect3,
-      function (o) {
-          rect3.move(o.x,o.y).rotate(0); // o.x * (360/800) );
-      }
-  );
-  ***/
 })();

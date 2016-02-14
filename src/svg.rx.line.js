@@ -11,7 +11,7 @@
       throw ("Assert failed" + (msg ? ": "+msg : ""))
     }
   }
-  assert(true);   // just use it up (jshint)
+  assert(true);   // use it up (jshint)
 
   // A function used when hiding out svg.js methods
   //

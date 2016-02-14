@@ -1,23 +1,14 @@
 /*
 * demo-triangles.js
 */
-
-function assert(b,msg) {    // (boolish, String) =>
-  if (!b) {
-    throw ("Assert failed" + (msg ? ": "+msg : ""))
-  }
-}
-assert(true);   // just use it up (jshint)
+/* globals assert */
 
 /*
 * A custom SVG component
 */
 (function() {
   "use strict";
-
-  assert( SVG.Rx.Point && SVG.Rx.Dist && SVG.Rx.Angle );
-
-  var R= 30;
+  assert(assert);
 
   // A function used when hiding out svg.js methods
   //
@@ -29,10 +20,6 @@ assert(true);   // just use it up (jshint)
 
   //--- SVG.Rx.MyTriangle ---
   //
-  //  ._cp: SVG.Rx.Point
-  //  ._r: SVG.Rx.Dist
-  //  ._angle: SVG.Rx.Angle
-  //
   //  ._locked: Boolean
   //
   //  .lock(Boolean)
@@ -40,80 +27,40 @@ assert(true);   // just use it up (jshint)
   //  .tieFrom( Observable of {x:Num, y:Num, angle:Num} )
   //  .tieTo( Observable of {x:Num, y:Num, angle:Num} )
   //
+  // Note: The size of the object is defined here, by the parameter, instead of using a '.scale' in the parent
+  //      method. Using 'scale' would cause problems with further movements - now we can keep things simple. AKa140216
+  //
   SVG.Rx.MyTriangle = SVG.invent({
-    create: function (cp,angle) {   // (SVG.Rx.Point, SVG.Rx.Angle) ->
-      var self= this;
+    create: function (r) {   // (Num) ->
+      //var self= this;
 
       this.constructor.call(this, SVG.create('g'));
 
-      this._cp = cp;
-      this._r = SVG.Rx.Dist(R);
-      this._angle = angle;
-
       this._locked = false;
 
-      /***
-      // Combine the location and angle into one Observable
+      // Path via the tips: (UNIT,0), (-UNIT/2,(± UNIT*sqrt(3)/2))
       //
-      this._obs = this._cp.subscribe().combineLatest(
-        this._angle.subscribeRad(),
-        function (cp,rad) {
-          return {
-            x: cp.x,
-            y: cp.y,
-            rad: rad
-          };
-        }
-      )
-      ***/
+      var B= r*Math.sqrt(3)/2;
 
-      // Path via the tips: (r,0), (-r/2,(± r*sqrt(3)/2))
-      //
-      var b= R*Math.sqrt(3)/2;
-
-      var path = "M"+R+",0"+
-        "L"+(-R/2)+","+b+
-        "l0,-"+(2*b)+
+      var path = "M"+r+",0"+
+        "L"+(-r/2)+","+B+
+        "l0,-"+(2*B)+
         "z";
 
-      console.log(path);
       this.path(path);
 
+      this.translate(r/2,B);   // make rotational center the group's origin
+
       this.addClass("my_triangle");
-
-      /* change the transformation matrix so that the rotational center becomes the group's x,y.
-      */
-      //self.translate(-R/2,-b);
-
-      /* handle moves via the 'SVG.Rx.Point'
-      */
-      this._cp.subscribe( function (o) {  // ({x:Num,y:Num}) ->
-        self.attr( {                      // what 'svg.js' would do (but separately for 'x' and 'y')
-          "x": o.x,
-          "y": o.y
-        });
-      } );
-
-      /* handle rotation via the 'SVG.Rx.Angle'
-      */
-      this._angle.subscribeDeg( function (deg) {    // (Num) ->
-
-        self.rotateDeg(deg);    // what 'svg.js' rotate would do
-      } );
-
     },
     inherit: SVG.G,
 
     construct: {          // parent method to create these
-      my_triangle: function (cp,rad) {   // ([{x:Num,y:Num}], [Num]) -> SVG.Rx.MyTriangle    | this = parent
+      my_triangle: function (r) {   // ([Num=10]) -> SVG.Rx.MyTriangle    | this = parent
 
-        var cp2 = cp ? new SVG.Rx.Point(cp.x, cp.y) : new SVG.Rx.Point();
-        var angle = new SVG.Rx.Angle(rad || 0);
+        var el= this.put(new SVG.Rx.MyTriangle(r));
 
-        var ret= this.put(new SVG.Rx.MyTriangle(cp2, angle));
-
-        if (!cp) { ret.hide(); }
-        return ret;
+        return el;
       }
     },
 
@@ -157,29 +104,38 @@ assert(true);   // just use it up (jshint)
 
       // Overrides of 'SVG.G' and 'SVG.Element'
       //
+      /***
       x: notSupported('x'),
       y: notSupported('y'),
+      move: function (x,y) {      // (Num,Num) -> this
+        // SVG 'g' element does not seem to observe its 'x' and 'y' attributes. Just the translation.
+        //
+        this.translate(x,y);
+
+        /_***
+        this.attr({        // what svg.js would do (but separately for 'x' and 'y')
+          x: x+ "px",
+          y: y+ "px"
+        });
+        ***_/
+      },
+      ***/
+
       cx: notSupported('cx'),
       cy: notSupported('cy'),
-      move: notSupported('move'),
+      center: notSupported('center'),
 
       // note: 'width', 'height' and 'size' are constant, since we handle all movement and rotation via the transforms.
-      //      There is no real need for them. The radius should be used, instead. AKa070216,AKa140216
+      //      There is no real need for them. AKa070216,AKa140216
+      //
       width: notSupported('width'),
       height: notSupported('height'),
       size: notSupported('size'),
 
-      center: function (cx,cy) {    // (Num,Num) -> this
-        this._cp.set(cx,cy);        // sets the position, but also broadcasts it to any observers
-        return this;
-      },
-      rotateDeg: function (deg) {      // (Num) -> this
-        this._angle.setDeg( this._angle.asDeg() + deg );
-      },
       rotateRad: function (rad) {      // (Num) -> this
-        this._angle.setRad( this._angle.asRad() + rad );
-      },
-      rotate: notSupported('rotate (use \'rotateDeg\' or \'rotateRad\'')
+        var RAD_TO_DEG = 180.0 / Math.PI;
+        this.rotate( rad * RAD_TO_DEG );
+      }
     }
   });
 
@@ -190,21 +146,19 @@ assert(true);   // just use it up (jshint)
 */
 (function() {
   "use strict";
+  assert(assert);
+
+  var R= 30;
 
   var svg = SVG("cradle");
 
-  function degToRad(deg) {
-    return deg * (Math.PI/180.0);
-  }
-
-  var t1 = svg.my_triangle( {x:100,y:100}, 0 );
-  var t2 = svg.my_triangle( {x:200,y:150}, degToRad(-90) );
-  var t3 = svg.my_triangle( {x:300,y:200}, 0 );
+  var t1 = svg.my_triangle(R).move(100,100);
+  var t2 = svg.my_triangle(R).move(200,150).rotate(-90);
+  var t3 = svg.my_triangle(R).move(300,200);
 
   //t1.tieTo(t2);
   //t2.tieTo(t3);
 
-  /*** disabled
   dragIt(t1);
   dragIt(t2);
   dragIt(t3);
@@ -221,8 +175,8 @@ assert(true);   // just use it up (jshint)
   //
   svg.rx_draggable().subscribe( function (dragObs) {
 
-    var t= svg.my_triangle();   // ready, hidden
-    var circle= svg.circle(10);   // ready, hidden
+    var t= svg.my_triangle(R).hide();   // ready, hidden
+    var circle= svg.circle(10);         // ready, hidden
     var rect= svg.rect().width(2*30).height(2*30).addClass("debug");
 
     var fresh = true;
@@ -230,7 +184,7 @@ assert(true);   // just use it up (jshint)
     dragObs.subscribe(
       function (o) {
         //console.log( "Dragging: "+ o.x + " "+ o.y );
-        t.center(o.x, o.y);     // 'x','y' are the actual touch/pointer coords, because we are tracking 'svg'
+        t.move(o.x, o.y);     // 'x','y' are the actual touch/pointer coords, because we are tracking 'svg'
         circle.center(o.x,o.y).show();
         rect.center(o.x,o.y);
 
@@ -248,6 +202,5 @@ assert(true);   // just use it up (jshint)
       }
     );
   });
-  ***/
 
 })();

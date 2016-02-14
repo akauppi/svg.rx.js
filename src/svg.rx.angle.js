@@ -2,16 +2,12 @@
 * svg.rx.angle.js
 */
 /*jshint devel:true */
+/*globals assert */
 
 (function () {
   "use strict";
 
-  function assert(b,msg) {    // (boolish, String) =>
-    if (!b) {
-      throw ("Assert failed" + (msg ? ": "+msg : ""))
-    }
-  }
-  assert(true);   // just use it up (jshint)
+  assert(assert);
 
   // A function used when hiding out svg.js methods
   //
@@ -20,6 +16,7 @@
       throw "Access to method '"+s+"' not supported in 'svg.rx.js'";
     }
   }
+  assert(notSupported);   // used up (jshint)
 
   SVG.Rx = SVG.Rx || {};
 
