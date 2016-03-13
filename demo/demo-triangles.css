@@ -4,6 +4,11 @@ g.my_triangle {
   fill: blue;
 }
 
+.my_triangle.selected {
+  stroke-width: 3px;
+  stroke: red;
+}
+
 line.connector {
   stroke-width: 10px;
   stroke: black;

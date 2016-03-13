@@ -4,6 +4,11 @@
 /*jshint devel: true */
 /*globals assert */
 
+function selectTriangle(el) {
+  el.parent().select(".selected").removeClass("selected");
+  el.addClass("selected");
+}
+
 /*
 * A custom SVG component
 */
@@ -23,6 +28,10 @@
 
   function dragIt( el ) {     // (SVGElement) ->
     el.rx_draggable().subscribe( function (dragObs) {
+
+      // Drag started
+      selectTriangle(el.parent());    // TBD: expects there to be a group (though path is draggable)
+
       dragObs.subscribe( function (o) {
         //console.log(o);
         el.move( o.x, o.y );
@@ -179,11 +188,14 @@
     var circle= svg.circle(10);         // ready, hidden
     var rect= svg.rect().width(2*30).height(2*30).addClass("debug");
 
+    t.rotate( Math.random() * 360 );
+
     var fresh = true;
 
     dragObs.subscribe(
       function (o) {
         if (fresh) {    // needs to be before the rest of the stuff, so that 'center' gives right position (it seems to count only visible contents?)
+          selectTriangle(t);
           t.show();
           fresh = false;
         }
