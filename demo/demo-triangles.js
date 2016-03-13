@@ -169,6 +169,40 @@ function selectTriangle(el) {
     t2.first().rotate(-90);
   var t3 = svg.my_triangle(R).move(300,200);
 
+  // Testing a symbol and rotation
+  //
+  if (true) {
+    var sym = svg.symbol();
+    sym.rect(100, 100).fill('#f09');
+    var dot = sym.circle(20).center(100,100).fill('yellow');
+
+    svg.rect(100,100).move(300,100).addClass("debug");    // to show the place
+
+    var use = svg.use(sym).move(300, 100).rotate(30,350,150);
+
+    use.rx_draggable().subscribe( function (dragObs) {
+      dragObs.subscribe( function (o) {
+        use.move( o.x, o.y );
+      });
+    });
+
+    dot.rx_draggable().subscribe( function (dragObs) {
+      dragObs.subscribe( function (o) {
+
+        // Rotate the use
+
+        console.log( "Rotating:", o.x, o.y );
+        //var pivotX = 50;
+        //var pivotY = 50;
+
+        //var rad = Math.atan2(o.x, o.y);
+
+        dot.center(o.x,o.y);
+        //use.rotate(rad);
+      });
+    });
+  }
+
   // Note: svg.js 2.x transform methods are absolute, but the 3.0 version will make them relative.
   //      We can take that approach with svg.rx.js already now. AKa140216
   //

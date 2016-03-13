@@ -17,10 +17,3 @@ line.connector.constrained {
   stroke: red;
 }
 
-/* DEBUG
-*/
-rect.debug {
-  stroke-width: 1px;
-  stroke: red;
-  fill-opacity: 0;
-}
