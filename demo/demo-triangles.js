@@ -1,7 +1,13 @@
 /*
 * demo-triangles.js
 */
-/* globals assert */
+/*jshint devel: true */
+/*globals assert */
+
+function selectTriangle(el) {
+  el.parent().select(".selected").removeClass("selected");
+  el.addClass("selected");
+}
 
 /*
 * A custom SVG component
@@ -16,6 +22,21 @@
     return function () {
       throw "Access to method '"+s+"' not supported in 'svg.rx.js'";
     }
+  }
+
+  SVG.Rx = SVG.Rx || {};
+
+  function dragIt( el ) {     // (SVGElement) ->
+    el.rx_draggable().subscribe( function (dragObs) {
+
+      // Drag started
+      selectTriangle(el.parent());    // TBD: expects there to be a group (though path is draggable)
+
+      dragObs.subscribe( function (o) {
+        //console.log(o);
+        el.move( o.x, o.y );
+      });
+    });
   }
 
   //--- SVG.Rx.MyTriangle ---
@@ -47,9 +68,11 @@
         "l0,-"+(2*B)+
         "z";
 
-      this.path(path);
+      var path= this.path(path);
+        //
+        path.translate(r/2,B);   // make rotational center the triangle's origin
 
-      this.translate(r/2,B);   // make rotational center the group's origin
+      dragIt(path);   // all triangles draggable (unless locked, tbd.)
 
       this.addClass("my_triangle");
     },
@@ -104,38 +127,27 @@
 
       // Overrides of 'SVG.G' and 'SVG.Element'
       //
-      /***
-      x: notSupported('x'),
-      y: notSupported('y'),
-      move: function (x,y) {      // (Num,Num) -> this
-        // SVG 'g' element does not seem to observe its 'x' and 'y' attributes. Just the translation.
-        //
-        this.translate(x,y);
+      //x: notSupported('x'),
+      //y: notSupported('y'),
+      //move: notSupported('move'),
 
-        /_***
-        this.attr({        // what svg.js would do (but separately for 'x' and 'y')
-          x: x+ "px",
-          y: y+ "px"
-        });
-        ***_/
-      },
-      ***/
-
-      cx: notSupported('cx'),
-      cy: notSupported('cy'),
-      center: notSupported('center'),
+      //cx: notSupported('cx'),
+      //cy: notSupported('cy'),
+      //center: notSupported('center'),
 
       // note: 'width', 'height' and 'size' are constant, since we handle all movement and rotation via the transforms.
       //      There is no real need for them. AKa070216,AKa140216
       //
-      width: notSupported('width'),
-      height: notSupported('height'),
-      size: notSupported('size'),
+      //width: notSupported('width'),
+      //height: notSupported('height'),
+      //size: notSupported('size'),
 
+      /***
       rotateRad: function (rad) {      // (Num) -> this
         var RAD_TO_DEG = 180.0 / Math.PI;
         this.rotate( rad * RAD_TO_DEG );
       }
+      ***/
     }
   });
 
@@ -153,23 +165,54 @@
   var svg = SVG("cradle");
 
   var t1 = svg.my_triangle(R).move(100,100);
-  var t2 = svg.my_triangle(R).move(200,150).rotate(-90);
+  var t2 = svg.my_triangle(R).move(200,150);
+    t2.first().rotate(-90);
   var t3 = svg.my_triangle(R).move(300,200);
 
-  //t1.tieTo(t2);
-  //t2.tieTo(t3);
+  // Testing a symbol and rotation
+  //
+  if (true) {
+    var sym = svg.symbol();
+    sym.rect(100, 100).fill('#f09');
+    var dot = sym.circle(20).center(100,100).fill('yellow');
 
-  dragIt(t1);
-  dragIt(t2);
-  dragIt(t3);
+    svg.rect(100,100).move(300,100).addClass("debug");    // to show the place
 
-  function dragIt( el ) {     // (SVGElement) ->
-    el.rx_draggable().subscribe( function (dragObs) {
+    var use = svg.use(sym).move(300, 100).rotate(30,350,150);
+
+    use.rx_draggable().subscribe( function (dragObs) {
       dragObs.subscribe( function (o) {
-        el.move( o.x, o.y );
+        use.move( o.x, o.y );
+      });
+    });
+
+    dot.rx_draggable().subscribe( function (dragObs) {
+      dragObs.subscribe( function (o) {
+
+        // Rotate the use
+
+        console.log( "Rotating:", o.x, o.y );
+        //var pivotX = 50;
+        //var pivotY = 50;
+
+        //var rad = Math.atan2(o.x, o.y);
+
+        dot.center(o.x,o.y);
+        //use.rotate(rad);
       });
     });
   }
+
+  // Note: svg.js 2.x transform methods are absolute, but the 3.0 version will make them relative.
+  //      We can take that approach with svg.rx.js already now. AKa140216
+  //
+  //      See -> https://github.com/wout/svg.js/blob/master/CHANGELOG.md
+  //
+  //var r1 = svg.rect(100,10).move(500,100);
+  //var r1b = svg.rect(100,10).move(500,100).rotate(-90).rotate(-45);
+
+  //t1.tieTo(t2);
+  //t2.tieTo(t3);
 
   // Allow creation of new triangles
   //
@@ -179,24 +222,27 @@
     var circle= svg.circle(10);         // ready, hidden
     var rect= svg.rect().width(2*30).height(2*30).addClass("debug");
 
+    t.rotate( Math.random() * 360 );
+
     var fresh = true;
 
     dragObs.subscribe(
       function (o) {
-        //console.log( "Dragging: "+ o.x + " "+ o.y );
-        t.move(o.x, o.y);     // 'x','y' are the actual touch/pointer coords, because we are tracking 'svg'
-        circle.center(o.x,o.y).show();
-        rect.center(o.x,o.y);
-
-        if (fresh) {
+        if (fresh) {    // needs to be before the rest of the stuff, so that 'center' gives right position (it seems to count only visible contents?)
+          selectTriangle(t);
           t.show();
           fresh = false;
         }
+
+        //console.log( "Dragging: "+ o.x + " "+ o.y );
+        t.center(o.x, o.y);     // 'x','y' are the actual touch/pointer coords, because we are tracking 'svg'
+        circle.center(o.x,o.y).show();
+        rect.center(o.x,o.y);
+
       },
       null,   // error handling
       function () {  // end of drag
-        // leave the triangle there, but allow dragging it later
-        dragIt(t);
+        // leave the triangle
         circle.remove();
         rect.remove();
       }

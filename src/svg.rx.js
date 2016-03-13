@@ -13,25 +13,19 @@
   }
   assert(true);   // just use it up (jshint)
 
-  var RxJS5 = !!Rx.Subscriber;
-
   // Check the things we will use of 'Rx'
   //
   assert( typeof Rx.Observable.fromEvent === "function" );
   assert( typeof Rx.Observable.merge === "function" );
 
-  // Note: RxJS does not have what Scala calls '.collect': to both filter and convert.
+  // Note: RxJS5 does not have what Scala calls '.collect': to both filter and convert.
   //
   // Ref.
   //  -> http://stackoverflow.com/questions/35118707/rxjs5-how-to-map-and-filter-on-one-go-like-collect-in-scala
   //  -> https://xgrommx.github.io/rx-book/content/guidelines/implementations/index.html#implement-new-operators-by-composing-existing-operators
   //
   Rx.Observable.prototype.mapAndFilterUndefinedOut = function (f) {
-    if (RxJS5) {
-      return this.map(f).filter( function (x) { return x !== undefined; } );
-    } else {
-      return this.select(f).filter( function (x) { return x !== undefined; } );
-    }
+    return this.map(f).filter( function (x) { return x !== undefined; } );
   }
 
   // JavaScript does not have an Array for range constructor.
@@ -116,7 +110,11 @@
     // Note: The returned value is kept in 'buf' and will be overwritten on next call. Not to be forwarded further
     //      by the caller.
     //
+    // Note: Use '.client[XY]' (not '.screen[XY]') so that the position of the SVG cradle does not affect (the difference
+    //      becomes visible only when dragging is applied on 'svg' background, like in demo4).
+    //
     var transformP = function (o /*, offset*/) {   // (MouseEvent or Touch) -> SVGPoint (which has '.x' and '.y')
+      console.log(o);
       buf.x = o.clientX;  // - (offset || 0)
       buf.y = o.clientY;
       return buf.matrixTransform(m);
@@ -185,7 +183,7 @@
     //      the next drag event. Let's implement this on the application side (demo4) for now, since most cases would
     //      not need it. AKa140116
     //
-    return (moveObs.select /*RxJS4*/ || moveObs.map).call( moveObs, function (o) {
+    return moveObs.map( function (o) {
       var p = transformP(o);
 
       return {
@@ -270,7 +268,7 @@
           return undefined;   // will not pass this event further for the particular stream
         }
 
-        // Note: RxJS does not seem to have what Scala calls '.collect': to both filter and convert.
+        // Note: RxJS does not have what Scala calls '.collect': to both map and filter.
         //
         var moveObs = moveAllObs.mapAndFilterUndefinedOut(f);
         var cancelObs = cancelAllObs.mapAndFilterUndefinedOut(f);
@@ -287,21 +285,12 @@
       // Note: the '.selectMany' means that we can spawn multiple (0..n) values from within this one event, unlike the
       //      single one that '.select' would.
       //
-      if (RxJS5) {
-        return startAllObs.mergeMap( function (ev) {  // (TouchEvent) -> Array of observable of {x:Int, y:Int}
+      return startAllObs.mergeMap( function (ev) {  // (TouchEvent) -> Array of observable of {x:Int, y:Int}
 
-          return range( 0, ev.changedTouches.length ).map( function (i) {
-            return touchDragObs( ev, i );
-          } );
-        });
-      } else {
-        return startAllObs.selectMany( function (ev) {  // (TouchEvent) -> Array of observable of {x:Int, y:Int}
-
-          return range( 0, ev.changedTouches.length ).map( function (i) {
-            return touchDragObs( ev, i );
-          } );
-        });
-      }
+        return range( 0, ev.changedTouches.length ).map( function (i) {
+          return touchDragObs( ev, i );
+        } );
+      });
     },  // rx_touch
 
     //---
@@ -324,18 +313,10 @@
       var moveObs =   Rx.Observable.fromEvent(window, "mousemove").filter(f);
       var endObs =    Rx.Observable.fromEvent(window, "mouseup").filter(f);
 
-      if (RxJS5) {
-        return startObs.map( function (ev) {   // (MouseEvent) -> observable of {x:Int, y:Int}
-          preventDefault(ev);
-          return innerObs( self, ev, moveObs, endObs );
-        } );
-
-      } else {  // RxJS4
-        return startObs.select( function (ev) {   // (MouseEvent) -> observable of {x:Int, y:Int}
-          preventDefault(ev);
-          return innerObs( self, ev, moveObs, endObs );
-        } );
-      }
+      return startObs.map( function (ev) {   // (MouseEvent) -> observable of {x:Int, y:Int}
+        preventDefault(ev);
+        return innerObs( self, ev, moveObs, endObs );
+      } );
     },
 
     //---

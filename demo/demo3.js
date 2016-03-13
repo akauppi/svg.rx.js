@@ -1,7 +1,7 @@
 /*
 * demo3.js
 *
-* Simple rectangle, getting its moves from an RxJs observable.
+* Tests that rotation, translation and scaling should not affect dragging behaviour.
 */
 /*jshint devel: true */
 
@@ -13,10 +13,12 @@
   var W= 160;
   var X2= X1 + 250;
   var Y2= Y1;
-  var X3 = X2 + 250;
-  var Y3 = Y2;
-  var X4 = X2 + 250;
-  var Y3 = Y2;
+  var X3= X2 + 250;
+  var Y3= Y2;
+  var X4= X3 + 250;
+  var Y4= Y3;
+  var X5= X4 + 250;
+  var Y5= Y4;
 
   var svg = SVG("cradle");
 
@@ -31,13 +33,13 @@
 
     el.rx_draggable()      // observable of observables of {x:int,y:int}
       .subscribe( function(dragObs) {
-        console.log("Drag started");
+        //console.log("Drag started");
         dragObs.subscribe( f || function(o) {       // {x:Int,y:Int}
-          console.log( JSON.stringify(o) );
+          //console.log( JSON.stringify(o) );
           el.move(o.x, o.y);
         },
         function () {
-          console.log("Drag ended");
+          //console.log("Drag ended");
         } );
     } );
   };
@@ -54,6 +56,8 @@
   /*
   * Rectangle with a twist (tests that transforms are properly handled).
   */
+  // Note: because order of transforms matter, they cannot be given in the same object.
+  //
   var rect2= svg.rect( W, W )
               .move(X2,Y2)
               .transform({ scale: 0.7 })
@@ -126,5 +130,4 @@
   dragIt(circle);
   dragIt(use1);
 
-  dragIt(rect2);
 })();
