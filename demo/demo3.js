@@ -34,6 +34,7 @@
     el.rx_draggable()      // observable of observables of {x:int,y:int}
       .subscribe( function(dragObs) {
         //console.log("Drag started");
+
         dragObs.subscribe( f || function(o) {       // {x:Int,y:Int}
           //console.log( JSON.stringify(o) );
           el.move(o.x, o.y);
@@ -103,7 +104,9 @@
   * Symbol and use with transforms
   *
   * - may well be the best way to handle complicated objects
-  * - need to fix that the transforms are based on some weird coordinate
+  *
+  * - use '.move' to set the symbol's origin
+  * - use '.translate' (not '.move') to move the use around (this allows other transforms to be applied, based on the origin)
   */
   svg.rect(W,W).move(X5,Y5)
     .transform({ scale: 0.8 })
@@ -123,7 +126,7 @@
   var use1= svg.use(sym1)
               .translate( X5+W/2, Y5+W/2 )
               .transform({ scale: 0.6 })
-              .transform({ rotation:30 })
+              .transform({ rotation: 30 })
               //
               .addClass("transformed");
 

@@ -86,7 +86,7 @@
     // Clean the allocated buffer
     //
     endObs.take(1).subscribe( function () {
-      console.log( "End of drag - could clear away the 'buf'");   // tbd
+      //console.log( "End of drag - could clear away the 'buf'");   // tbd
 
       console.log(buf);
 
