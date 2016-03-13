@@ -177,7 +177,7 @@
               //.transform({ rotation: 30 })
               //
 
-  var gxCircle = gx.circle(30).move(100,0);
+  var gxCircle = gx.circle(30).center(100,0);
 
   dragIt(gx);
 
