@@ -37,7 +37,12 @@
 
         dragObs.subscribe( f || function(o) {       // {x:Int,y:Int}
           //console.log( JSON.stringify(o) );
-          el.move(o.x, o.y);
+
+          if ((el instanceof SVG.Circle) || (el instanceof SVG.Ellipse)) {
+            el.center(o.x, o.y);
+          } else {
+            el.move(o.x, o.y);
+          }
         },
         function () {
           //console.log("Drag ended");
