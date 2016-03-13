@@ -64,6 +64,8 @@
     // Override the setting/access functions
     //
     extend: {
+      // Note: 'svg.js' '.center()' is only used for setting the coordinates, it cannot be used for reading them. AKa130316
+      //
       center: function (cx,cy) {   // (cx:Num,cy:Num) -> this or () -> SVG.Rx.Point
         if (arguments.length === 2) {
           //console.log("Going to set _cp");

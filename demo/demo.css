@@ -6,3 +6,11 @@ div#cradle {
   width: 99%;
   outline: 1px solid red;
 }
+
+/* DEBUG
+*/
+rect.debug {
+  stroke-width: 1px;
+  stroke: red;
+  fill-opacity: 0;
+}

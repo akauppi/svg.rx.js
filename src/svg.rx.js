@@ -46,13 +46,13 @@
 
   // Inner stream of drags. Handles coordinate transforms etc.
   //
+  // Note: The event handling code is originally based on 'svg.draggable.js' -> https://github.com/wout/svg.draggable.js
+  //      but we only enable stuff that we actually test (manually). I.e. 'SVG.Nested', 'SVG.Text' support remains
+  //      disabled until we need it, and there are demos that exercise those things.
+  //
   // References:
   //    MouseEvent -> https://developer.mozilla.org/en-US/docs/Web/API/MouseEvent
   //    Touch -> https://developer.mozilla.org/en-US/docs/Web/API/Touch
-  //
-  // Note: The event handling code is originally based on 'svg.draggable.js' -> https://github.com/wout/svg.draggable.js
-  //      but we only enable stuff that we actually test (manually). I.e. 'SVG.Nested', 'SVG.Use', 'SVG.Text' support
-  //      remains disabled until we need it, and there are demos that exercise those things.
   //
   function innerObs (el, oStart, moveObs, endObs) {    // (SVG.Element|SVG.G|SVG.Doc, MouseEvent or Touch, observable of MouseEvent or Touch, observable of MouseEvent or Touch) -> observable of {x:Int, y:Int}
 
@@ -60,6 +60,10 @@
 
     if (! ((el instanceof SVG.Element) || (el instanceof SVG.G) || isDoc)) {
       throw "svg.rx.js does not support: "+ (typeof el);
+    }
+
+    if (el instanceof SVG.Text) {
+      console.log( "Warning: dragging might not work with "+ el );
     }
 
     // If 'el' is already the doc (or 'SVG.Nested', which we don't currently support), we can use that as the cradle
@@ -76,8 +80,34 @@
     //      See -> https://github.com/wout/svg.js/issues/437
     //             https://github.com/wout/svg.js/issues/403
     //
+    // tbd. The 'buf' should be cleared away when the dragging ends (currently, we are leaking point objects, one per
+    //      drag). AKa130316
+    //
+    // Note: If thinking of not cleaning the point buffer, but keeping it always there, consider that multiple objects
+    //      can be moved simultaneously (and their points may be cradled in the 'SVG.Doc'). The dynamic alloc/dealloc
+    //      is probably the simplest way to go. AKa130316
+    //
     var buf = doc.node.createSVGPoint();          // point buffer (allocated just once per drag)
-    var m = el.screenCTM().inverse().native();    // calculated just once per drag
+
+    // Clean the allocated buffer
+    //
+    endObs.take(1).subscribe( function () {
+      console.log( "End of drag - could clear away the 'buf'");   // tbd
+
+      console.log(buf);
+
+      //buf.remove();   // not it
+      //delete buf;   // not it
+      buf = null;     // is that all it takes?
+    });
+
+    // TBD. Need to think where we want to apply the '.screenCTM()'.
+    //    - if with 'el', demo2 works but demo-triangles doesn't
+    //    - if with 'el.parent()', demo-triangles works, but demo2 doesn't
+    //  AKa140216
+    //
+    var m = el.screenCTM().inverse().native();
+    //var m = (isDoc ? doc : el.parent()).screenCTM().inverse().native();
 
     // Transform from screen to user coordinates
     //
@@ -126,12 +156,12 @@
       //
       // Do not access '.x' or '.y' on a circle - they are not needed, and 'SVG.Rx.Circle' does not implement them.
 
-      var center = el.center();   // {x:Num,y:Num}
+      // Note: Do not use 'el.center()' for reading coordinates; only '.cx()' and '.cy()' work as getters.
 
-      x_offset = p0.x - center.x;   // we are providing center's coordinates to the circle / ellipse being dragged
-      y_offset = p0.y - center.y;
+      x_offset = p0.x - el.cx();   // we are providing center's coordinates to the circle / ellipse being dragged
+      y_offset = p0.y - el.cy();
 
-    } else if (typeof el.x === "function") {    // normal 'svg.js' elements (all have '.x' and '.y', even the circle
+    } else if (typeof el.x === "function") {    // normal 'svg.js' elements (all have '.x' and '.y', even the circle)
       x_offset = p0.x - el.x();
       y_offset = p0.y - el.y();
 
@@ -171,7 +201,7 @@
   /*
   * Prevent default behaviour for 'mousedown' and 'touchstart', and bubbling up of the event to the parents.
   *
-  * Note: We're not having this with 'innerObs' since here the TouchEvent, not Touch, is needed.
+  * Note: this is not within 'innerObs' since here the TouchEvent, not Touch, is needed.
   */
   function preventDefault (evStart) {    // (MouseEvent or TouchEvent) ->
     // Prevent browser drag behavior

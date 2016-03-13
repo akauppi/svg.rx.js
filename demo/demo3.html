@@ -15,8 +15,18 @@
 
 <body>
   <h1>Demo 3</h1>
-  <p>You should be able to drag both rectangles.
-    <br />Rotation, scaling or translation of the local coordinate system should not affect the dragging.
+  <p>Dragging objects under transformation (scale, rotation).
+    <ol>
+      <li>Basic rectangle (no transformation); just for reference</li>
+      <li>Tilter rectangle (scale and rotation); should follow a drag</li>
+      <li>Group (scale and rotation); does not follow a drag correctly</li>
+      <li>Nested SVG (scale and rotation); does not observe the transformations; does follow a drag</li>
+      <li>Symbol + use (scale and rotation); does follow a drag
+        <ul>the red circle should be draggable within the symbol</ul>
+      </li>
+    </ol>
+    This demo is used for testing different aspects of grouping elements together, while keeping them draggable
+        under transformation. We only really need one such mechanism to work well (symbol + use looks most appropriate).
   </p>
 
   <div id="cradle">
