@@ -30,3 +30,12 @@ use.transformed {
 circle {
   fill: red;
 }
+
+rect.sub {
+  fill: blue;
+  /*display: none;*/
+}
+use.showSub rect.sub {
+  fill: green;
+  /*display: initial;*/
+}

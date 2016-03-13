@@ -60,6 +60,8 @@
       console.log( "Warning: dragging might not work with "+ el );
     }
 
+    console.log(oStart);
+
     // If 'el' is already the doc (or 'SVG.Nested', which we don't currently support), we can use that as the cradle
     // for our point.
     //
@@ -88,20 +90,42 @@
     endObs.take(1).subscribe( function () {
       //console.log( "End of drag - could clear away the 'buf'");   // tbd
 
-      console.log(buf);
-
-      //buf.remove();   // not it
+      //buf.remove();   // not it (it's not an SVG element)
       //delete buf;   // not it
       buf = null;     // is that all it takes?
     });
 
+    // The screen -> user coordinate conversion.
+    //
+    //  - If dragging on the background, conversion from screen to SVG document coords (obvious)
+    //  - If dragging a transformed element, conversion from screen to that element's coords
+
+    //
     // TBD. Need to think where we want to apply the '.screenCTM()'.
     //    - if with 'el', demo2 works but demo-triangles doesn't
     //    - if with 'el.parent()', demo-triangles works, but demo2 doesn't
     //  AKa140216
     //
-    var m = el.screenCTM().inverse().native();
-    //var m = (isDoc ? doc : el.parent()).screenCTM().inverse().native();
+    var m;
+
+    //console.log(el, el.parent(), el.parent().parent(), el.parent().parent().parent());
+    console.log(el, el.parent());
+
+    if (true) {
+      // This
+      //    - works for e.g. transformed rectangles
+      //    - doesn't work for groups
+      //
+      m = el.screenCTM().inverse().native();
+
+
+    } else {
+      // This
+      //    - doesn't work for transformed rectangles
+      //    - seems to work for groups (kind of)
+      //
+      m = (isDoc ? doc : el.parent()).screenCTM().inverse().native();
+    }
 
     // Transform from screen to user coordinates
     //
@@ -114,7 +138,6 @@
     //      becomes visible only when dragging is applied on 'svg' background, like in demo4).
     //
     var transformP = function (o /*, offset*/) {   // (MouseEvent or Touch) -> SVGPoint (which has '.x' and '.y')
-      console.log(o);
       buf.x = o.clientX;  // - (offset || 0)
       buf.y = o.clientY;
       return buf.matrixTransform(m);

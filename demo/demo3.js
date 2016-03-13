@@ -11,14 +11,18 @@
   var X1= 50;
   var Y1= 50;
   var W= 160;
-  var X2= X1 + 250;
+  var X2= X1 + 200;
   var Y2= Y1;
-  var X3= X2 + 250;
+  var X3= X2 + 200;
   var Y3= Y2;
-  var X4= X3 + 250;
+  var X4= X3 + 100;
   var Y4= Y3;
-  var X5= X4 + 250;
+  var X5= X4 + 200;
   var Y5= Y4;
+  var X6= X5 + 200;
+  var Y6= Y5;
+
+  var RAD2DEG = 180.0 / Math.PI;
 
   var svg = SVG("cradle");
 
@@ -85,9 +89,10 @@
               .addClass("transformed");
 
   g1.rect(W,W);
-  g1.circle(W/3).center(W/2,W/2);
+  var g1circle= g1.circle(W/3).center(W/2,W/2);
 
   dragIt(g1);
+  dragIt(g1circle);
 
   /*
   * Nested SVG with transforms
@@ -124,18 +129,75 @@
   var sym1= svg.symbol().move(-W/2,-W/2);
 
   sym1.rect(W,W);
-  var circle = sym1.circle(W/3).center(W/2,W/2);
+  var circle = sym1.circle(W/3).center(2/3*W,W/2);
 
-  // Note: For 'use', move the
-  //
+  sym1.rect(W/2,W/2).move(W/2,W/2).addClass("sub");
+
   var use1= svg.use(sym1)
               .translate( X5+W/2, Y5+W/2 )
               .transform({ scale: 0.6 })
               .transform({ rotation: 30 })
               //
-              .addClass("transformed");
+              .addClass("transformed")
+              .addClass("showSub");
+
+  dragIt(use1);
 
   dragIt(circle);
-  dragIt(use1);
+
+  var use1b= svg.use(sym1)
+              .translate( X5+W/2, Y5+100+W/2 )
+              .transform({ scale: 0.3 })
+              .transform({ rotation: 20 })
+              //
+              .addClass("transformed");
+
+  dragIt(use1b);
+
+  /*
+  * Symbol within a group
+  *
+  * Allow reuse of symbol definition
+  * Allow rotation by the events coming to a drag handle
+  */
+  var R = 80;
+  var B= R*Math.sqrt(3)/2;
+  var sym2= svg.symbol();
+  sym2.path( "M"+R+",0"+
+        "L"+(-R/2)+","+B+
+        "l0,-"+(2*B)+
+        "z" );
+  sym2.circle(30).center(0,0);
+
+  var gx = svg.group()
+           .translate( X6+W/2, Y6+W/2 );
+
+  var use2= gx.use(sym2)
+              //.transform({ scale: 0.6 })
+              //.transform({ rotation: 30 })
+              //
+
+  var gxCircle = gx.circle(30).move(100,0);
+
+  dragIt(gx);
+
+  // Try to make the ball change the rotation of the group
+  //
+  gxCircle.rx_draggable()      // observable of observables of {x:int,y:int}
+    .subscribe( function(dragObs) {
+      //console.log("Drag started");
+
+      dragObs.subscribe( function(o) {       // {x:Int,y:Int}
+        console.log( JSON.stringify(o) );
+
+        var rad = Math.atan2(o.y,o.x);
+
+        gx.rotate(rad * RAD2DEG);
+
+      },
+      function () {
+        //console.log("Drag ended");
+      } );
+  } );
 
 })();

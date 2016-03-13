@@ -192,13 +192,13 @@ function selectTriangle(el) {
         // Rotate the use
 
         console.log( "Rotating:", o.x, o.y );
-        //var pivotX = 50;
-        //var pivotY = 50;
+        var pivotX = 50;
+        var pivotY = 50;
 
-        //var rad = Math.atan2(o.x, o.y);
+        var rad = Math.atan2(o.y, o.x);
 
         dot.center(o.x,o.y);
-        //use.rotate(rad);
+        use.rotate(rad * (180/Math.PI));
       });
     });
   }
