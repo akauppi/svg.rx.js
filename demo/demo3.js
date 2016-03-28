@@ -17,10 +17,10 @@
   var Y3= Y2;
   var X4= X3 + 100;
   var Y4= Y3;
-  var X5= X4 + 200;
-  var Y5= Y4;
+  var X5= X4;
+  var Y5= Y4+ 200;    // note: Placing this in another column, to let the last one show on tablets
   var X6= X5 + 200;
-  var Y6= Y5;
+  var Y6= Y4;
 
   var RAD2DEG = 180.0 / Math.PI;
 

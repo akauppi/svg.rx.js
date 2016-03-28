@@ -5,6 +5,8 @@
 /*globals assert */
 
 function selectTriangle(el) {
+  "use strict";
+
   el.parent().select(".selected").removeClass("selected");
   el.addClass("selected");
 }
@@ -63,12 +65,12 @@ function selectTriangle(el) {
       //
       var B= r*Math.sqrt(3)/2;
 
-      var path = "M"+r+",0"+
+      var p = "M"+r+",0"+
         "L"+(-r/2)+","+B+
         "l0,-"+(2*B)+
         "z";
 
-      var path= this.path(path);
+      var path= this.path(p);
         //
         path.translate(r/2,B);   // make rotational center the triangle's origin
 
