@@ -60,7 +60,7 @@
       console.log( "Warning: dragging might not work with "+ el );
     }
 
-    console.log(oStart);
+    //console.log(oStart);
 
     // If 'el' is already the doc (or 'SVG.Nested', which we don't currently support), we can use that as the cradle
     // for our point.
@@ -95,36 +95,18 @@
       buf = null;     // is that all it takes?
     });
 
-    // The screen -> user coordinate conversion.
+    // If a group is observing the drag, we want its transform NOT to be included. Otherwise, we get problems if the group
+    // is rotated.
     //
-    //  - If dragging on the background, conversion from screen to SVG document coords (obvious)
-    //  - If dragging a transformed element, conversion from screen to that element's coords
-
-    //
-    // TBD. Need to think where we want to apply the '.screenCTM()'.
-    //    - if with 'el', demo2 works but demo-triangles doesn't
-    //    - if with 'el.parent()', demo-triangles works, but demo2 doesn't
-    //  AKa140216
+    // Note: In the future, we might also do some group translation handling here (instead of in the calling code, see 'demo3'),
+    //      so it may make sense to have the initialization within if-else (instead of tertiary operator). AKa290316
     //
     var m;
 
-    //console.log(el, el.parent(), el.parent().parent(), el.parent().parent().parent());
-    console.log(el, el.parent());
-
-    if (true) {
-      // This
-      //    - works for e.g. transformed rectangles
-      //    - doesn't work for groups
-      //
+    if (! (el instanceof SVG.G)) {
       m = el.screenCTM().inverse().native();
-
-
     } else {
-      // This
-      //    - doesn't work for transformed rectangles
-      //    - seems to work for groups (kind of)
-      //
-      m = (isDoc ? doc : el.parent()).screenCTM().inverse().native();
+      m = el.parent().screenCTM().inverse().native();
     }
 
     // Transform from screen to user coordinates
@@ -168,8 +150,6 @@
     //
     var x_offset, y_offset;
 
-    // tbd. We might be better off not doing any of this here, but in the application code. AKa170116
-
     if (isDoc) {
       x_offset = y_offset = 0;
 
@@ -179,15 +159,15 @@
 
       // Note: Do not use 'el.center()' for reading coordinates; only '.cx()' and '.cy()' work as getters.
 
+      // Note: Once we get 'svg.js' replaced, positioning centers and ellipses will always happen just by their center
+      //      (then we can remove this special handling).
+
       x_offset = p0.x - el.cx();   // we are providing center's coordinates to the circle / ellipse being dragged
       y_offset = p0.y - el.cy();
 
     } else if (typeof el.x === "function") {    // normal 'svg.js' elements (all have '.x' and '.y', even the circle)
       x_offset = p0.x - el.x();
       y_offset = p0.y - el.y();
-
-    } else {
-      throw "Unknown element: "+ typeof el;
     }
 
     // Note: some events actually come with the same x,y values (at least on Safari OS X) - removed by the

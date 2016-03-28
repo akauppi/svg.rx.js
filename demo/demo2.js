@@ -15,19 +15,6 @@
 
   var svg = SVG("cradle");
 
-  /*
-  * Helper function for dragging.
-  */
-  var dragItWithFilter = function (outerObs,conv,f) {        // (observable of observables of {x:int,y:int}, (observable of {x:int,y:int}) => observable of T, (T) =>)
-    outerObs.subscribe( function(dragObs) {
-      //console.log("Drag started");
-      conv(dragObs).subscribe(f,
-      function () {
-        //console.log("Drag ended");
-      } );
-    } );
-  };
-
   var g = svg.group().move(100,100);
 
   g.circle(2*A).addClass("knob").center(0,0);
@@ -46,26 +33,22 @@
   // Note: This could be done simpler but wanted to show how a 'deg' observable can be created. It can be useful
   //      e.g. if a value should be shown in some text field.
   //
-  // tbd. Is there an RxJS method that does both filter and map?
+  // Try to make the ball change the rotation of the group
   //
-  dragItWithFilter( handle.rx_draggable(),
+  handle.rx_draggable()      // observable of observables of {x:int,y:int}
+    .subscribe( function(dragObs) {
+      console.log("Drag started");
 
-    function (dragObs) {   // (observable of {x:int,y:int}) => observable
-      return dragObs.map( function (o) {  // ({x:int, y:int}) => degNum|null
-        var dx = o.x - pivotX,
-            dy = o.y - pivotY;
+      // keep initial rotation
+      var preDeg = g.transform('rotation');    // just gives the rads
 
-        if (dx && dy) {
-          var deg = Math.atan2(dy,dx) * (180.0/Math.PI);
-          return deg;
-        } else {
-          return null;
-        }
-      }).filter( function(degOrNull) { return degOrNull !== null; } );
-    },
+      dragObs.subscribe( function(o) {       // {x:Int,y:Int}
+        var rad = Math.atan2(o.y - pivotY, o.x - pivotX);
+        g.rotate(preDeg + rad * RAD2DEG,pivotX,pivotY);
+      },
+      function () {
+        //console.log("Drag ended");
+      } );
+  } );
 
-    function (deg) {    // (degNum) =>
-      g.rotate(deg,pivotX,pivotY);
-    }
-  );
 })();

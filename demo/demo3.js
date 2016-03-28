@@ -39,11 +39,22 @@
       .subscribe( function(dragObs) {
         //console.log("Drag started");
 
+        var originalTranslateForGroup = (el instanceof SVG.G) && el.transform();    // { x: Number, y: Number, ... }
+
+        //console.log(originalTranslateForGroup);
+
         dragObs.subscribe( f || function(o) {       // {x:Int,y:Int}
           //console.log( JSON.stringify(o) );
 
           if ((el instanceof SVG.Circle) || (el instanceof SVG.Ellipse)) {
             el.center(o.x, o.y);
+          } else if (el instanceof SVG.G) {
+            // Note: there's some difference in svg.js between '.move' and '.translate' for groups (it's probably in the
+            //      order that transforms are made, with regard to a rotation). If we have a 'move' here, the group does
+            //      not pan nicely, when rotated. (We should eventually replace 'svg.js' with something that stays true
+            //      to the nature of SVG, and e.g. will not even have 'move' for a group). AKa280316
+            //
+            el.translate(o.x, o.y);
           } else {
             el.move(o.x, o.y);
           }
@@ -171,6 +182,8 @@
   *     - groups don't seem to rotate by their origin, by default (but probably by the center point of anything that
   *       happens to be in the group)
   *       - however, by explicitly adding origin (...,0,0) to the '.rotate' call, rotation around the origin is possible
+  *     - groups don't observe 'x' and 'y' attributes, i.e. they cannot be moved around other than by changing their
+  *       transformations
   */
   var R = 80;
   var B= R*Math.sqrt(3)/2;
@@ -190,9 +203,6 @@
   var use2= gx.use(sym2)
               //.translate(-DX,-DY)
               .move(-DX,-DY);
-              //.transform({ scale: 0.6 })
-              //.transform({ rotation: 30 })
-              //
 
   gx.circle(140).center(0,0).addClass("debug-blue").back();
 
@@ -209,13 +219,13 @@
       //console.log("Drag started");
 
       // keep initial rotation
-      var preRad = gx.transform('rotation');    // just gives the rads
+      var preDeg = gx.transform('rotation');    // just gives the rads
 
       dragObs.subscribe( function(o) {       // {x:Int,y:Int}
-        console.log( JSON.stringify(o) );
+        //console.log( JSON.stringify(o) );
 
         var rad = Math.atan2(o.y,o.x);
-        gx.rotate(preRad + rad * RAD2DEG,0,0);
+        gx.rotate(preDeg + rad * RAD2DEG,0,0);
       },
       function () {
         //console.log("Drag ended");
