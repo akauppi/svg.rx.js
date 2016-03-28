@@ -39,3 +39,7 @@ use.showSub rect.sub {
   fill: green;
   /*display: initial;*/
 }
+
+circle.debug-blue {
+  fill: blue;
+}

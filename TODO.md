@@ -11,6 +11,10 @@
 
 - Package for npm (not Bower!)
 
+- `Rx.config.longStackSupport = true`
+  "When running the same example again with the flag set at the top, our stack trace looks much nicer and indicates exactly where the error occurred:"
+  https://github.com/Reactive-Extensions/RxJS/blob/master/doc/gettingstarted/testing.md  
+  
 ## Features
 
 - In demo3, make the line between the knob and the base follow moves declaratively. Also, make constraints (in angles) for the movement of the knob, declaratively.

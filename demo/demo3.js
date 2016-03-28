@@ -159,23 +159,44 @@
   *
   * Allow reuse of symbol definition
   * Allow rotation by the events coming to a drag handle
+  *
+  * Note: This sample shows how immensenly difficult getting a symbol + group to be tamed for dragging and interactive
+  *       rotation is. THis WORKS, but here are the things to keep in mind (pheeww):
+  *
+  *     - drawing of the symbol must be on the positive axis, i.e. anything left of Y axis and above the X axis seems
+  *       simply to be cut out
+  *     - symbols don't react to transformations, meaning their origin cannot be set by a 'translate'
+  *       - however, transforms *can* be applied to the 'use' that instantiates the symbol. This essentially serves the
+  *         same purpose, but the transform needs to be repeated for every 'use'.
+  *     - groups don't seem to rotate by their origin, by default (but probably by the center point of anything that
+  *       happens to be in the group)
+  *       - however, by explicitly adding origin (...,0,0) to the '.rotate' call, rotation around the origin is possible
   */
   var R = 80;
   var B= R*Math.sqrt(3)/2;
+
+  var DX= R/2;
+  var DY= B;
+
   var sym2= svg.symbol();
-  sym2.path( "M"+R+",0"+
-        "L"+(-R/2)+","+B+
+  sym2.path( "M"+(DX+R)+","+DY+
+        "L"+(DX-R/2)+","+(DY+B)+
         "l0,-"+(2*B)+
         "z" );
-  sym2.circle(30).center(0,0);
+  sym2.circle(30).center(DX,DY);
 
   var gx = svg.group()
-           .translate( X6+W/2, Y6+W/2 );
 
   var use2= gx.use(sym2)
+              //.translate(-DX,-DY)
+              .move(-DX,-DY);
               //.transform({ scale: 0.6 })
               //.transform({ rotation: 30 })
               //
+
+  gx.circle(140).center(0,0).addClass("debug-blue").back();
+
+  gx.translate( X6+W/2, Y6+W/2 );
 
   var gxCircle = gx.circle(30).center(100,0);
 
@@ -192,7 +213,7 @@
 
         var rad = Math.atan2(o.y,o.x);
 
-        gx.rotate(rad * RAD2DEG);
+        gx.rotate(rad * RAD2DEG,0,0);
 
       },
       function () {
