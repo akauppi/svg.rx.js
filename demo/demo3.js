@@ -208,13 +208,14 @@
     .subscribe( function(dragObs) {
       //console.log("Drag started");
 
+      // keep initial rotation
+      var preRad = gx.transform('rotation');    // just gives the rads
+
       dragObs.subscribe( function(o) {       // {x:Int,y:Int}
         console.log( JSON.stringify(o) );
 
         var rad = Math.atan2(o.y,o.x);
-
-        gx.rotate(rad * RAD2DEG,0,0);
-
+        gx.rotate(preRad + rad * RAD2DEG,0,0);
       },
       function () {
         //console.log("Drag ended");
