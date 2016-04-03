@@ -11,23 +11,41 @@ The API is tremendously simple, but powerful in the RxJS fashion. All drags are 
 - mouse is not very different from touch
 - any touch is treated the same (enables multiuser touch UIs on a big tablet / table)
 
+## Road ahead
+
+I'm doing this to be a building block for a non-open-source project. So the focus is not in utter general feature coverage, but "just enough" to scratch my own itch (that doing interactive SVG web apps is Hard!).
+
+I will prefer simplicity (of the API) over full feature coverage.
+
+Any features should have tests (currently, they have none). If you wish to contribute, planning and starting to make tests would be Great!
+
+Next steps:
+
+- making `demo-triangles` to work
+  - making a CAD-like "halo" menu system around a group
+  - making undo/redo (won't be part of this project, but maybe integrating such in one demo)
+
+Potentially, the `svg.js` library could be ditched at some point. It's turned out to be more of a bother - it embraces too much and things where it tries to be helpful, e.g. providing a `.move` for groups though they don't actually observe `.x` and `.y`  attributes, is simply misleading. In the end, we may be better off without it (but that is not a pressing concern).
+
 ## Code
 
 - [src/svg.rx.js](src/svg.rx.js)
 
-The code is currently using [RxJS 5.0.0 beta1](https://github.com/ReactiveX/RxJS), but still carries compatibility to older RxJS4 as well. However, the older use is not tested and is expected to be removed once RxJS5 has become official. AKa310116
+The code is currently using RxJS 5.0.0 beta4. Once RxJS 5 becomes available via node.js, we're moving to it.
+
+( Check the [current situation](https://www.npmjs.com/package/rxjs) of RxJS releases for npm. )
 
 ## Demos
 
 - [sources](demo/)
 - [online](http://akauppi.github.io/svg.rx.js/index.html)
 
-The demos work both as sample code and as manual tests. There are no automated tests, because testing such graphical stuff would probably become more complex than the library itself. 
+The demos work both as sample code and as manual tests.
 
-<!--
-Ideas for how to make automated tests are of course appreciated.
--->
+## Tests 
 
+Unfortunately, there are no tests at the moment. Once the APIs get stable, making an automated test set would be highly appreciated. All claimed features should have tests. 
+ 
 ## Scope
 
 The project aims at:
@@ -42,7 +60,7 @@ The project aims at:
   
 Not supported:
   
-- Dragging of `SVG.Nested`, `SVG.Use` and `SVG.Text`
+- Dragging of `SVG.Nested` and `SVG.Text`
   - there is special code for these in the [svg.draggable.js](https://github.com/wout/svg.draggable.js) project but since we don't have demos for these, we are currently not supporting them, at all
 
 - Changing the draggable object's conversion matrix (scaling, rotation and translation) during a drag.
@@ -61,12 +79,15 @@ Scope of the project is SVG on modern browsers. That probably means IE9 and late
 - Latest Android browser 
   - on Nexus 7
 
-If you find platforms where it doesn't work for you, [Issues](https://github.com/akauppi/svg.rx.js/issues) and Pull Requests are the way to go.
+If you find platforms where it doesn't work for you, [issues](https://github.com/akauppi/svg.rx.js/issues) and pull requests are the way to go.
 
 
 ---
 
 ## Usage 
+
+<font color=red>Note: The APIs are still in flux, and it might be better to see the 
+working samples. AKa030416</font>
 
 You can simply download the `svg.rx.js` file and place it in your project. 
 
@@ -76,9 +97,9 @@ You can simply download the `svg.rx.js` file and place it in your project.
 ### HTML
 
 ```html
-  <script src="svg.min.js"></script>
-  <script src="rx.lite.min.js"></script>
-  <script src="svg.rx.js"></script>
+<script src="svg.min.js"></script>
+<script src="Rx.umd.min.js"></script>
+<script src="svg.rx.js"></script>
 ```
 
 ### JavaScript API
@@ -120,13 +141,9 @@ Note that the library does not move (drag) your object automatically. This is in
 Dependencies:
 
 - `svg.js`
-- `rx.lite.js`
+- RxJS 5.0 
 
 You are expected to provide the dependencies in any way you like.
-
-<!-- disabled (now using 4.0.6)
-Note: `rx[.lite].js` 4.0.1 release has a bug that causes `fromEvent()` not to pass events to an observable. Avoid that release.
--->
 
 ---
 
@@ -195,10 +212,7 @@ The package is then visible [here](https://www.npmjs.com/package/svg.rx.js). You
 
 ## Help requested!!
 
-- checking the code from `RxJS` point of view
-- checking the code from `svg.js` point of view
-- general testing on Microsoft platforms (building and behaviour in IE versions)
-- see `TODO.md`, `BUGS.md` and [GitHub Issues](https://github.com/akauppi/svg.rx.js/issues)
+See `TODO.md`, `BUGS.md` and [GitHub Issues](https://github.com/akauppi/svg.rx.js/issues) for ways to help.
 
 ---
 

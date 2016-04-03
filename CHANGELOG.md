@@ -2,7 +2,10 @@
 
 ## latest
 
+## 0.0.5
+
 - changed to RxJS 5.0.0 beta1 from RxJS4
+- got finally group translations to work (a rotated group can be transitioned)
 
 ## 0.0.4
 

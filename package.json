@@ -1,7 +1,7 @@
 {
   "": "",
   "name": "svg.rx.js",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "description": "Bridge of SVG graphics (svg.js) and Reactive Extensions (rx-lite or rxjs).",
   "keywords": [
     "svg",
@@ -16,7 +16,7 @@
   ],
   "repository": "github:akauppi/svg.rx.js",
   "dependencies": {
-    "@reactivex/rxjs": "5.0.0-beta.2",
+    "@reactivex/rxjs": "5.0.0-beta.4",
     "svg.js": "^2.2.5",
     "systemjs": "^0.19.17"
   },
