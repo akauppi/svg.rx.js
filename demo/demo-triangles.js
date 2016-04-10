@@ -71,10 +71,10 @@ function selectTriangle(el) {
         "z";
 
       var path= this.path(p);
-        //
-        path.translate(r/2,B);   // make rotational center the triangle's origin
 
-      dragIt(path);   // all triangles draggable (unless locked, tbd.)
+      this.translate(r/2,B);   // make rotational center the triangle's origin
+
+      dragIt(this);   // all triangles draggable (unless locked, tbd.)
 
       this.addClass("my_triangle");
     },
@@ -168,42 +168,8 @@ function selectTriangle(el) {
 
   var t1 = svg.my_triangle(R).move(100,100);
   var t2 = svg.my_triangle(R).move(200,150);
-    t2.first().rotate(-90);
+    t2.rotate(-40);
   var t3 = svg.my_triangle(R).move(300,200);
-
-  // Testing a symbol and rotation
-  //
-  if (true) {
-    var sym = svg.symbol();
-    sym.rect(100, 100).fill('#f09');
-    var dot = sym.circle(20).center(100,100).fill('yellow');
-
-    svg.rect(100,100).move(300,100).addClass("debug");    // to show the place
-
-    var use = svg.use(sym).move(300, 100).rotate(30,350,150);
-
-    use.rx_draggable().subscribe( function (dragObs) {
-      dragObs.subscribe( function (o) {
-        use.move( o.x, o.y );
-      });
-    });
-
-    dot.rx_draggable().subscribe( function (dragObs) {
-      dragObs.subscribe( function (o) {
-
-        // Rotate the use
-
-        console.log( "Rotating:", o.x, o.y );
-        var pivotX = 50;
-        var pivotY = 50;
-
-        var rad = Math.atan2(o.y, o.x);
-
-        dot.center(o.x,o.y);
-        use.rotate(rad * (180/Math.PI));
-      });
-    });
-  }
 
   // Note: svg.js 2.x transform methods are absolute, but the 3.0 version will make them relative.
   //      We can take that approach with svg.rx.js already now. AKa140216
@@ -236,8 +202,16 @@ function selectTriangle(el) {
           fresh = false;
         }
 
-        //console.log( "Dragging: "+ o.x + " "+ o.y );
-        t.center(o.x, o.y);     // 'x','y' are the actual touch/pointer coords, because we are tracking 'svg'
+        console.log( "Dragging: "+ o.x + " "+ o.y );
+
+        // BUG: The group's 'move' and 'center' shouldn't be used.
+        //
+        if (true) {
+          t.translate(o.x, o.y);
+        } else {
+          t.center(o.x, o.y);     // 'x','y' are the actual touch/pointer coords, because we are tracking 'svg'
+        }
+
         circle.center(o.x,o.y).show();
         rect.center(o.x,o.y);
 
