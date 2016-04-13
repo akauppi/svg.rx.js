@@ -18,6 +18,8 @@ function selectTriangle(el) {
   "use strict";
   assert(assert);
 
+  var RAD2DEG = 180.0 / Math.PI;
+
   // A function used when hiding out svg.js methods
   //
   function notSupported (s) {   // (String) -> () -> never returns
@@ -55,13 +57,15 @@ function selectTriangle(el) {
   //
   SVG.Rx.MyTriangle = SVG.invent({
     create: function (r) {   // (Num) ->
-      //var self= this;
+      var self= this;
 
       this.constructor.call(this, SVG.create('g'));
 
       this._locked = false;
 
       // Path via the tips: (UNIT,0), (-UNIT/2,(± UNIT*sqrt(3)/2))
+      //
+      // tbd. eventually make this path into a symbol.
       //
       var B= r*Math.sqrt(3)/2;
 
@@ -72,7 +76,30 @@ function selectTriangle(el) {
 
       var path= this.path(p);
 
-      this.translate(r/2,B);   // make rotational center the triangle's origin
+      var dist = 1.8*B;
+      var g2 = this.group().addClass("handle").back();
+        //
+        g2.line(0,0,dist,0);
+        var dot= g2.circle(15).center(dist,0);
+
+      // Make handle change the rotation of the group
+      //
+      dot.rx_draggable()      // observable of observables of {x:int,y:int}
+        .subscribe( function(dragObs) {
+          // keep initial rotation
+          var preDeg = self.transform('rotation');    // just gives the rads
+
+          dragObs.subscribe( function(o) {       // {x:Int,y:Int}
+
+            console.log(o.y, o.x);
+            var rad = Math.atan2(o.y,o.x);
+            self.rotate(preDeg + rad * RAD2DEG,0,0);
+          },
+          function () {   // drag ended
+          } );
+      } );
+
+      //this.translate(r/2,B);   // make rotational center the triangle's origin
 
       dragIt(this);   // all triangles draggable (unless locked, tbd.)
 

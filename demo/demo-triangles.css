@@ -1,12 +1,19 @@
 @import url("demo.css");
 
-g.my_triangle {
+.my_triangle {
   fill: blue;
+}
+.my_triangle .handle {
+  visibility: hidden;
 }
 
 .my_triangle.selected {
   stroke-width: 3px;
   stroke: red;
+}
+.my_triangle.selected .handle {
+  fill: red;
+  visibility: initial;
 }
 
 line.connector {

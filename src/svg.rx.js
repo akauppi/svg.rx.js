@@ -83,16 +83,12 @@
     //      can be moved simultaneously (and their points may be cradled in the 'SVG.Doc'). The dynamic alloc/dealloc
     //      is probably the simplest way to go. AKa130316
     //
-    var buf = doc.node.createSVGPoint();          // point buffer (allocated just once per drag)
+    var buf = doc.node.createSVGPoint();    // point buffer (allocated just once per drag)
 
     // Clean the allocated buffer
     //
     endObs.take(1).subscribe( function () {
-      //console.log( "End of drag - could clear away the 'buf'");   // tbd
-
-      //buf.remove();   // not it (it's not an SVG element)
-      //delete buf;   // not it
-      buf = null;     // is that all it takes?
+      buf = null;     // GC will clean it up
     });
 
     // If a group is observing the drag, we want its transform NOT to be included. Otherwise, we get problems if the group
@@ -103,10 +99,19 @@
     //
     var m;
 
-    if (! (el instanceof SVG.G)) {
-      m = el.screenCTM().inverse().native();
-    } else {
+    // If 'el' is a standalone element ('SVG.Doc' is its parent) and not a group
+    //
+    // If 'el' is a group
+    //
+    // If 'el' is within a group
+    //
+    console.log(el);
+    if (el instanceof SVG.G) {
       m = el.parent().screenCTM().inverse().native();
+    //} else if (el.parent() instanceof SVG.G) {      // NOTE: not sure if this is needed AKa130416
+      //m = el.parent().screenCTM().inverse().native();
+    } else {
+      m = el.screenCTM().inverse().native();
     }
 
     // Transform from screen to user coordinates
