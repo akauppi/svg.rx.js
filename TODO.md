@@ -24,5 +24,13 @@
 
 - backpressure using RxJS 5 (try with `demo4` on a tablet):
   - if the drag produces more coordinates than the subscriber can handle, we'd be okay always skipping to the latest one. How to formulate this in RxJS? (ask in StackOverflow) AKa251015
+
+## One Day...
+
+- redefining group methods so that `move` etc. start making sense.
+  - change translation before first move = set the origin of a group
+  - freeze the origin e.g. with first move
+  - just make it so that `move`, `rotate` etc. really work (so we don`t need to move by translate, as it is now)
  
+
 <br />

@@ -32,11 +32,11 @@ function selectTriangle(el) {
     el.rx_draggable().subscribe( function (dragObs) {
 
       // Drag started
-      selectTriangle(el.parent());    // TBD: expects there to be a group (though path is draggable)
+      selectTriangle(el);
 
       dragObs.subscribe( function (o) {
         //console.log(o);
-        el.move( o.x, o.y );
+        el.translate( o.x, o.y );
       });
     });
   }
