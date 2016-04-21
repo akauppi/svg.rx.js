@@ -223,7 +223,7 @@ function selectTriangle(el) {
     // This subscription simply to pull down 'canvasDrags' once the drag ends
     //
     dragObs.subscribe(
-      function (o) {},    // nothing (tbd. try 'null')
+      null,   // drag events
       null,   // error handling
       function () {  // end of drag
         canvasDrags -= 1;
