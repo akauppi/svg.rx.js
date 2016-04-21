@@ -245,13 +245,9 @@ function selectTriangle(el) {
         function (o) {
           console.log( "Dragging: "+ o.x + " "+ o.y );
 
-          // BUG: The group's 'move' and 'center' shouldn't be used.
+          // Note: Don't use a group's '.move' or '.center'
           //
-          if (true) {
-            t.translate(o.x, o.y);
-          } else {
-            t.center(o.x, o.y);     // 'x','y' are the actual touch/pointer coords, because we are tracking 'svg'
-          }
+          t.translate(o.x, o.y);    // 'x','y' are the actual touch/pointer coords, because we are tracking 'svg'
 
           circle.center(o.x,o.y).show();
           rect.center(o.x,o.y);
@@ -267,20 +263,17 @@ function selectTriangle(el) {
     } else if ((canvasDrags === 2) || (canvasDrags === 1 && hasShift)) {   // rotate selected triangle
       var selected = svg.select(".selected").members[0];
 
-      //console.log(selected);
+      console.log("Should rotate!");
+      console.log(selected);
 
       if (selected) {
-        var preDeg = selected.rotate();
-
         dragObs.subscribe(
           function (o) {
-            console.log( "Dragging: "+ o.x + " "+ o.y, selected.transform("x"), selected.transform("y") );
+            var selX = selected.transform("x");
+            var selY = selected.transform("y");
 
-            var dx= o.x - selected.transform("x");
-            var dy= o.y - selected.transform("y");
-
-            var rad= Math.atan2(dy,dx);
-            selected.rotate(preDeg + rad * RAD2DEG, 0,0);
+            var rad= Math.atan2(o.y - selY, o.x - selX);
+            selected.rotate(rad * RAD2DEG, 0,0);
           },
           null,   // error handling
           null // end of drag
