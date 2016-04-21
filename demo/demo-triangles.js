@@ -74,7 +74,7 @@ function selectTriangle(el) {
         "l0,-"+(2*B)+
         "z";
 
-      var path= this.path(p);
+      this.path(p);
 
       var dist = 1.8*B;
       var g2 = this.group().addClass("handle").back();
@@ -190,6 +190,7 @@ function selectTriangle(el) {
   assert(assert);
 
   var R= 30;
+  var RAD2DEG = 180.0 / Math.PI;
 
   var svg = SVG("cradle");
 
@@ -209,47 +210,82 @@ function selectTriangle(el) {
   //t1.tieTo(t2);
   //t2.tieTo(t3);
 
-  // Allow creation of new triangles
+  var canvasDrags = 0;    // number of simultaneous canvas drags
+
+  // Allow creation of new triangles, and rotation of old ones
+  //  - touching on canvas while dragging a triangle changes its orientation
+  //  - pointing on canvas, with Shift, does the same
   //
   svg.rx_draggable().subscribe( function (dragObs) {
+    canvasDrags += 1;
+    console.log( "canvas drag: "+ canvasDrags );
 
-    var t= svg.my_triangle(R).hide();   // ready, hidden
-    var circle= svg.circle(10);         // ready, hidden
-    var rect= svg.rect().width(2*30).height(2*30).addClass("debug");
-
-    t.rotate( Math.random() * 360 );
-
-    var fresh = true;
-
+    // This subscription simply to pull down 'canvasDrags' once the drag ends
+    //
     dragObs.subscribe(
-      function (o) {
-        if (fresh) {    // needs to be before the rest of the stuff, so that 'center' gives right position (it seems to count only visible contents?)
-          selectTriangle(t);
-          t.show();
-          fresh = false;
-        }
-
-        console.log( "Dragging: "+ o.x + " "+ o.y );
-
-        // BUG: The group's 'move' and 'center' shouldn't be used.
-        //
-        if (true) {
-          t.translate(o.x, o.y);
-        } else {
-          t.center(o.x, o.y);     // 'x','y' are the actual touch/pointer coords, because we are tracking 'svg'
-        }
-
-        circle.center(o.x,o.y).show();
-        rect.center(o.x,o.y);
-
-      },
+      function (o) {},    // nothing (tbd. try 'null')
       null,   // error handling
       function () {  // end of drag
-        // leave the triangle
-        circle.remove();
-        rect.remove();
+        canvasDrags -= 1;
       }
     );
-  });
 
+    var hasShift = window.event.shiftKey;   // state of Shift at last event
+
+    if (canvasDrags === 1 && !hasShift) {   // create new triangle
+      var t= svg.my_triangle(R);   // ready, visible
+      var circle= svg.circle(10);         // ready, hidden
+      var rect= svg.rect().width(2*30).height(2*30).addClass("debug");
+
+      t.rotate( Math.random() * 360 );
+
+      selectTriangle(t);
+
+      dragObs.subscribe(
+        function (o) {
+          console.log( "Dragging: "+ o.x + " "+ o.y );
+
+          // BUG: The group's 'move' and 'center' shouldn't be used.
+          //
+          if (true) {
+            t.translate(o.x, o.y);
+          } else {
+            t.center(o.x, o.y);     // 'x','y' are the actual touch/pointer coords, because we are tracking 'svg'
+          }
+
+          circle.center(o.x,o.y).show();
+          rect.center(o.x,o.y);
+
+        },
+        null,   // error handling
+        function () {  // end of drag
+          // leave the triangle
+          circle.remove();
+          rect.remove();
+        }
+      );
+    } else if ((canvasDrags === 2) || (canvasDrags === 1 && hasShift)) {   // rotate selected triangle
+      var selected = svg.select(".selected").members[0];
+
+      //console.log(selected);
+
+      if (selected) {
+        var preDeg = selected.rotate();
+
+        dragObs.subscribe(
+          function (o) {
+            console.log( "Dragging: "+ o.x + " "+ o.y, selected.transform("x"), selected.transform("y") );
+
+            var dx= o.x - selected.transform("x");
+            var dy= o.y - selected.transform("y");
+
+            var rad= Math.atan2(dy,dx);
+            selected.rotate(preDeg + rad * RAD2DEG, 0,0);
+          },
+          null,   // error handling
+          null // end of drag
+        );
+      }
+    }
+  });
 })();

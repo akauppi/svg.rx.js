@@ -39,8 +39,7 @@
       .subscribe( function(dragObs) {
         //console.log("Drag started");
 
-        var originalTranslateForGroup = (el instanceof SVG.G) && el.transform();    // { x: Number, y: Number, ... }
-
+        //var originalTranslateForGroup = (el instanceof SVG.G) && el.transform();    // { x: Number, y: Number, ... }
         //console.log(originalTranslateForGroup);
 
         dragObs.subscribe( f || function(o) {       // {x:Int,y:Int}
@@ -200,7 +199,7 @@
 
   var gx = svg.group()
 
-  var use2= gx.use(sym2)
+  /*var use2=*/ gx.use(sym2)
               //.translate(-DX,-DY)
               .move(-DX,-DY);
 

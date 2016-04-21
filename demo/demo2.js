@@ -3,6 +3,7 @@
 *
 * A rotary group.
 */
+/*jshint devel: true */
 
 (function() {
   "use strict";
@@ -12,6 +13,8 @@
   var C= 10;     // width of the lever
   var D= 20;     // radius of the handle circle
   var X= 5;
+
+  var RAD2DEG = 180.0 / Math.PI;
 
   var svg = SVG("cradle");
 
