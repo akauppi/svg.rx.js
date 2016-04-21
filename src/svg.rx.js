@@ -48,7 +48,10 @@
   //    MouseEvent -> https://developer.mozilla.org/en-US/docs/Web/API/MouseEvent
   //    Touch -> https://developer.mozilla.org/en-US/docs/Web/API/Touch
   //
-  function innerObs (el, oStart, moveObs, endObs) {    // (SVG.Element|SVG.G|SVG.Doc, MouseEvent or Touch, observable of MouseEvent or Touch, observable of MouseEvent or Touch) -> observable of {x:Int, y:Int}
+  // 'el' is the element that is being tracked
+  // 'elCoords' is the element, whose coordinate system is used (can be 'el', or e.g. its parent)
+  //
+  function innerObs (el, oStart, moveObs, endObs, elCoords) {    // (SVG.Element|SVG.G|SVG.Doc, MouseEvent or Touch, observable of MouseEvent or Touch, observable of MouseEvent or Touch, [SVG.Element]) -> observable of {x:Int, y:Int}
 
     var isDoc = (el instanceof SVG.Doc);
 
@@ -58,6 +61,20 @@
 
     if (el instanceof SVG.Text) {
       console.log( "Warning: dragging might not work with "+ el );
+    }
+
+    // Select which element is used for reporting the coordinates.
+    //
+    // Note: For groups, do NOT include the group's transformation matrix, or things won't work when a group is rotated.
+    //
+    // For full power, the caller can provide the 'elCoords' (and actually, should).
+    //
+    if (!elCoords) {
+      if (el instanceof SVG.G) {
+        elCoords = el.parent();
+      } else {
+        elCoords = el;
+      }
     }
 
     //console.log(oStart);
@@ -97,14 +114,9 @@
     // Note: In the future, we might also do some group translation handling here (instead of in the calling code, see 'demo3'),
     //      so it may make sense to have the initialization within if-else (instead of tertiary operator). AKa290316
     //
-    var m;
+    var m = elCoords.screenCTM().inverse().native();
 
-    // If 'el' is a standalone element ('SVG.Doc' is its parent) and not a group
-    //
-    // If 'el' is a group
-    //
-    // If 'el' is within a group
-    //
+    /** This worked. AKa210416
     console.log(el);
     if (el instanceof SVG.G) {
       m = el.parent().screenCTM().inverse().native();
@@ -113,6 +125,7 @@
     } else {
       m = el.screenCTM().inverse().native();
     }
+    **/
 
     // Transform from screen to user coordinates
     //
@@ -240,7 +253,7 @@
     //      reuses id's whereas iOS does not). The model chosen seems to be a good fit for allowing e.g. multiple
     //      users to work on a touch interface simultaneously, i.e. it feels more generic and expandable. AKa060116
     //
-    rx_touch: function () {   // () -> observable of observables of { x: Int, y: Int }
+    rx_touch: function (elCoords) {   // ([SVG.Element]) -> observable of observables of { x: Int, y: Int }
 
       var self = this;    // to be used within further inner functions
 
@@ -284,7 +297,7 @@
 
         var cancelOrEndObs = Rx.Observable.merge( endObs, cancelObs );
 
-        return innerObs( self, touchStart, moveObs, cancelOrEndObs )
+        return innerObs( self, touchStart, moveObs, cancelOrEndObs, elCoords )
 
       }; // touchDragObs
 
@@ -308,7 +321,7 @@
     //      should see it from the application point of view. Also, shift etc. might be as important as the different
     //      buttons. AKa060116
     //
-    rx_mouse: function () {   // () -> observable of observables of {x:Int, y:Int}
+    rx_mouse: function (elCoords) {   // ([SVG.Element]) -> observable of observables of {x:Int, y:Int}
       var self = this;
 
       // Just consider primary button
@@ -323,7 +336,7 @@
 
       return startObs.map( function (ev) {   // (MouseEvent) -> observable of {x:Int, y:Int}
         preventDefault(ev);
-        return innerObs( self, ev, moveObs, endObs );
+        return innerObs( self, ev, moveObs, endObs, elCoords );
       } );
     },
 
@@ -333,11 +346,11 @@
     // Returns:
     //  observable of observables of { x: Int, y: Int }
     //
-    rx_draggable: function () {   // () -> observable of observables of { x: Int, y: Int }
+    rx_draggable: function (elCoords) {   // ([SVG.Element]) -> observable of observables of { x: Int, y: Int }
 
       return Rx.Observable.merge(
-        this.rx_mouse(),
-        this.rx_touch()
+        this.rx_mouse(elCoords),
+        this.rx_touch(elCoords)
       );
     }
   });
