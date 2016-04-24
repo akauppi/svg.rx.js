@@ -1,5 +1,4 @@
 {
-  "": "",
   "name": "svg.rx.js",
   "version": "0.0.5",
   "description": "Bridge of SVG graphics (svg.js) and Reactive Extensions (rx-lite or rxjs).",
@@ -21,15 +20,18 @@
     "systemjs": "^0.19.17"
   },
   "devDependencies": {
+    "chai": "^3.5.0",
     "gh-pages": "^0.5.0",
     "http-server": "^0.8.5",
-    "jshint": "^2.8.0"
+    "jshint": "^2.8.0",
+    "mocha": "^2.4.5"
   },
   "scripts": {
-    "": "",
     "gh-pages": "node_modules/.bin/gh-pages -d demo",
     "serve": "node_modules/.bin/http-server demo -p 8080",
     "jshint": "node_modules/.bin/jshint --verbose --show-non-errors --config jshint.json src/*.js demo/*.js",
+    "mocha": "node_modules/.bin/mocha",
+    "": "",
     "preserve": "npm run jshint",
     "pregh-pages": "npm run jshint"
   },
