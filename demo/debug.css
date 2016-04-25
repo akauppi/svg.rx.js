@@ -1,2 +1,5 @@
 @import url("demo.css");
 
+rect {
+  fill: green;
+}

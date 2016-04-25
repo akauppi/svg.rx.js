@@ -7,64 +7,80 @@
 
 (function() {
   "use strict";
+  var assert = chai.assert;
 
-  function assert(b,msg) {    // (boolish, String) =>
-    if (!b) {
-      throw ("Assert failed" + (msg ? ": "+msg : ""))
-    }
-  }
+  var SIDE = 30;
 
   var svg = SVG("cradle");
 
-  var last = {};     // { [touchId]: "touchstart"|"touchmove"|"touchend"; ... }
+  //var gx = svg.rx.gx( svg.rect(10,10) ).translate(5,5);
+  //gx.pos(200,100);
 
-  var genHandler = function (name) {
-    return function (ev) {
+  var rect= svg.rect(SIDE,SIDE).translate(-SIDE/2,-SIDE/2).move(200,100).rotate(45);
 
-      // '.preventDefault' e.g. prevents the event from causing a scroll (Safari iOS)
-      //
-      if (name === "touchstart") {
-        ev.preventDefault();
-        ev.stopPropagation();
-      }
+  /***
+  // '.tbox()' gives the bounding box, with transformations applied (ie. in screen coords):
+  //
+  //  {
+  //    cx: Num,    // x + w/2
+  //    cy: Num,    // y + h/2
+  //    h: Num,
+  //    w: Num,
+  //    x: Num,
+  //    x2: Num,    // x + w
+  //    y: Num,
+  //    y2: Num     // y + h
+  //  }
+  //
+  // NOTE: Doesn't work after rotation, gives (334,-14) as 'cx','cy'
+  //
+  var tbox = rect.tbox();
 
-      console.log(ev.changedTouches);
+  console.log(tbox);
 
-      // Note: 'ev.changedTouches' does not work like an array, i.e. no '.map' and such. AKa131215
-      //
-      var s="";
-      var i,touch;
+  assert( tbox.cx === 200 );
+  assert( tbox.cy === 100 );
+  ***/
 
-      for( /*var*/ i=0; i< ev.changedTouches.length; i++ ) {
-        /*var*/ touch = ev.changedTouches[i];
-        var x = touch.clientX;
-        var y = touch.clientY;
-        s += touch.identifier + ": "+ x +" "+ y + " ";
-      }
+  /*
+  * '.getBoundingClientRect()' gives what we want (screen coords of the element bounds, translations applied):
+  *
+  * <<
+  *   bottom: 207.50857543945312      <<-- wrong (should be 100+7.07)
+  *   height: 14.142120361328125
+  *   left: 200.92893981933594        <<-- wrong (should be 200-7.07)
+  *   right: 215.07107543945312       <<-- wrong (should be 200+7.07)
+  *   top: 193.366455078125           <<-- wrong (should be 100-7.07)
+  *   width: 14.142135620117188
+  * <<
+  * Try sending a click on the screen and see if the element catches it.
+  *
+  console.log( rect.native().getBoundingClientRect() );
+  */
 
-      console.log(name + " "+ s);
+  // offset of the SVG (needs to be added to use '.elementFromPoint()'
+  //
+  var ox = svg.native().offsetLeft;
+  var oy = svg.native().offsetTop;
 
-      for( i=0; i< ev.changedTouches.length; i++ ) {
-        touch = ev.changedTouches[i];
+  assert( document.elementFromPoint(ox+200, oy+100) === rect.native() );
+  assert( document.elementFromPoint(ox+200-SIDE/2, oy+100) === rect.native() );
+  assert( document.elementFromPoint(ox+200-SIDE/2, oy+100+SIDE/2) !== rect.native() );
+  assert( document.elementFromPoint(ox+200-SIDE/2, oy+100-SIDE/2) !== rect.native() );
 
-        if (name === "touchstart") {
-          assert(last[i] === undefined);
-        } else {
-          assert(last[i] !== undefined);
-        }
+  // ...
 
-        if ((name !== "touchend") && (name !== "touchcancel")) {
-          last[i]= name;
-        } else {
-          delete last.name;   // clear the field
-        }
-      }
-      console.log(last);
-    }
-  }
+  var m= rect.screenCTM().inverse();
+  console.log(m);
 
-  svg.node.addEventListener("touchstart", genHandler("touchstart"), false);
-  svg.node.addEventListener("touchend", genHandler("touchend"), false);
-  svg.node.addEventListener("touchcancel", genHandler("touchcancel"), false);
-  svg.node.addEventListener("touchmove", genHandler("touchmove"), false);
+  // (0,0) should be ...
+  // (10,10) should be ...
+  //
+  var t= SIDE* Math.sqrt(0.5);
+
+  //assert.closeTo( top, 100-t, 0.01 );
+  //assert.closeTo( bottom, 100+t, 0.01 );
+  //assert.closeTo( left, 200-t, 0.01 );
+  //assert.closeTo( right, 200+t, 0.01 );
+
 }());
