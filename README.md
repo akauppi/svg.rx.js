@@ -1,6 +1,8 @@
 # svg.rx.js
 
-[![Join the chat at https://gitter.im/akauppi/svg.rx.js](https://badges.gitter.im/akauppi/svg.rx.js.svg)](https://gitter.im/akauppi/svg.rx.js?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+[![](https://badges.gitter.im/akauppi/svg.rx.js.svg)](https://gitter.im/akauppi/svg.rx.js?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+
+## What is it?
 
 Binds [RxJS](https://github.com/Reactive-Extensions/RxJS) with [svg.js](https://github.com/wout/svg.js), for handling user interactions.
 
@@ -11,40 +13,68 @@ The API is tremendously simple, but powerful in the RxJS fashion. All drags are 
 - mouse is not very different from touch
 - any touch is treated the same (enables multiuser touch UIs on a big tablet / table)
 
-## Road ahead
+<!-- could embed a demo right here to give a feeling what it's about
+-->
 
-I'm doing this to be a building block for a non-open-source project. So the focus is not in utter general feature coverage, but "just enough" to scratch my own itch (that doing interactive SVG web apps is Hard!).
+<!-- then show the code of that demo, right here as well. AKa010516
+-->
 
-I will prefer simplicity (of the API) over full feature coverage.
+## Requirements
 
-Any features should have tests (currently, they have none). If you wish to contribute, planning and starting to make tests would be Great!
+- `npm`
 
-Next steps:
+## Platform scope
 
-- making `demo-triangles` to work
-  - making a CAD-like "halo" menu system around a group
-  - making undo/redo (won't be part of this project, but maybe integrating such in one demo)
+Scope of the project is SVG on modern browsers. That probably means IE9 and later, but in practice the code gets tested on:
 
-Potentially, the `svg.js` library could be ditched at some point. It's turned out to be more of a bother - it embraces too much and things where it tries to be helpful, e.g. providing a `.move` for groups though they don't actually observe `.x` and `.y`  attributes, is simply misleading. In the end, we may be better off without it (but that is not a pressing concern).
+- Latest Safari on OS X
+- Latest Chrome on OS X
+- Safari on iOS 9
+  -  on iPhone 6 and iPad Lite
+- Latest Android browser 
+  - on Nexus 7
+
+If you find platforms where it doesn't work for you, [issues](https://github.com/akauppi/svg.rx.js/issues) and pull requests are the way to go.
+
+## Getting started
+
+Install the tools and dependencies:
+
+```
+$ npm update
+```
 
 ## Code
 
 - [src/svg.rx.js](src/svg.rx.js)
 
-The code is currently using RxJS 5.0.0 beta4. Once RxJS 5 becomes available via node.js, we're moving to it.
-
-( Check the [current situation](https://www.npmjs.com/package/rxjs) of RxJS releases for npm. )
-
-## Demos
-
 - [sources](demo/)
-- [online](http://akauppi.github.io/svg.rx.js/index.html)
+- [online](http://akauppi.github.io/svg.rx.js/index.html) - may not be the latest versions
 
 The demos work both as sample code and as manual tests.
 
+|Note|
+|-|
+| The code is currently using RxJS 5.0.0 beta4. Once RxJS 5 becomes available via node.js, we're moving to it. Check the [current situation](https://www.npmjs.com/package/rxjs) of RxJS releases for npm. |
+
+<!-- 5.0.0-beta7 as of AKa010516 -->
+
+
 ## Tests 
 
-Unfortunately, there are no tests at the moment. Once the APIs get stable, making an automated test set would be highly appreciated. All claimed features should have tests. 
+All claimed features should have tests.
+
+Run the tests:
+
+```
+$ npm run test
+```
+
+Alternatively, you can run the tests in a browser:
+
+```
+$ open test/NoTest.html   # tbd. have to change that name :)
+```
  
 ## Scope
 
@@ -67,19 +97,6 @@ Not supported:
   - this is probably not needed in practical applications
 
 Please send a PR if you need these - and provide a manual test that proves when the support works.
-
-### Platform scope
-
-Scope of the project is SVG on modern browsers. That probably means IE9 and later, but in practice the code gets tested on:
-
-- Latest Safari on OS X
-- Latest Chrome on OS X
-- Safari on iOS 9
-  - on iPhone 6 and iPad Lite
-- Latest Android browser 
-  - on Nexus 7
-
-If you find platforms where it doesn't work for you, [issues](https://github.com/akauppi/svg.rx.js/issues) and pull requests are the way to go.
 
 
 ---
@@ -147,72 +164,33 @@ You are expected to provide the dependencies in any way you like.
 
 ---
 
-## Development
+## Road ahead
 
-If you wish to help with the project, do this after cloning:
+<!--
+I'm doing this to be a building block for a non-open-source project. So the focus is not in utter general feature coverage, but "just enough" to scratch my own itch (that doing interactive SVG web apps is Hard!).
 
-```
-$ npm update
-```
+I will prefer simplicity (of the API) over full feature coverage.
 
-This downloads the demo dependencies.
+Any features should have tests (just starting...).
 
-The `demo/lib/*` files are symbolic links to the libraries that are fetched when doing the updates.
+Next steps:
 
-Note: It is important to keep `demo/` self-sufficient (i.e. no paths leading up from it, other than via the symbolic links), because of the way it gets published (see below). Likewise, `demo/src` is a symbolic link to `src`.
-
-Note: `git` supports symbolic links fully, but some IDEs may get confused if you open the same file (say the source) as both `src/rx.svg.js` and `demo/src/rx.svg.js`. The solution is simple - try to only open one of them, or change tools.
-
-### Testing on Android Browser
-
-Chrome has a wonderful [Android Remote Debugging](https://developer.chrome.com/devtools/docs/remote-debugging) mode that allows one to debug what's happening in the mobile browser, from the desktop. It requires no additional installations (no `adb`) - just:
-
-1. enable the USB debugging mode in your device (see the link)
-2. open desktop Chrome at `chrome:inspect`
-
-You can use the "Port forwarding" feature, together with a lightweight node based http-server, to test code changes without publishing to the Internet:
-
-1. run `npm run serve` on the command line. This serves the `demo/` folder in `localhost:8080`
-2. enable the "Port forwarding" in desktop Chrome (under `chrome:inspect`)
-3. browse the demos with the phone/tablet
-
-It really couldn't be easier!
-
-iOS has a similar feature. See [DEV-TIPS/Remote Debugging.md](DEV-TIPS/Remote Debugging.md) for more info on these.
-
-## Publishing
-
-The demos are published on [GitHub Pages](https://pages.github.com), using the `gh-pages` npm module.
-
-```
-$ npm run gh-pages
-```
-
-This removes any previous contents of the `gh-pages` branch and replaces them with what's in `demo/` folder. 
-
-
-<!-- This does not really need to be public. At least not now. Think about once we are actually pulling svg.rx.js via npm, ourselves. AKa090116
-
-## Packaging
-
-The project is published via `npm`.
-
-```
-$ npm publish
-```
-
-The package is then visible [here](https://www.npmjs.com/package/svg.rx.js). You need to be properly registered with `npm` in order to publish packages.
-
-### Adding versions
-
-- Check that `CHANGELOG.md` is up to date
-- Check that all manual demos work
-- Check that the version in `package.json` is correct
+- making `demo-triangles` to work
+  - making a CAD-like "halo" menu system around a group
+  - making undo/redo (won't be part of this project, but maybe integrating such in one demo)
 -->
+
+Potentially, the `svg.js` library could be ditched at some point. It's turned out to be more of a bother - it embraces too much and things where it tries to be helpful, e.g. providing a `.move` for groups though they don't actually observe `.x` and `.y`  attributes, is simply misleading. In the end, we may be better off without it (but that is not a pressing concern).
 
 ## Help requested!!
 
-See `TODO.md`, `BUGS.md` and [GitHub Issues](https://github.com/akauppi/svg.rx.js/issues) for ways to help.
+See:
+ 
+- `TODO.md`
+- `BUGS.md` and
+- [GitHub Issues](https://github.com/akauppi/svg.rx.js/issues) 
+
+for ways to help
 
 ---
 
@@ -225,10 +203,10 @@ These are presented for code comparisons. Their approach is the normal event cap
 - [svg.draggable.js](https://github.com/wout/svg.draggable.js)
   - has been the basis for our touch event and coordinate translation handling. Thanks, Fuzzy!
 - [svg.draggy.js](https://github.com/jillix/svg.draggy.js/)
-- [Phantomjs, Mocha and Chai for functional testing](http://doublenegative.com/phantomjs-mocha-and-chai-for-functional-testing/) (blog, Thomas Clowes, Aug 2014)
 
 ### Background info
 
 - [How to Use npm as a Build Tool](http://blog.keithcirkel.co.uk/how-to-use-npm-as-a-build-tool/) - blog by Keith Cirkel
+- [Phantomjs, Mocha and Chai for functional testing](http://doublenegative.com/phantomjs-mocha-and-chai-for-functional-testing/) (blog, Thomas Clowes, Aug 2014)
 
 <br />

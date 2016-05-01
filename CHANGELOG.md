@@ -2,6 +2,8 @@
 
 ## latest
 
+- added mocha tests
+
 ## 0.0.5
 
 - changed to RxJS 5.0.0 beta1 from RxJS4
