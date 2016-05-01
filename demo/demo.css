@@ -14,3 +14,7 @@ rect.debug {
   stroke: red;
   fill-opacity: 0;
 }
+
+text.debug {
+  fill: red;
+}
