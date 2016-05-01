@@ -28,18 +28,24 @@ describe('just testing', function () {    // sample on how to test positions
     var svg = SVG( document.body );   // just append the SVG to the body
     var rect= svg.rect(SIDE,SIDE).translate(-SIDE/2,-SIDE/2).move(X,Y).rotate(45);
 
-    var rbox = rect.rbox();
+    var box = (function() {    // get the bounding box, relative to origin of the SVG element
+      var rbox= rect.rbox();
 
-    // In browser, this is 150
-    // In command line testing, it's 60
-    //
-    var OFFSET_Y = 60;   // for some reason, 'rbox' y values are this much off (at least in browsers)
+      // In browser, this is 150
+      // In command line testing, it's 60
+      //
+      var OFFSET_Y = svg.native().offsetTop;
 
-    console.log( "Difference in Y:", (Y-T)-rbox.y );
+      rbox.y -= OFFSET_Y;
+      rbox.y2 -= OFFSET_Y;
+      rbox.cy -= OFFSET_Y;
 
-    (rbox.x).should.be.closeTo( X-T, 0.01 );
-    (rbox.y-OFFSET_Y).should.be.closeTo( Y-T, 0.01 );
-    (rbox.width).should.be.closeTo(2*T, 0.01);
-    (rbox.height).should.be.closeTo(2*T, 0.01);
+      return rbox;
+    })();
+
+    (box.x).should.be.closeTo( X-T, 0.01 );
+    (box.y).should.be.closeTo( Y-T, 0.01 );
+    (box.width).should.be.closeTo(2*T, 0.01);
+    (box.height).should.be.closeTo(2*T, 0.01);
   });
 });
