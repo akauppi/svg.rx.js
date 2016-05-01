@@ -99,7 +99,7 @@ $ npm run test
 Alternatively, you can run the tests in a browser:
 
 ```
-$ open test/NoTest.html   # tbd. have to change that name :)
+$ open test/index.html
 ```
  
 ---

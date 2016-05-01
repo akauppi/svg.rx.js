@@ -5,7 +5,7 @@
     <link rel="stylesheet" href="../node_modules/mocha/mocha.css" />
 </head>
 <body>
-<!-- mocha -->
+    <!-- mocha -->
     <div id="mocha"></div>
     <script src="../node_modules/mocha/mocha.js"></script>
     <script src="../node_modules/chai/chai.js"></script>
@@ -21,14 +21,11 @@
     -->
 
     <!-- tests (add new ones to the list) -->
+    <script src="common.js"></script>
     <script src="NoTest.js"></script>
     <script src="test-gx.js"></script>
 
     <script>
-        // Create just one SVG cradle (not a new one to each test)
-        //
-        var svg = SVG( document.body );   // just append the SVG to the body
-
         // Samples have it like this, but 'window.mochaPhantomJS' seems to always be 'undefined'. AKa010516
         //
         if (window.mochaPhantomJS) { mochaPhantomJS.run(); }

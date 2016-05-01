@@ -24,20 +24,7 @@ describe('just testing', function () {    // sample on how to test positions
 
     var rect= svg.rect(SIDE,SIDE).translate(-SIDE/2,-SIDE/2).move(X,Y).rotate(45);
 
-    var box = (function() {    // get the bounding box, relative to origin of the SVG element
-      var rbox= rect.rbox();
-
-      // In browser, this is 150
-      // In command line testing, it's 60
-      //
-      var OFFSET_Y = svg.native().offsetTop;
-
-      rbox.y -= OFFSET_Y;
-      rbox.y2 -= OFFSET_Y;
-      rbox.cy -= OFFSET_Y;
-
-      return rbox;
-    })();
+    var box = sbox(rect);
 
     (box.x).should.be.closeTo( X-T, 0.01 );
     (box.y).should.be.closeTo( Y-T, 0.01 );
