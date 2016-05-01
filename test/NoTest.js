@@ -1,11 +1,8 @@
-/*global: SVG, assert, describe, it*/
+/*global: SVG, svg, assert, describe, it*/
 /*jshint devel: true */
 
 // References:
 //    'Should' style of Chai -> http://chaijs.com/guide/styles/
-//    Phantomjs, Mocha and Chai for functional testing -> http://doublenegative.com/phantomjs-mocha-and-chai-for-functional-testing/
-
-mocha.ui('bdd');
 
 var assert = chai.assert;
 chai.should();
@@ -25,7 +22,6 @@ describe('just testing', function () {    // sample on how to test positions
     var X= 100;
     var Y= 50;
 
-    var svg = SVG( document.body );   // just append the SVG to the body
     var rect= svg.rect(SIDE,SIDE).translate(-SIDE/2,-SIDE/2).move(X,Y).rotate(45);
 
     var box = (function() {    // get the bounding box, relative to origin of the SVG element

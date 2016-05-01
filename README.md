@@ -225,6 +225,7 @@ These are presented for code comparisons. Their approach is the normal event cap
 - [svg.draggable.js](https://github.com/wout/svg.draggable.js)
   - has been the basis for our touch event and coordinate translation handling. Thanks, Fuzzy!
 - [svg.draggy.js](https://github.com/jillix/svg.draggy.js/)
+- [Phantomjs, Mocha and Chai for functional testing](http://doublenegative.com/phantomjs-mocha-and-chai-for-functional-testing/) (blog, Thomas Clowes, Aug 2014)
 
 ### Background info
 
