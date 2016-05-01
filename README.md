@@ -4,25 +4,29 @@
 
 ## What is it?
 
-Binds [RxJS](https://github.com/Reactive-Extensions/RxJS) with [svg.js](https://github.com/wout/svg.js), for handling user interactions.
+`svg.rx.js` binds [RxJS](https://github.com/Reactive-Extensions/RxJS) together with SVG graphics.
 
-Allows SVG applications to be crafted without callbacks or events, using `RX.Observable`s instead.
+It currently uses [svg.js](https://github.com/wout/svg.js) for dealing with the SVG elements, but this dependency may later be relaxed (so that any such library could be used, or none at all, leaving it an application decision).
 
-The API is tremendously simple, but powerful in the RxJS fashion. All drags are mapped into an `observable of observables of {x: Int, y:Int}`. This means, among other things that:
+With `svg.rx.js`, user interactions such as touch and mouse events can be modeled as `RX.Observable`s, tremendously simplifying the code concerned.
 
-- mouse is not very different from touch
-- any touch is treated the same (enables multiuser touch UIs on a big tablet / table)
+The intention is that also animations would be modeled to use `Rx.Observable`s, instead of SVG-specific constructs that have a learning curve, and limitations.
 
-<!-- could embed a demo right here to give a feeling what it's about
--->
+The end game is to get a simple programming paradigm for making SVG-only animated, interactive applications that run fast in the browser.
 
-<!-- then show the code of that demo, right here as well. AKa010516
--->
+The reasons why this isn't already practical lie within the SVG details. It doesn't seem easy to make a group out of SVG elements that can be dragged and interacted with. We're intending to fix these shortcomings, with the `gx` object.
 
-## Requirements
+## Design goals
 
-- `npm`
-
+- simplicity of API over feature support
+- every documented API must have unit tests
+- touch and mouse should not seem very different
+- touch first (treat mouse as a useable fallback 2nd class citizen)
+- any touch is treated the same (enables multiuser touch on a big tablet/table)
+- providing the bare mechanisms needed, instead of trying to cater for a certain kind of application
+- value brewity of the code, and maintainability
+- provide support for both desktop and touch use cases, equally
+  
 ## Platform scope
 
 Scope of the project is SVG on modern browsers. That probably means IE9 and later, but in practice the code gets tested on:
@@ -36,22 +40,44 @@ Scope of the project is SVG on modern browsers. That probably means IE9 and late
 
 If you find platforms where it doesn't work for you, [issues](https://github.com/akauppi/svg.rx.js/issues) and pull requests are the way to go.
 
+## Not supported
+  
+- Dragging of `SVG.Nested` and `SVG.Text`
+  - there is special code for these in the [svg.draggable.js](https://github.com/wout/svg.draggable.js) project but since we don't have demos for these, we are currently not supporting them, at all
+
+- Changing the draggable object's conversion matrix (scaling, rotation and translation) during a drag.
+  - this is probably not needed in practical applications
+
+Please send a PR if you need these - and provide a demo or test that proves when the support works.
+
+
+---
+
 ## Getting started
 
-Install the tools and dependencies:
+Install the tools and dependencies (needed for running demos):
 
 ```
 $ npm update
 ```
 
-## Code
+## Demos
 
-- [src/svg.rx.js](src/svg.rx.js)
+<!-- could embed a demo right here to give a feeling what it's about
+-->
+
+<!-- then show the code of that demo, right here as well. AKa010516
+-->
 
 - [sources](demo/)
 - [online](http://akauppi.github.io/svg.rx.js/index.html) - may not be the latest versions
 
 The demos work both as sample code and as manual tests.
+
+
+## Code
+
+- [src/svg.rx.js](src/svg.rx.js)
 
 |Note|
 |-|
@@ -76,29 +102,6 @@ Alternatively, you can run the tests in a browser:
 $ open test/NoTest.html   # tbd. have to change that name :)
 ```
  
-## Scope
-
-The project aims at:
-
-- providing enough bridging between `RxJS` and `svg.js` so that event callbacks are never needed in application code
-- using the RxJS API directly - no need to blur it behind an abstraction
-  - alternatively, the ES7 native Observables API can be used, if that is sufficient for our other purposes
-- having manual tests (demos) for all supported entries
-- providing the bare mechanisms needed, instead of trying to cater for a certain kind of application
-- value brewity of the code, and maintainability
-- provide support for both desktop and touch use cases, equally
-  
-Not supported:
-  
-- Dragging of `SVG.Nested` and `SVG.Text`
-  - there is special code for these in the [svg.draggable.js](https://github.com/wout/svg.draggable.js) project but since we don't have demos for these, we are currently not supporting them, at all
-
-- Changing the draggable object's conversion matrix (scaling, rotation and translation) during a drag.
-  - this is probably not needed in practical applications
-
-Please send a PR if you need these - and provide a manual test that proves when the support works.
-
-
 ---
 
 ## Usage 
@@ -108,15 +111,12 @@ working samples. AKa030416</font>
 
 You can simply download the `svg.rx.js` file and place it in your project. 
 
-<!-- Mention here about 'npm' once we distribute through it. AKa060116
--->
-
 ### HTML
 
-```html
-<script src="svg.min.js"></script>
-<script src="Rx.umd.min.js"></script>
-<script src="svg.rx.js"></script>
+```
+	<script src="svg.min.js"></script>
+	<script src="Rx.umd.min.js"></script>
+	<script src="svg.rx.js"></script>
 ```
 
 ### JavaScript API
@@ -137,7 +137,7 @@ If you only wish to handle mouse or touch, you can also use:
 
 ### Sample
 
-```javascript
+```
 var outerObs = rect.rx_draggable();
     
 outerObs.subscribe( function(dragObs) {
@@ -155,30 +155,9 @@ outerObs.subscribe( function(dragObs) {
 
 Note that the library does not move (drag) your object automatically. This is intentional and allows other kinds of dragging behaviour (e.g. constraints or circular following) to happen, instead of the usual 1:1 dragging.
 
-Dependencies:
-
-- `svg.js`
-- RxJS 5.0 
-
-You are expected to provide the dependencies in any way you like.
-
 ---
 
 ## Road ahead
-
-<!--
-I'm doing this to be a building block for a non-open-source project. So the focus is not in utter general feature coverage, but "just enough" to scratch my own itch (that doing interactive SVG web apps is Hard!).
-
-I will prefer simplicity (of the API) over full feature coverage.
-
-Any features should have tests (just starting...).
-
-Next steps:
-
-- making `demo-triangles` to work
-  - making a CAD-like "halo" menu system around a group
-  - making undo/redo (won't be part of this project, but maybe integrating such in one demo)
--->
 
 Potentially, the `svg.js` library could be ditched at some point. It's turned out to be more of a bother - it embraces too much and things where it tries to be helpful, e.g. providing a `.move` for groups though they don't actually observe `.x` and `.y`  attributes, is simply misleading. In the end, we may be better off without it (but that is not a pressing concern).
 

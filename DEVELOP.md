@@ -1,12 +1,18 @@
 # Development
 
+## Requirements
+
+- `npm` is enough
+
+## Misc
+
 The `demo/lib/*` files are symbolic links to the libraries that are fetched when doing the updates.
 
 Note: It is important to keep `demo/` self-sufficient (i.e. no paths leading up from it, other than via the symbolic links), because of the way it gets published (see below). Likewise, `demo/src` is a symbolic link to `src`.
 
 Note: `git` supports symbolic links fully, but some IDEs may get confused if you open the same file (say the source) as both `src/rx.svg.js` and `demo/src/rx.svg.js`. The solution is simple - try to only open one of them, or change tools.
 
-### Testing on Android Browser
+## Testing on Android Browser
 
 Chrome has a wonderful [Android Remote Debugging](https://developer.chrome.com/devtools/docs/remote-debugging) mode that allows one to debug what's happening in the mobile browser, from the desktop. It requires no additional installations (no `adb`) - just:
 
