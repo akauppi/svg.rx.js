@@ -1,0 +1,17 @@
+
+svg {
+  margin-left: 10px;
+  margin-bottom: 10px;
+  width: 98%;
+  border: 1px solid red;
+}
+
+rect {
+  fill: green;
+}
+
+.debug {
+  fill: none;
+  stroke-width: 1px;
+  stroke: red;
+}

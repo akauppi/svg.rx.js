@@ -24,10 +24,12 @@ describe('just testing', function () {    // sample on how to test positions
 
     var rect= svg.rect(SIDE,SIDE).translate(-SIDE/2,-SIDE/2).move(X,Y).rotate(45);
 
-    var box = sbox(rect);
+    var box = rect.sbox();
 
     (box.x).should.be.closeTo( X-T, 0.01 );
     (box.y).should.be.closeTo( Y-T, 0.01 );
+    (box.x2).should.be.closeTo( X+T, 0.01 );
+    (box.y2).should.be.closeTo( Y+T, 0.01 );
     (box.width).should.be.closeTo(2*T, 0.01);
     (box.height).should.be.closeTo(2*T, 0.01);
   });

@@ -1,77 +1,79 @@
 /*
-* gx.js
+* svg.gx.js
 */
 /*jshint devel:true */
 
 (function () {
   "use strict";
 
-  function assert(b,msg) {    // (boolish, String) =>
-    if (!b) {
-      throw ("Assert failed" + (msg ? ": "+msg : ""))
-    }
-  }
-  assert(true);   // use it up (jshint)
-
-  SVG.Rx = SVG.Rx || {};
-
-
-  //--- SVG.Rx.gx ---
+  //--- Gx---
   //
-  //  .xxx: Xxx
+  // ._g: SVG.Group   The SVG contents (note: caller has no direct access to this group)
   //
-  SVG.Rx.gx = SVG.invent({
-  ...
-    create: function (a,b) {   // (SVG.Rx.Point, SVG.Rx.Point) ->
-      var self = this;
+  var Gx = SVG.invent({
+    // Initialize node
+    create: function ( parent, populateF ) {    // ( SVG.Container, (SVG.Container) -> )
+      //var self = this;
 
-      this.constructor.call(this, SVG.create('line'));
+      //console.log(parent);    // SVG.Doc
+      var g= parent.group();
 
-      this._pa = a;
-      this._pb = b;
+      populateF(g);
 
-      this._pa.subscribe( function (o) {
-        self.attr('x1',o.x).attr('y1',o.y);     // Note: bypass 'svg.js' code by purpose - it would simply do this
-      });
-
-      this._pb.subscribe( function (o) {
-        self.attr('x2',o.x).attr('y2',o.y);     // Note: bypass 'svg.js' code by purpose - it would simply do this
-      });
+      this._g = g;
     },
 
-    inherit: SVG.Line,
-
-    construct: {          // parent method to create these
-      rx_line: function (a,b) {   // (SVG.Rx.Point, SVG.Rx.Point) -> SVG.Rx.Line
-
-        return this.put(new SVG.Rx.Line(a,b));
-      }
-    },
-
-    // Override the access functions
-    //
+    // Add class methods
     extend: {
-      // Note: We do not support the "point string", "point array" and 'SVG.PointArray' variants of 'svg.js'.
+      // Set the origin for the contents of the 'Gx'
       //
-      plot: function (ax,ay,bx,by) {   // (ax:Num,ay:Num,bx:Num,by:Num) -> this
-        var tax = typeof ax;
-        var tay = typeof ay;
-        var tbx = typeof bx;
-        var tby = typeof by;
+      origin: function (x, y) {   // (Num, Num) -> this
 
-        if ((arguments.length === 4) && (tax === "number") && (tay === "number") && (tbx === "number") && (tby === "number")) {
-          this._pa.set(ax,ay);
-          this._pb.set(bx,by);
-          return this;
+        console.log( this._g.children() );
 
-        } else {
-          throw "'.plot' with these parameters not supported in 'svg.rx.js': "+ arguments;
+        if (true) {
+          this._g.translate(-x, -y);     // did work, after all AKa050516
+        } else {  // remove?
+          this._g.children().forEach( function(el) {
+            el.translate(-x,-y);
+          } );
         }
+
+        return this;
       },
 
-      array: notSupported('array'),
-      move: notSupported('move'),
-      size: notSupported('size')
+      // Move the 'Gx', absolutely
+      //
+      pos: function(xy) {   // ({x:Num,y:Num}) -> this
+      },
+
+      // Move the 'Gx', relatively
+      //
+      relpos: function(xy) {   // ({x:Num,y:Num}) -> this
+      },
+
+      // Rotate the 'Gx', around the origin
+      //
+      rotDeg: function(deg) {   // (Num) -> this
+        this._g.rotate(deg);
+        return this;
+      },
+
+    }
+  });
+
+  //---
+  // Add the '.gx' method to the SVG document (not a method of say 'SVG.G'; we want to keep the SVG libraries
+  // subordinate to the 'gx' concept). AKa050516
+  //
+  // Note: Later, maybe, we'd allow creating sub-gx'es within a 'gx'.
+  //
+  SVG.extend( SVG.Doc, {
+
+    gx: function( populateF ) {    // ( (SVG.Container) -> ) -> Gx
+      //console.log(this);    // SVG.Doc
+
+      return new Gx(this, populateF);
     }
   });
 
