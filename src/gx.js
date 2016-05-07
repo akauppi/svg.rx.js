@@ -9,6 +9,8 @@
   //--- Gx---
   //
   // ._g: SVG.Group   The SVG contents (note: caller has no direct access to this group)
+  // ._dx: Num        Offset of origin, used in translates
+  // ._dy: Num        -''-
   //
   var Gx = SVG.invent({
     // Initialize node
@@ -21,6 +23,7 @@
       populateF(g);
 
       this._g = g;
+      this._dx = this._dy = 0;
     },
 
     // Add class methods
@@ -28,23 +31,31 @@
       // Set the origin for the contents of the 'Gx'
       //
       origin: function (x, y) {   // (Num, Num) -> this
+        var xyWas = this.pos();   // the position without the offset applied
 
-        console.log( this._g.children() );
+        this._dx = -x;
+        this._dy = -y;
 
-        if (true) {
-          this._g.translate(-x, -y);     // did work, after all AKa050516
-        } else {  // remove?
-          this._g.children().forEach( function(el) {
-            el.translate(-x,-y);
-          } );
-        }
+        this.pos(xyWas.x, xyWas.y);   // with the new origin applied
 
         return this;
       },
 
-      // Move the 'Gx', absolutely
+      // Move the 'Gx', absolutely, or ask the position
       //
-      pos: function(xy) {   // ({x:Num,y:Num}) -> this
+      // Note: Position is placed as to the origin of the group, so rotations do not matter (the group rotates around
+      //      that origin).
+      //
+      pos: function(x,y) {   // (Num,Num) -> this or () -> {x:Num, y:Num}
+
+        if (x === undefined) {
+          var o = this._g.transform();
+          return {x: o.x, y: o.y}
+
+        } else {
+          this._g.translate( x+this._dx, y+this._dy );
+          return this;
+        }
       },
 
       // Move the 'Gx', relatively
