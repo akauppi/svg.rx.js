@@ -9,6 +9,8 @@ chai.should();
 
 describe('gx', function () {    // Test all 'gx' operations
 
+  var DEG2RAD = Math.PI / 180.0;
+
   beforeEach(function () {
     svg.clear();
   });
@@ -56,25 +58,54 @@ describe('gx', function () {    // Test all 'gx' operations
     o.y.should.be.closeTo( Y, 0.01 );
   });
 
-  xit ('should be relatively moveable', function () {
-    var X= 100,
+  it ('should be possible to change the origin', function () {
+    var X= 200,
       Y= 100,
-      DX= 20,
-      DY= 10;
-    create().pos(X,Y).relpos(DX/2,DY/2).relpos(DX/2,DY/2);   // let's see that the moves are additive
+      OX= 10,
+      OY= 10;
+    var gx= create().pos(X,Y).origin(OX,OY);
 
     var sbox= r.sbox();
-    sbox.x.should.be.closeTo( X+ DX -SIDE/2, 0.01 );
-    sbox.y.should.be.closeTo( Y+ DY -SIDE/2, 0.01 );
+    sbox.x.should.be.closeTo( X-OX, 0.01 );
+    sbox.y.should.be.closeTo( Y-OY, 0.01 );
+
+    // position should still be intact
+    //
+    var o= gx.pos();
+    o.x.should.be.closeTo( X, 0.01 );
+    o.y.should.be.closeTo( Y, 0.01 );
   });
 
-  xit ('should be rotatable', function () {
+  it ('should be rotatable', function () {
+    var X= 200,
+      Y= 100;
     var DEG= 15;
-    create().rotDeg(123).rotDeg(DEG);   // only the last call matters
+    create().pos(X,Y).rotDeg(123).rotDeg(DEG);   // only the last angle matters (non-relative)
+
+    svg.rect(SIDE,SIDE).center(X,Y).rotate(DEG,X,Y).addClass("debug");
+
+    // Where will the top left corner be
+    //
+    var DX= -(Math.cos( (45+DEG) * DEG2RAD ) * SIDE/2),
+      DY= -(Math.sin( (45+DEG) * DEG2RAD ) * SIDE/2);
+
+    // visually, (192, 83) is close to the top left corner
+    //
+    console.log("DX",DX);
+    console.log("DY",DY);
 
     var sbox= r.sbox();
-    sbox.x.should.be.closeTo( 999, 0.01 );
-    sbox.y.should.be.closeTo( 999, 0.01 );
+    sbox.x.should.be.closeTo( X+DX, 0.01 );
+    sbox.y.should.be.closeTo( Y+DY, 0.01 );
+  });
+
+  xit ('should be possible to read the rotation', function () {
+    var X= 100, Y= 200;
+    var DEG= 123;
+    var gx= create().pos(X,Y).rotDeg(DEG);
+
+    var deg= gx.rotDeg();
+    deg.should.be.closeTo( DEG, 0.01 );
   });
 
   xit ('should be possible to read the position (after rotation)', function () {
@@ -87,13 +118,16 @@ describe('gx', function () {    // Test all 'gx' operations
     o.y.should.be.closeTo( Y, 0.01 );
   });
 
-  xit ('should be possible to read the rotation', function () {
-    var X= 100, Y= 200;
-    var DEG= 123;
-    var gx= create().pos(X,Y).rotDeg(DEG);
+  xit ('should be relatively moveable', function () {
+    var X= 100,
+      Y= 100,
+      DX= 20,
+      DY= 10;
+    create().pos(X,Y).relpos(DX/2,DY/2).relpos(DX/2,DY/2);   // let's see that the moves are additive
 
-    var deg= gx.rotDeg();
-    deg.should.be.closeTo( DEG, 0.01 );
+    var sbox= r.sbox();
+    sbox.x.should.be.closeTo( X+ DX -SIDE/2, 0.01 );
+    sbox.y.should.be.closeTo( Y+ DY -SIDE/2, 0.01 );
   });
 
   xit ('should be possible to subscribe to moves', function () {

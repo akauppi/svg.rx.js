@@ -31,8 +31,12 @@ SVG.extend( SVG.Element, {
     // Note: '.getBoundingClientRect()' seems to give a trustworthy response, also when the element has been rotated,
     //      and/or is outside of the positive viewport (neither svg.js '.rbox' or '.tbox' methods do this). AKa060516
     //
+    //      See -> https://developer.mozilla.org/en-US/docs/Web/API/Element/getBoundingClientRect
+    //
     var o = this.native().getBoundingClientRect();
-    console.log("getBoundingClientRect", o);
+
+    var sx = window.scrollX,
+      sy = window.scrollY;
 
     var mySvg_native = this.parent(SVG.Doc).native();   // same as our 'svg' global (but we're more encapsulated this way)
 
@@ -56,16 +60,11 @@ SVG.extend( SVG.Element, {
     var borderLeft = f("border-left-width");
     var borderTop = f("border-top-width");
 
-    console.log( "left", o.left - OFFSET_X - borderLeft );
-    console.log( "right", o.right - OFFSET_X - borderLeft );
-    console.log( "top", o.top - OFFSET_Y - borderTop );
-    console.log( "bottom", o.bottom - OFFSET_Y - borderTop );
-
     return {
-      x: o.left - OFFSET_X - borderLeft,
-      y: o.top - OFFSET_Y - borderTop,
-      x2: o.right - OFFSET_X - borderLeft,
-      y2: o.bottom - OFFSET_Y - borderTop,
+      x: o.left +sx - OFFSET_X - borderLeft,
+      y: o.top +sy - OFFSET_Y - borderTop,
+      x2: o.right +sx - OFFSET_X - borderLeft,
+      y2: o.bottom +sy - OFFSET_Y - borderTop,
       width: o.width,
       height: o.height
 
