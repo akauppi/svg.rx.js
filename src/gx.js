@@ -9,8 +9,7 @@
   //--- Gx---
   //
   // ._g: SVG.Group   The SVG contents (note: caller has no direct access to this group)
-  // ._dx: Num        Offset of origin, used in translates
-  // ._dy: Num        -''-
+  // ._ox, ._oy: Num  Offset of origin (within the given SVG elements)
   //
   var Gx = SVG.invent({
     // Initialize node
@@ -23,7 +22,7 @@
       populateF(g);
 
       this._g = g;
-      this._dx = this._dy = 0;
+      this._ox = this._oy = 0;
     },
 
     // Add class methods
@@ -33,8 +32,8 @@
       origin: function (x, y) {   // (Num, Num) -> this
         var xyWas = this.pos();   // the position without the offset applied
 
-        this._dx = -x;
-        this._dy = -y;
+        this._ox = x;
+        this._oy = y;
 
         this.pos(xyWas.x, xyWas.y);   // with the new origin applied
 
@@ -50,24 +49,32 @@
 
         if (x === undefined) {
           var o = this._g.transform();
-          return {x: o.x, y: o.y}
-
+          console.log("transform",o);
+          return {x: o.x+this._ox, y: o.y+this._oy}
         } else {
-          this._g.translate( x+this._dx, y+this._dy );
+          this._g.translate( x-this._ox, y-this._oy );
           return this;
         }
       },
 
       // Move the 'Gx', relatively
       //
-      relpos: function(xy) {   // ({x:Num,y:Num}) -> this
+      relpos: function(dx,dy) {   // (Num,Num) -> this
+        var o= this.pos();
+        this.pos( o.x+dx, o.y+dy );
+        return this;
       },
 
-      // Rotate the 'Gx', around the origin
+      // Rotate the 'Gx', around the origin, or ask the rotation
       //
-      rotDeg: function(deg) {   // (Num) -> this
-        this._g.rotate(deg);
-        return this;
+      rotDeg: function(deg) {   // (Num) -> this or () -> Num
+        if (deg === undefined) {
+          var deg = this._g.transform("rotation");
+          return deg;
+        } else {
+          this._g.rotate(deg);    // around the group's origin (right?)
+          return this;
+        }
       },
 
     }

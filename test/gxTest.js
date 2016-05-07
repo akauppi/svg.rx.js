@@ -37,8 +37,8 @@ describe('gx', function () {    // Test all 'gx' operations
   });
 
   it ('should be moveable', function () {
-    var X= 200;
-    var Y= 100;
+    var X= 200,
+      Y= 100;
     create().pos(123,456).pos(X,Y);   // only the last '.pos' should matter
 
     var sbox= r.sbox();
@@ -46,14 +46,26 @@ describe('gx', function () {    // Test all 'gx' operations
     sbox.y.should.be.closeTo( Y -SIDE/2, 0.01 );
   });
 
+  it ('should be possible to read the position', function () {    // note: '.relpos' may use this (so test this first)
+    var X= 100, Y= 200;
+    var gx= create().pos(X,Y);
+
+    var o= gx.pos();
+
+    o.x.should.be.closeTo( X, 0.01 );
+    o.y.should.be.closeTo( Y, 0.01 );
+  });
+
   xit ('should be relatively moveable', function () {
-    var DX= 20;
-    var DY= 10;
-    create().relpos(DX/2,DY/2).relpos(DX/2,DY/2);   // let's see that the moves are additive
+    var X= 100,
+      Y= 100,
+      DX= 20,
+      DY= 10;
+    create().pos(X,Y).relpos(DX/2,DY/2).relpos(DX/2,DY/2);   // let's see that the moves are additive
 
     var sbox= r.sbox();
-    sbox.x.should.be.closeTo( DX -SIDE/2, 0.01 );
-    sbox.y.should.be.closeTo( DY -SIDE/2, 0.01 );
+    sbox.x.should.be.closeTo( X+ DX -SIDE/2, 0.01 );
+    sbox.y.should.be.closeTo( Y+ DY -SIDE/2, 0.01 );
   });
 
   xit ('should be rotatable', function () {
@@ -65,15 +77,23 @@ describe('gx', function () {    // Test all 'gx' operations
     sbox.y.should.be.closeTo( 999, 0.01 );
   });
 
-  xit ('should be possible to read the position', function () {
-    var X= 100;
-    var Y= 200;
-    var gx= create().pos(X,Y);
+  xit ('should be possible to read the position (after rotation)', function () {
+    var X= 100, Y= 200;
+    var gx= create().pos(X,Y).rotDeg(12);   // rotation shouldn't matter
 
-    var xy= gx.pos();
+    var o= gx.pos();
 
-    xy.x.should.be.closeTo( X, 0.01 );
-    xy.y.should.be.closeTo( Y, 0.01 );
+    o.x.should.be.closeTo( X, 0.01 );
+    o.y.should.be.closeTo( Y, 0.01 );
+  });
+
+  xit ('should be possible to read the rotation', function () {
+    var X= 100, Y= 200;
+    var DEG= 123;
+    var gx= create().pos(X,Y).rotDeg(DEG);
+
+    var deg= gx.rotDeg();
+    deg.should.be.closeTo( DEG, 0.01 );
   });
 
   xit ('should be possible to subscribe to moves', function () {
