@@ -6,12 +6,7 @@
 (function () {
   "use strict";
 
-  function assert(b,msg) {    // (boolish, String) =>
-    if (!b) {
-      throw ("Assert failed" + (msg ? ": "+msg : ""))
-    }
-  }
-  assert(true);   // just use it up (jshint)
+  assert(true);
 
   // Check the things we will use of 'Rx'
   //

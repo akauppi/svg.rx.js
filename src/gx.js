@@ -1,10 +1,16 @@
 /*
-* svg.gx.js
+* gx.js
 */
 /*jshint devel:true */
 
+// Needed to be globally known so that 'gx.draggable.js' et.al. can extend it.
+//
+var Gx;
+
 (function () {
   "use strict";
+
+  assert(true);
 
   //--- Gx---
   //
@@ -14,7 +20,7 @@
   // Note: It is unsure, whether use of two groups or handling one group and maintaining two matrices is the better
   //      approach, performance-wise. We can try these at some stage, if moving/rotating needs boosting. AKa080516
   //
-  var Gx = SVG.invent({
+  Gx = SVG.invent({
     // Initialize node
     create: function ( parent, populateF ) {    // ( SVG.Container, (SVG.Container) -> )
       //var self = this;

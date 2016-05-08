@@ -1,5 +1,5 @@
 /*
-* test-gx.js
+* gx-test.js
 */
 /*global: SVG, svg, assert, describe, it, beforeEach, afterEach*/
 /*jshint devel: true */
@@ -7,7 +7,7 @@
 var assert = chai.assert;
 chai.should();
 
-describe('gx', function () {    // Test all 'gx' operations
+describe('gx', function () {    // Test 'gx.js' operations
 
   var DEG2RAD = Math.PI / 180.0;
 
@@ -149,6 +149,56 @@ describe('gx', function () {    // Test all 'gx' operations
     sbox.x2.should.be.closeTo( sbox2.x2, 0.01 );
     sbox.y2.should.be.closeTo( sbox2.y2, 0.01 );
   });
+
+  /*** placing the dragging stuff to another file
+  it ('should be possible to drag it', function () {
+    var X= 200,
+      Y= 100,
+      X_END= X+12,
+      Y_END= Y+34;
+
+    var gx= create().pos(X,Y);
+
+    // Make it draggable
+    //
+    gx.draggable(
+
+    );
+
+    /_***
+    // Simulate dragging to (X_END, Y_END)
+    //
+    var canceled = !r.dispatchEvent(
+      new MouseEvent( 'mousedown', {
+        'view': window,
+        'bubbles': true,
+        'cancelable': true
+      });
+    );
+
+    var canceled = !r.dispatchEvent(
+      new MouseEvent( 'mousemove', {
+        // ...
+      });
+    );
+
+    var canceled = !r.dispatchEvent(
+      new MouseEvent( 'mouseend', {
+        // ...
+      });
+    );
+    ***_/
+    var sbox= r.sbox();
+
+    sbox.x.should.be.closeTo( X_END, 0.01 );
+    sbox.y.should.be.closeTo( Y_END, 0.01 );
+  });
+
+  xit ('should be possible to drag it (when rotated)', function () {
+
+    // tbd
+  });
+  ***/
 
   xit ('should be possible to subscribe to moves', function () {
 
