@@ -24,7 +24,7 @@ describe('testing tools', function () {    // sample on how to test positions
     var Y= 50;
     var R= Math.sqrt(SIDE*SIDE/2);
 
-    var DEG= 45;    // within 0..45
+    var DEG= 25;    // within 0..90
 
     // Shift of corners
     //
@@ -40,13 +40,19 @@ describe('testing tools', function () {    // sample on how to test positions
 
     // Visually close to (95,32) (top left corner)
 
+    // The corners should be at:
+    //  top left: (X-A*R, Y-B*R)
+    //  bottom right: (X+B*R, Y+A*R)
+
+    // Note: '.sbox()' provides the overall bounding box within the SVG, not where an individual corner ended up.
+    //
     var o = rect.sbox();
 
-    (o.x).should.be.closeTo( X-A*R, 0.01 );
+    (o.x).should.be.closeTo( X-B*R, 0.01 );
     (o.y).should.be.closeTo( Y-B*R, 0.01 );
     (o.x2).should.be.closeTo( X+B*R, 0.01 );
-    (o.y2).should.be.closeTo( Y+A*R, 0.01 );
-    (o.width).should.be.closeTo(2*Math.max(A,B)*R, 0.01);
-    (o.height).should.be.closeTo(2*Math.max(A,B)*R, 0.01);
+    (o.y2).should.be.closeTo( Y+B*R, 0.01 );
+    //(o.width).should.be.closeTo(2*B*R, 0.01);
+    //(o.height).should.be.closeTo(2*B*R, 0.01);
   });
 });
