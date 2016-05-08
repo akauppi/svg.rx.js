@@ -49,7 +49,6 @@
 
         if (x === undefined) {
           var o = this._g.transform();
-          console.log("transform",o);
           return {x: o.x+this._ox, y: o.y+this._oy}
         } else {
           this._g.translate( x-this._ox, y-this._oy );

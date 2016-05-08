@@ -79,24 +79,19 @@ describe('gx', function () {    // Test all 'gx' operations
   it ('should be rotatable', function () {
     var X= 200,
       Y= 100;
-    var DEG= 15;
+    var DEG= 15;    // 0..90
     create().pos(X,Y).rotDeg(123).rotDeg(DEG);   // only the last angle matters (non-relative)
 
     svg.rect(SIDE,SIDE).center(X,Y).rotate(DEG,X,Y).addClass("debug");
 
-    // Where will the top left corner be
-    //
-    var DX= -(Math.cos( (45+DEG) * DEG2RAD ) * SIDE/2),
-      DY= -(Math.sin( (45+DEG) * DEG2RAD ) * SIDE/2);
+    var R= Math.sqrt(SIDE*SIDE/2);
+    var B= Math.sin( (45+DEG)*DEG2RAD )
 
-    // visually, (192, 83) is close to the top left corner
-    //
-    console.log("DX",DX);
-    console.log("DY",DY);
-
-    var sbox= r.sbox();
-    sbox.x.should.be.closeTo( X+DX, 0.01 );
-    sbox.y.should.be.closeTo( Y+DY, 0.01 );
+    var o= r.sbox();
+    (o.x).should.be.closeTo( X-B*R, 0.01 );
+    (o.y).should.be.closeTo( Y-B*R, 0.01 );
+    (o.x2).should.be.closeTo( X+B*R, 0.01 );
+    (o.y2).should.be.closeTo( Y+B*R, 0.01 );
   });
 
   xit ('should be possible to read the rotation', function () {
@@ -106,6 +101,24 @@ describe('gx', function () {    // Test all 'gx' operations
 
     var deg= gx.rotDeg();
     deg.should.be.closeTo( DEG, 0.01 );
+  });
+
+  xit ('order of movement and rotation should not matter', function () {
+    var X= 200,
+      Y= 100;
+    var DEG= 15;    // 0..90
+    create().rotDeg(DEG).pos(X,Y);   // rotate first, move then
+
+    svg.rect(SIDE,SIDE).center(X,Y).rotate(DEG,X,Y).addClass("debug");
+
+    var R= Math.sqrt(SIDE*SIDE/2);
+    var B= Math.sin( (45+DEG)*DEG2RAD )
+
+    var o= r.sbox();
+    (o.x).should.be.closeTo( X-B*R, 0.01 );
+    (o.y).should.be.closeTo( Y-B*R, 0.01 );
+    (o.x2).should.be.closeTo( X+B*R, 0.01 );
+    (o.y2).should.be.closeTo( Y+B*R, 0.01 );
   });
 
   xit ('should be possible to read the position (after rotation)', function () {
