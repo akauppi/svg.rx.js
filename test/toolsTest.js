@@ -24,7 +24,7 @@ describe('testing tools', function () {    // sample on how to test positions
     var Y= 50;
     var R= Math.sqrt(SIDE*SIDE/2);
 
-    var DEG= 0;    // within 0..45
+    var DEG= 45;    // within 0..45
 
     // Shift of corners
     //
