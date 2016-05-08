@@ -94,7 +94,7 @@ describe('gx', function () {    // Test all 'gx' operations
     (o.y2).should.be.closeTo( Y+B*R, 0.01 );
   });
 
-  xit ('should be possible to read the rotation', function () {
+  it ('should be possible to read the rotation', function () {
     var X= 100, Y= 200;
     var DEG= 123;
     var gx= create().pos(X,Y).rotDeg(DEG);
@@ -103,7 +103,7 @@ describe('gx', function () {    // Test all 'gx' operations
     deg.should.be.closeTo( DEG, 0.01 );
   });
 
-  xit ('order of movement and rotation should not matter', function () {
+  it ('order of movement and rotation should not matter', function () {
     var X= 200,
       Y= 100;
     var DEG= 15;    // 0..90
@@ -121,7 +121,7 @@ describe('gx', function () {    // Test all 'gx' operations
     (o.y2).should.be.closeTo( Y+B*R, 0.01 );
   });
 
-  xit ('should be possible to read the position (after rotation)', function () {
+  it ('should be possible to read the position (after rotation)', function () {
     var X= 100, Y= 200;
     var gx= create().pos(X,Y).rotDeg(12);   // rotation shouldn't matter
 
@@ -131,30 +131,28 @@ describe('gx', function () {    // Test all 'gx' operations
     o.y.should.be.closeTo( Y, 0.01 );
   });
 
-  xit ('should be relatively moveable', function () {
-    var X= 100,
+  it ('should be possible to change the origin (after rotation)', function () {
+    var X= 200,
       Y= 100,
-      DX= 20,
-      DY= 10;
-    create().pos(X,Y).relpos(DX/2,DY/2).relpos(DX/2,DY/2);   // let's see that the moves are additive
+      OX= 10,
+      OY= 10,
+      DEG= 15;
 
+    var gx= create().pos(X,Y).rotDeg(DEG).origin(OX,OY);
     var sbox= r.sbox();
-    sbox.x.should.be.closeTo( X+ DX -SIDE/2, 0.01 );
-    sbox.y.should.be.closeTo( Y+ DY -SIDE/2, 0.01 );
+
+    var gx2= create().origin(OX,OY).pos(X,Y).rotDeg(DEG);   // for control
+    var sbox2= r.sbox();
+
+    sbox.x.should.be.closeTo( sbox2.x, 0.01 );
+    sbox.y.should.be.closeTo( sbox2.y, 0.01 );
+    sbox.x2.should.be.closeTo( sbox2.x2, 0.01 );
+    sbox.y2.should.be.closeTo( sbox2.y2, 0.01 );
   });
 
   xit ('should be possible to subscribe to moves', function () {
 
     // tbd
-  });
-
-  xit ('should be possible to read the rotation', function () {
-    var DEG= 25;
-    var gx= create().rotDeg(DEG);
-
-    var deg= gx.rotDeg();
-
-    deg.should.be.closeTo( DEG, 0.01 );
   });
 
   xit ('should be possible to subscribe to rotations', function () {

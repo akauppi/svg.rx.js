@@ -8,34 +8,35 @@
 
   //--- Gx---
   //
-  // ._g: SVG.Group   The SVG contents (note: caller has no direct access to this group)
-  // ._ox, ._oy: Num  Offset of origin (within the given SVG elements)
+  // ._g2: SVG.Group  Inner group. Origin translation and rotation happen for this group.
+  // ._g: SVG.Group   Outer group. Positioning happens for this group.
+  //
+  // Note: It is unsure, whether use of two groups or handling one group and maintaining two matrices is the better
+  //      approach, performance-wise. We can try these at some stage, if moving/rotating needs boosting. AKa080516
   //
   var Gx = SVG.invent({
     // Initialize node
     create: function ( parent, populateF ) {    // ( SVG.Container, (SVG.Container) -> )
       //var self = this;
 
-      //console.log(parent);    // SVG.Doc
-      var g= parent.group();
-
-      populateF(g);
+      var g = parent.group();
+      var g2 = g.group();
+      populateF(g2);
 
       this._g = g;
-      this._ox = this._oy = 0;
+      this._g2 = g2;
     },
 
     // Add class methods
     extend: {
-      // Set the origin for the contents of the 'Gx'
+      // Set the origin for the contents of the 'Gx' (ie. affect the offset how it's shown). Changing the offset later
+      // allows eg. wobbling of the entity; that's why we keep the option of changing the origin after creation open,
+      // though it might not actually be needed. AKa080516
       //
       origin: function (x, y) {   // (Num, Num) -> this
-        var xyWas = this.pos();   // the position without the offset applied
 
-        this._ox = x;
-        this._oy = y;
-
-        this.pos(xyWas.x, xyWas.y);   // with the new origin applied
+        var deg= this._rotDeg();
+        this._g2.rotate(0).translate(-x,-y).rotate(deg);    // works :)
 
         return this;
       },
@@ -48,34 +49,43 @@
       pos: function(x,y) {   // (Num,Num) -> this or () -> {x:Num, y:Num}
 
         if (x === undefined) {
-          var o = this._g.transform();
-          return {x: o.x+this._ox, y: o.y+this._oy}
+          return this._pos();
         } else {
-          this._g.translate( x-this._ox, y-this._oy );
+          this._g.translate(x,y);
           return this;
         }
       },
 
-      // Move the 'Gx', relatively
-      //
-      relpos: function(dx,dy) {   // (Num,Num) -> this
-        var o= this.pos();
-        this.pos( o.x+dx, o.y+dy );
-        return this;
-      },
-
-      // Rotate the 'Gx', around the origin, or ask the rotation
+      // Rotate the 'Gx', or ask the rotation
       //
       rotDeg: function(deg) {   // (Num) -> this or () -> Num
         if (deg === undefined) {
-          var deg = this._g.transform("rotation");
-          return deg;
+          return this._rotDeg();
         } else {
-          this._g.rotate(deg);    // around the group's origin (right?)
+          this._g2.rotate(deg);     // replace earlier rotation (keep origin translation)
           return this;
         }
       },
 
+      //--- Private methods ---
+
+      _pos: function() {    // () -> {x:Num,y:Num}
+        var o = this._g.transform();
+        return {x: o.x, y: o.y}
+      },
+
+      _rotDeg: function() {     // () -> Num
+
+        // Note: The returned value is not necessarily normalized to [0,360) range (e.g. setting to '123' causes
+        //      the angle '-237' to be read). We do the normalization here. AKa080516
+        //
+        var deg = this._g2.transform("rotation");   // this should be in the (-360,360) range, though?
+
+        var tmp = (deg+360)%360;
+        assert( tmp >= 0 && tmp < 360 );
+
+        return tmp;
+      }
     }
   });
 
