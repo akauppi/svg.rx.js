@@ -135,6 +135,7 @@
     var transformP = function (o /*, offset*/) {   // (MouseEvent or Touch) -> SVGPoint (which has '.x' and '.y')
       buf.x = o.clientX;  // - (offset || 0)
       buf.y = o.clientY;
+
       return buf.matrixTransform(m);
     };
 

@@ -70,5 +70,23 @@ SVG.extend( SVG.Element, {
 
       // 'cx','cy','width','height','w','h' omitted
     }
+  },
+
+  /*
+  * Transform a coordinate from some SVG element to the coordinates of the enclosing SVG.Doc.
+  */
+  transformBack: function (x,y) {    // (Num,Num) -> {x:Num,y:Num}
+    var m= this.ctm();
+
+    console.log(m);
+
+    // This should take into account also rotation.
+    //
+    // See -> http://stackoverflow.com/questions/18554224/getting-screen-positions-of-d3-nodes-after-transform/18561829
+    //
+    return {
+      x: m.e + x*m.a + y*m.c,
+      y: m.f + x*m.b + y*m.d
+    }
   }
 });

@@ -39,10 +39,6 @@
 
         dragObs.subscribe( function (o) {   // ({x:Num, y:Num} ->
           //console.log(o);
-
-          // Note: if we call the callback first, and make it return Boolean, we could introduce constraints even in this
-          //      easier variant, but likely not worth it.
-
           self.pos( o.x, o.y );   // move the object before informing the callback
 
           if (f) f(o.x, o.y);
