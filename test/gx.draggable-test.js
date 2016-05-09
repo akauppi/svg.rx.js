@@ -32,6 +32,53 @@ describe('gx.draggable', function () {    // test 'gx.draggable.js' features
   //
   var simulateDrag= function (dx,dy) {    // (Num,Num) ->
 
+    // Create 'mousedown', 'mousemove' or 'mouseup' events
+    //
+    var mouseEvent = function (eventName, o) {   // (String,Object) -> MouseEvent
+      var ev;
+
+      // Add fields that are same for all calls
+      //
+      o.button = 0;      // 0: primary button
+      o.bubbles = true;
+      o.cancelable = true;    // event's default action can be prevented (does not seem to matter)
+
+      // PhantomJS (at least 1.9.7, which is used by 'mocha-phantomjs' still in May 2016) seems to need a workaround.
+      //
+      // [ ] 'npm install phantomjs-prebuilt' installs a later (2.1.1) PhantomJS. How to make 'mocha-phantomjs' use it? AKa090516
+      //
+      // See -> https://github.com/ariya/phantomjs/issues/11289
+      //
+      try {
+        ev= new MouseEvent( eventName, o );
+      } catch(e) {
+        // PhantomJS
+        //
+        // See -> https://developer.mozilla.org/en-US/docs/Web/API/MouseEvent/initMouseEvent
+        //
+        ev = document.createEvent('MouseEvent');
+        ev.initMouseEvent(
+          eventName,    // type
+          o.bubbles,    // canBubble
+          o.cancelable, // cancelable
+          window,       // view
+          undefined,    // detail
+          undefined,    // screenX
+          undefined,    // screenY
+          o.clientX,    // clientX
+          o.clientY,    // clientY
+          false,        // ctrlKey
+          false,        // altKey
+          false,        // shiftKey
+          false,        // metaKey
+          o.button,     // button
+          null          // relatedTarget ("pass null" - if not 'mouseover' or 'mouseout')
+        );
+      }
+
+      return ev;
+    }
+
     // See:
     //    MouseEvent documentation (Mozilla) -> https://developer.mozilla.org/en-US/docs/Web/API/MouseEvent
     //    Simulating Mouse Events in JavaScript -> http://marcgrabanski.com/simulating-mouse-click-events-in-javascript/
@@ -56,30 +103,9 @@ describe('gx.draggable', function () {    // test 'gx.draggable.js' features
     //
     var CX= 0, CY= 0;   // the constants don't matter
 
-    r_native.dispatchEvent(
-      new MouseEvent( 'mousedown', {
-        button: 0,      // 0: primary button
-        bubbles: true,
-        clientX: CX,
-        clientY: CY
-      })
-    );
-
-    window.dispatchEvent(
-      new MouseEvent( 'mousemove', {
-        button: 0,
-        bubbles: true,
-        clientX: CX+dx,
-        clientY: CY+dy
-      })
-    );
-
-    window.dispatchEvent(
-      new MouseEvent( 'mouseup', {
-        button: 0,
-        bubbles: true
-      })
-    );
+    r_native.dispatchEvent( mouseEvent( 'mousedown', { clientX: CX, clientY: CY } ) );
+    window.dispatchEvent( mouseEvent( 'mousemove', { clientX: CX+dx, clientY: CY+dy } ) );
+    window.dispatchEvent( mouseEvent( 'mouseup', {} ) );
   }
 
   it ('should be possible to drag a\'Gx\'', function () {

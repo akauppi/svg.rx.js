@@ -78,8 +78,6 @@ SVG.extend( SVG.Element, {
   transformBack: function (x,y) {    // (Num,Num) -> {x:Num,y:Num}
     var m= this.ctm();
 
-    console.log(m);
-
     // This should take into account also rotation.
     //
     // See -> http://stackoverflow.com/questions/18554224/getting-screen-positions-of-d3-nodes-after-transform/18561829
