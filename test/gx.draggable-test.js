@@ -128,12 +128,10 @@ describe('gx.draggable', function () {    // test 'gx.draggable.js' features
 
     // The dispatched events seem to be acted upon right away: no need for asynchronic waiting here.
 
-    // tbd. Change the control like below, once 'transformBack' works. AKa080516
+    var o= r.transformBack( r.cx(), r.cy() );
 
-    var sbox= r.sbox();
-
-    sbox.x.should.be.closeTo( X+DX-SIDE/2, 0.01 );
-    sbox.y.should.be.closeTo( Y+DY-SIDE/2, 0.01 );
+    o.x.should.be.closeTo( X+DX, 0.01 );
+    o.y.should.be.closeTo( Y+DY, 0.01 );
   });
 
   it ('should be possible to drag it (when rotated)', function () {

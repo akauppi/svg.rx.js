@@ -4,7 +4,6 @@
 /*global: SVG, svg, assert, describe, it, beforeEach, afterEach*/
 /*jshint devel: true */
 
-var assert = chai.assert;
 chai.should();
 
 describe('gx', function () {    // Test 'gx.js' operations
@@ -30,12 +29,10 @@ describe('gx', function () {    // Test 'gx.js' operations
 
     //svg.rect(SIDE,SIDE).move(0,0).addClass("debug").front();
 
-    var sbox= r.sbox();
+    var o= r.transformBack( r.x(), r.y() );
 
-    //console.log("sbox", sbox);
-
-    sbox.x.should.be.closeTo( -SIDE/2, 0.01 );
-    sbox.y.should.be.closeTo( -SIDE/2, 0.01 );
+    o.x.should.be.closeTo( -SIDE/2, 0.01 );
+    o.y.should.be.closeTo( -SIDE/2, 0.01 );
   });
 
   it ('should be moveable', function () {
@@ -43,9 +40,9 @@ describe('gx', function () {    // Test 'gx.js' operations
       Y= 100;
     create().pos(123,456).pos(X,Y);   // only the last '.pos' should matter
 
-    var sbox= r.sbox();
-    sbox.x.should.be.closeTo( X -SIDE/2, 0.01 );
-    sbox.y.should.be.closeTo( Y -SIDE/2, 0.01 );
+    var o= r.transformBack( r.x(), r.y() );
+    o.x.should.be.closeTo( X -SIDE/2, 0.01 );
+    o.y.should.be.closeTo( Y -SIDE/2, 0.01 );
   });
 
   it ('should be possible to read the position', function () {    // note: '.relpos' may use this (so test this first)
@@ -65,15 +62,15 @@ describe('gx', function () {    // Test 'gx.js' operations
       OY= 10;
     var gx= create().pos(X,Y).origin(OX,OY);
 
-    var sbox= r.sbox();
-    sbox.x.should.be.closeTo( X-OX, 0.01 );
-    sbox.y.should.be.closeTo( Y-OY, 0.01 );
+    var o1= r.transformBack( r.x(), r.y() );
+    o1.x.should.be.closeTo( X-OX, 0.01 );
+    o1.y.should.be.closeTo( Y-OY, 0.01 );
 
     // position should still be intact
     //
-    var o= gx.pos();
-    o.x.should.be.closeTo( X, 0.01 );
-    o.y.should.be.closeTo( Y, 0.01 );
+    var o2= gx.pos();
+    o2.x.should.be.closeTo( X, 0.01 );
+    o2.y.should.be.closeTo( Y, 0.01 );
   });
 
   it ('should be rotatable', function () {
@@ -84,14 +81,17 @@ describe('gx', function () {    // Test 'gx.js' operations
 
     svg.rect(SIDE,SIDE).center(X,Y).rotate(DEG,X,Y).addClass("debug");
 
-    var R= Math.sqrt(SIDE*SIDE/2);
-    var B= Math.sin( (45+DEG)*DEG2RAD )
+    var R= Math.sqrt(SIDE*SIDE/2),
+      A= Math.cos( (45+DEG)*DEG2RAD ),
+      B= Math.sin( (45+DEG)*DEG2RAD );
 
-    var o= r.sbox();
-    (o.x).should.be.closeTo( X-B*R, 0.01 );
-    (o.y).should.be.closeTo( Y-B*R, 0.01 );
-    (o.x2).should.be.closeTo( X+B*R, 0.01 );
-    (o.y2).should.be.closeTo( Y+B*R, 0.01 );
+    var o1= r.transformBack( r.x(), r.y() );
+    (o1.x).should.be.closeTo( X-A*R, 0.01 );
+    (o1.y).should.be.closeTo( Y-B*R, 0.01 );
+
+    var o2= r.transformBack( r.x()+SIDE, r.y()+SIDE );
+    (o2.x).should.be.closeTo( X+A*R, 0.01 );
+    (o2.y).should.be.closeTo( Y+B*R, 0.01 );
   });
 
   it ('should be possible to read the rotation', function () {
@@ -111,14 +111,17 @@ describe('gx', function () {    // Test 'gx.js' operations
 
     svg.rect(SIDE,SIDE).center(X,Y).rotate(DEG,X,Y).addClass("debug");
 
-    var R= Math.sqrt(SIDE*SIDE/2);
-    var B= Math.sin( (45+DEG)*DEG2RAD )
+    var R= Math.sqrt(SIDE*SIDE/2),
+      A= Math.cos( (45+DEG)*DEG2RAD ),
+      B= Math.sin( (45+DEG)*DEG2RAD );
 
-    var o= r.sbox();
-    (o.x).should.be.closeTo( X-B*R, 0.01 );
-    (o.y).should.be.closeTo( Y-B*R, 0.01 );
-    (o.x2).should.be.closeTo( X+B*R, 0.01 );
-    (o.y2).should.be.closeTo( Y+B*R, 0.01 );
+    var o1= r.transformBack( r.x(), r.y() );
+    (o1.x).should.be.closeTo( X-A*R, 0.01 );
+    (o1.y).should.be.closeTo( Y-B*R, 0.01 );
+
+    var o2= r.transformBack( r.x()+SIDE, r.y()+SIDE );
+    (o2.x).should.be.closeTo( X+A*R, 0.01 );
+    (o2.y).should.be.closeTo( Y+B*R, 0.01 );
   });
 
   it ('should be possible to read the position (after rotation)', function () {
@@ -139,68 +142,21 @@ describe('gx', function () {    // Test 'gx.js' operations
       DEG= 15;
 
     var gx= create().pos(X,Y).rotDeg(DEG).origin(OX,OY);
-    var sbox= r.sbox();
+    var o1_tl= r.transformBack( r.x(), r.y() );
+    var o1_br= r.transformBack( r.x()+SIDE, r.y()+SIDE );
 
     var gx2= create().origin(OX,OY).pos(X,Y).rotDeg(DEG);   // for control
-    var sbox2= r.sbox();
+    var o2_tl= r.transformBack( r.x(), r.y() );
+    var o2_br= r.transformBack( r.x()+SIDE, r.y()+SIDE );
 
-    sbox.x.should.be.closeTo( sbox2.x, 0.01 );
-    sbox.y.should.be.closeTo( sbox2.y, 0.01 );
-    sbox.x2.should.be.closeTo( sbox2.x2, 0.01 );
-    sbox.y2.should.be.closeTo( sbox2.y2, 0.01 );
+    o1_tl.x.should.be.closeTo( o2_tl.x, 0.01 );
+    o1_tl.y.should.be.closeTo( o2_tl.y, 0.01 );
+    o1_br.x.should.be.closeTo( o2_br.x, 0.01 );
+    o1_br.y.should.be.closeTo( o2_br.y, 0.01 );
   });
-
-  /*** placing the dragging stuff to another file
-  it ('should be possible to drag it', function () {
-    var X= 200,
-      Y= 100,
-      X_END= X+12,
-      Y_END= Y+34;
-
-    var gx= create().pos(X,Y);
-
-    // Make it draggable
-    //
-    gx.draggable(
-
-    );
-
-    /_***
-    // Simulate dragging to (X_END, Y_END)
-    //
-    var canceled = !r.dispatchEvent(
-      new MouseEvent( 'mousedown', {
-        'view': window,
-        'bubbles': true,
-        'cancelable': true
-      });
-    );
-
-    var canceled = !r.dispatchEvent(
-      new MouseEvent( 'mousemove', {
-        // ...
-      });
-    );
-
-    var canceled = !r.dispatchEvent(
-      new MouseEvent( 'mouseend', {
-        // ...
-      });
-    );
-    ***_/
-    var sbox= r.sbox();
-
-    sbox.x.should.be.closeTo( X_END, 0.01 );
-    sbox.y.should.be.closeTo( Y_END, 0.01 );
-  });
-
-  xit ('should be possible to drag it (when rotated)', function () {
-
-    // tbd
-  });
-  ***/
 
   xit ('should be possible to subscribe to moves', function () {
+
 
     // tbd
   });
