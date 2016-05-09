@@ -11,11 +11,15 @@ var Gx;
   "use strict";
 
   assert(true);
+  assert(Rx.Subject);
 
   //--- Gx---
   //
   // ._g2: SVG.Group  Inner group. Origin translation and rotation happen for this group.
   // ._g: SVG.Group   Outer group. Positioning happens for this group.
+  //
+  // ._obsPos: [observable of {x:Num,y:Num}]    non-null if it has been subscribed at least once
+  // ._obsRotDeg: [observable of Num]           -''-
   //
   // Note: It is unsure, whether use of two groups or handling one group and maintaining two matrices is the better
   //      approach, performance-wise. We can try these at some stage, if moving/rotating needs boosting. AKa080516
@@ -31,6 +35,8 @@ var Gx;
 
       this._g = g;
       this._g2 = g2;
+      this._obsPos = null;
+      this._obsRotDeg = null;
     },
 
     // Add class methods
@@ -58,6 +64,9 @@ var Gx;
           return this._pos();
         } else {
           this._g.translate(x,y);
+          if (this._obsPos) {
+            this._obsPos.next({x:x,y:y});
+          }
           return this;
         }
       },
@@ -69,8 +78,23 @@ var Gx;
           return this._rotDeg();
         } else {
           this._g2.rotate(deg);     // replace earlier rotation (keep origin translation)
+          if (this._obsRotDeg) {
+            this._obsRotDeg.next(deg);
+          }
           return this;
         }
+      },
+
+      // Subscribe to position changes
+      //
+      obsPos: function () {   // () -> observable of {x:Num,y:Num}
+        return this._obsPos= this._obsPos || new Rx.Subject;
+      },
+
+      // Subscribe to rotation changes
+      //
+      obsRotDeg: function () {   // () -> observable of Num
+        return this._obsRotDeg= this._obsRotDeg || new Rx.Subject;
       },
 
       //--- Private methods ---

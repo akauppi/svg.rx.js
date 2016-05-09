@@ -155,15 +155,52 @@ describe('gx', function () {    // Test 'gx.js' operations
     o1_br.y.should.be.closeTo( o2_br.y, 0.01 );
   });
 
-  xit ('should be possible to subscribe to moves', function () {
+  it ('should be possible to subscribe to moves', function () {
+    var X=100, Y=150,
+      X2= X+20, Y2= Y+20;
 
+    var gx= create().pos(X,Y);
 
-    // tbd
+    var obs= gx.obsPos();   // observable of {x:Num,y:Num}
+
+    // Note: Our 'obs' is a 'Subject' (not 'BehaviorSubject') so it's not caching the last value (not that we need that
+    //      either, since it's askable as '.pos').
+
+    var oLast;    // {x:Num,y:Num}
+    obs.subscribe( function (o) {
+      console.log( "notified of move", o.x, o.y );
+      oLast= {x:o.x,y:o.y};
+    } );
+
+    // Move the 'gx' slightly
+    //
+    gx.pos(X2, Y2);
+
+    oLast.x.should.be.closeTo( X2, 0.01 );
+    oLast.y.should.be.closeTo( Y2, 0.01 );
   });
 
-  xit ('should be possible to subscribe to rotations', function () {
+  it ('should be possible to subscribe to rotations', function () {
+    var X=100, Y=150,
+      DEG2= 30,
+      DEG3= 60;
 
-    // tbd
+    var gx= create().pos(X,Y);
+
+    var obs= gx.obsRotDeg();   // observable of Num
+
+    var degLast;    // Num
+    obs.subscribe( function (deg) {
+      console.log( "notified of rotation", deg );
+      degLast= deg;
+    } );
+
+    // Move the 'gx' slightly
+    //
+    gx.rotDeg(DEG2);
+    gx.rotDeg(DEG3);
+
+    degLast.should.be.closeTo( DEG3, 0.01 );
   });
+
 });
-

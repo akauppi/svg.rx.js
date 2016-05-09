@@ -13,10 +13,6 @@
   }
   assert(true);   // just use it up (jshint)
 
-  // tbd. Could get this from main 'svg.rx.js' in some way (non-DRY) AKa310116
-  //
-  var RxJS5 = !!Rx.Subscriber;
-
   SVG.Rx = SVG.Rx || {};
 
 
@@ -56,11 +52,7 @@
     extend: {
       set: function (v) {   // (v:Num) ->
         this.value = v;
-        if (RxJS5) {
-          this._sub.next(v);
-        } else {
-          this._sub.onNext(v);  // RxJS4
-        }
+        this._sub.next(v);
       },
 
       subscribe: function (f) {   // ( ({x:Num,y:Num} ->) -> subscription
