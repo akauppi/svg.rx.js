@@ -4,7 +4,7 @@ div#cradle {
   left: 0;
   /* Note: 99% lets also the right red edge to be shown, even if there are vertical scroll bars (OS X Safari) */
   width: 99%;
-  outline: 1px solid red;
+  border: 1px solid red;
 }
 
 /* DEBUG

@@ -16,6 +16,7 @@
   visibility: initial;
 }
 
+/***
 line.connector {
   stroke-width: 10px;
   stroke: black;
@@ -23,4 +24,5 @@ line.connector {
 line.connector.constrained {
   stroke: red;
 }
+***/
 

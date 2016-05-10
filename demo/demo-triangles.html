@@ -2,9 +2,15 @@
 <head>
   <script src="lib/svg.min.js"></script>
   <script src="lib/Rx.umd.js"></script>
+  <script src="lib/chai.js"></script>
+  <script>
+    var assert = chai.assert;
+  </script>
 
-  <script src="src/assert.js"></script>
+  <script src="src/gx.js"></script>
   <script src="src/svg.rx.js"></script>
+  <script src="src/gx.draggable.js"></script>
+
   <link href="demo-triangles.css" type="text/css" rel="stylesheet" />
 </head>
 
@@ -14,7 +20,7 @@
     <br />Tap or click more triangles - they should get connected to the earlier one.
     <br />Drag triangles around - their connections should follow (turn red if a connection cannot be done with minimum radius).
     <br />Rotate a triangle by (touch) holding a triangle and dragging on the canvas with a second finger; (pointer) shift-drag on the canvas.
-    <br /><font color="red">Still under work</font>
+    <br />Note: The rotation method is brain-dead and won't be used more than in this demo. :)
   </p>
 
   <div id="cradle">
