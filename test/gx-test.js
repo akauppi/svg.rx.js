@@ -203,4 +203,45 @@ describe('gx', function () {    // Test 'gx.js' operations
     degLast.should.be.closeTo( DEG3, 0.01 );
   });
 
+  it ('should be possible to use a symbol for creating a \'gx\'', function () {
+    var X=100,
+      Y=50;
+      R=30,     // radius of the triangle
+      B= R*Math.sqrt(3)/2;
+
+    // Note: SVG symbols must be expressed completely in the positive X,Y areas (the browsers cut out anything else).
+    //    This is an SVG limitation. In practise, using relative drawing commands (lower case) helps with this.
+    //
+    // Note: It seems to be simply a visual thing. The bounding box of the 'use' is still following the actual
+    //    extents of the path (if defined on negative coordinate areas), so tests would pass, but the negative parts
+    //    don't show up on the screen.
+    //
+    var symbol = svg.symbol();
+
+    symbol.path( "M"+(2*R)+","+R+
+      "l"+(-3*R/2)+","+B+
+      "l0,-"+(2*B)+
+      "z");
+
+    var el;
+    var gx= svg.gx( function(g) { el= g.use(symbol); } )
+            .origin( R, R );
+
+    gx.pos(X,Y);
+
+    svg.circle(10).center(X,Y).addClass("debug");
+    svg.circle(2*R).center(X,Y).addClass("debug");
+
+    var box = el.bbox();
+
+    var p1= el.transformBack( box.x, box.y );
+    var p2= el.transformBack( box.x2, box.y2 );
+
+    p1.x.should.be.closeTo( X-R/2, 0.01 );
+    p1.y.should.be.closeTo( Y-B, 0.01 );
+
+    p2.x.should.be.closeTo( X+R, 0.01 );
+    p2.y.should.be.closeTo( Y+B, 0.01 );
+  });
+
 });
