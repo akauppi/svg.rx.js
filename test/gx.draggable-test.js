@@ -4,7 +4,6 @@
 /*global: SVG, svg, assert, describe, it, beforeEach, afterEach*/
 /*jshint devel: true */
 
-var assert = chai.assert;
 chai.should();
 
 describe('gx.draggable', function () {    // test 'gx.draggable.js' features

@@ -24,6 +24,30 @@ describe('gx', function () {    // Test 'gx.js' operations
             .origin( SIDE/2, SIDE/2 );
   }
 
+  function createTriangle(R) {   // (Num) -> { sym: SVG.Symbol, originX: Num, originY: Num }
+    var B= R*Math.sqrt(3)/2;
+
+    // Note: SVG symbols must be expressed completely in the positive X,Y areas (the browsers cut out anything else).
+    //    This is an SVG limitation. In practise, using relative drawing commands (lower case) helps with this.
+    //
+    // Note: It seems to be simply a visual thing. The bounding box of the 'use' is still following the actual
+    //    extents of the path (if defined on negative coordinate areas), so tests would pass, but the negative parts
+    //    don't show up on the screen.
+    //
+    var sym = svg.symbol();
+
+    sym.path( "M"+(2*R)+","+R+
+      "l"+(-3*R/2)+","+B+
+      "l0,-"+(2*B)+
+      "z");
+
+    return {
+      sym: sym,
+      originX: R,
+      originY: R
+    }
+  }
+
   it ('should be possible to create a \'gx\' and set its origin', function () {
     create();
 
@@ -168,7 +192,6 @@ describe('gx', function () {    // Test 'gx.js' operations
 
     var oLast;    // {x:Num,y:Num}
     obs.subscribe( function (o) {
-      console.log( "notified of move", o.x, o.y );
       oLast= {x:o.x,y:o.y};
     } );
 
@@ -191,7 +214,6 @@ describe('gx', function () {    // Test 'gx.js' operations
 
     var degLast;    // Num
     obs.subscribe( function (deg) {
-      console.log( "notified of rotation", deg );
       degLast= deg;
     } );
 
@@ -209,28 +231,155 @@ describe('gx', function () {    // Test 'gx.js' operations
       R=30,     // radius of the triangle
       B= R*Math.sqrt(3)/2;
 
-    // Note: SVG symbols must be expressed completely in the positive X,Y areas (the browsers cut out anything else).
-    //    This is an SVG limitation. In practise, using relative drawing commands (lower case) helps with this.
-    //
-    // Note: It seems to be simply a visual thing. The bounding box of the 'use' is still following the actual
-    //    extents of the path (if defined on negative coordinate areas), so tests would pass, but the negative parts
-    //    don't show up on the screen.
-    //
-    var symbol = svg.symbol();
-
-    symbol.path( "M"+(2*R)+","+R+
-      "l"+(-3*R/2)+","+B+
-      "l0,-"+(2*B)+
-      "z");
+    var o = createTriangle(R);
 
     var el;
-    var gx= svg.gx( function(g) { el= g.use(symbol); } )
-            .origin( R, R );
+    var gx= svg.gx( function(g) { el= g.use(o.sym); } )
+            .origin( o.originX, o.originY );
 
     gx.pos(X,Y);
 
     svg.circle(10).center(X,Y).addClass("debug");
     svg.circle(2*R).center(X,Y).addClass("debug");
+
+    var box = el.bbox();
+
+    var p1= el.transformBack( box.x, box.y );
+    var p2= el.transformBack( box.x2, box.y2 );
+
+    p1.x.should.be.closeTo( X-R/2, 0.01 );
+    p1.y.should.be.closeTo( Y-B, 0.01 );
+
+    p2.x.should.be.closeTo( X+R, 0.01 );
+    p2.y.should.be.closeTo( Y+B, 0.01 );
+  });
+
+  // This possibility is essential for making custom components
+  //
+  it ('should be possible to derive from \'Gx\'', function () {
+    var X=100,
+      Y=50;
+      R=30,     // radius of the triangle
+      B= R*Math.sqrt(3)/2;
+
+    assert(Gx);   // the constructor should be available
+
+    // Create the symbols just once.
+    //
+    var o = createTriangle(R);
+
+    //--- GxTriangle ---
+    //
+    // Use:
+    //    <parent>.gxTriangle()       // () -> GxTriangle
+    //
+    // ._xxx: String    Dummy member for testing
+    // ._use: SVG.Use   Access for testing
+    //
+    // Note: Using bare ES5 derivation, since didn't get the 'SVG.invent' to work for us (also, better not to rely
+    //      on 'svg.js' at this higher level). AKa150516
+    //
+    // References:
+    //    JavaScript Inheritance Done Right (blog)
+    //    -> https://ncombo.wordpress.com/2013/07/11/javascript-inheritance-done-right/
+    //
+    var GxTriangle = function (parent) {    // (SVGDoc) ->
+      var self= this;
+
+      Gx.call(this, parent, function (g) {
+        self._use= g.use(o.sym);
+      });
+
+      this.origin( o.originX, o.originY );
+
+      this._xxx = "xxx";
+    }
+
+    // Note: There's a whole land behind the 'Object.create' 'propertiesObject' parameter (optional) that allows things
+    //    like getters and setters. However, didn't get it initially to work. AKa150516
+    //
+    //    See -> https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/create
+    //
+    GxTriangle.prototype = Object.create( Gx.prototype );
+
+    // The way recommended in the blog (link above).
+    //
+    GxTriangle.prototype.xxx = function () {
+      console.log( "WITHIN .xxx" );
+      return this._xxx;
+    }
+
+    // 'Object.create' documentation mentions this, but the blog (see above) says it's not needed.
+    //
+    GxTriangle.prototype.constructor = GxTriangle;
+
+    SVG.extend( SVG.Doc, {
+      gxTriangle: function () {
+        return new GxTriangle(this);    // tbd. maybe we shouldn't use 'new' (see the blog)
+      }
+    });
+
+    /*** REMOVE
+    var GxTriangle = SVG.invent( {
+      create: function (parent) {   // (SVG.Doc) ->
+        var self= this;
+
+        console.log("CREATE", this);
+
+        // tbd. how to add the 'Gx'?
+        //
+        Gx.call( this, parent, function(g) {
+          self._use= g.use(sym);
+        } );
+
+        this._xxx = "xxx";
+      },
+
+      // hmm... This is optional, and caused problems if enabled. AKa150516
+      //  >>
+      //    TypeError: undefined is not an object (evaluating 'parent.group')create@src/gx.js:32:21
+      //    invent@lib/svg.min.js:1:2938
+      //    gx-test.js:293:32
+      //  >>
+      //inherit: Gx,
+
+      extend: {
+        xxx: function () {
+          return this._xxx;
+        }
+      },
+
+      // Add method to SVG parent elements, for creating the object
+      //
+      construct: {
+        gxTriangle: function () {
+          console.log("CONSTRUCT");
+          return new GxTriangle(this);
+        }
+      },
+
+      // Restrict creation to under 'SVG.Document' (like 'Gx' is)
+      //
+      parent: SVG.Document
+    });
+    ***/
+
+    var gxt= svg.gxTriangle().pos(X,Y);
+
+    // extended methods should work
+    //
+    gxt.xxx().should.be.string("xxx");
+
+    // 'isInstanceOf' should acknowledge both of the relations
+    //
+    (gxt instanceof GxTriangle).should.be.true;
+    (gxt instanceof Gx).should.be.true;
+
+    svg.circle(10).center(X,Y).addClass("debug");
+    svg.circle(2*R).center(X,Y).addClass("debug");
+
+    var el= gxt._use;
+    assert(el);
 
     var box = el.bbox();
 

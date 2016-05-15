@@ -13,7 +13,7 @@ var Gx;
   assert(true);
   assert(Rx.Subject);
 
-  //--- Gx---
+  //--- Gx ---
   //
   // ._g2: SVG.Group  Inner group. Origin translation and rotation happen for this group.
   // ._g: SVG.Group   Outer group. Positioning happens for this group.
@@ -26,7 +26,7 @@ var Gx;
   //
   Gx = SVG.invent({
     // Initialize node
-    create: function ( parent, populateF ) {    // ( SVG.Container, (SVG.Container) -> )
+    create: function ( parent, populateF ) {    // ( SVG.Doc, (SVG.Container) -> )
       //var self = this;
 
       var g = parent.group();
@@ -116,22 +116,26 @@ var Gx;
 
         return tmp;
       }
-    }
-  });
+    },
 
-  //---
-  // Add the '.gx' method to the SVG document (not a method of say 'SVG.G'; we want to keep the SVG libraries
-  // subordinate to the 'gx' concept). AKa050516
-  //
-  // Note: Later, maybe, we'd allow creating sub-gx'es within a 'gx'.
-  //
-  SVG.extend( SVG.Doc, {
+    construct: {
+      gx: function( populateF ) {    // ( (SVG.Container) -> ) -> Gx
+        //console.log(this);    // SVG.Doc
 
-    gx: function( populateF ) {    // ( (SVG.Container) -> ) -> Gx
-      //console.log(this);    // SVG.Doc
+        // tbd. According to the svg.js documentation, this would be:
+        //  <<
+        //    return this.put(new Gx(this, populateF));
+        //  <<
+        //
+        return new Gx(this, populateF);
+      }
+    },
 
-      return new Gx(this, populateF);
-    }
+    /*
+    * Restrict creation to 'SVG.Document' (not e.g. under 'SVG.G'), to keep svg.js subordinate to Gx system
+    * (so we can eventually replace it, and/or add support for raw SVG for describing the elements).
+    */
+    parent: SVG.Document
   });
 
 })();
