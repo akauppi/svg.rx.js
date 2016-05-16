@@ -286,6 +286,8 @@ describe('gx', function () {    // Test 'gx.js' operations
     var GxTriangle = function (parent) {    // (SVGDoc) ->
       var self= this;
 
+      // super class's constructor
+      //
       Gx.call(this, parent, function (g) {
         self._use= g.use(o.sym);
       });
@@ -311,6 +313,7 @@ describe('gx', function () {    // Test 'gx.js' operations
 
     // 'Object.create' documentation mentions this, but the blog (see above) says it's not needed.
     //
+    // tbd. disable
     GxTriangle.prototype.constructor = GxTriangle;
 
     SVG.extend( SVG.Doc, {
