@@ -29,8 +29,6 @@ var Gx;
   //      approach, performance-wise. We can try these at some stage, if moving/rotating needs boosting. AKa080516
   //
   Gx = function (parent, populateF) {    // ( SVG.Doc, (SVG.Container) -> )
-    //if (!arguments.length) return;    // use in getting a prototype holder (enable if 'prototype: new Gx' is being used in derived types)
-
     var g = parent.group();
     var g2 = g.group();
     populateF(g2);
@@ -132,13 +130,6 @@ var Gx;
   */
   SVG.extend( SVG.Doc, {
     gx: function (populateF) {  // ( (SVG.Container) -> ) -> Gx
-
-      // tbd. According to the svg.js documentation, this would be:
-      //      (this can probably be done if 'svg.js' provides a way to create nodes in the wild, without attaching to a certain SVG) AKa170516
-      //  <<
-      //    return this.put(new Gx(populateF));
-      //  <<
-      //
       return new Gx(this, populateF);
     }
   });

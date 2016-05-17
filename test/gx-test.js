@@ -288,15 +288,12 @@ describe('gx', function () {    // Test 'gx.js' operations
     //    -> https://ncombo.wordpress.com/2013/07/11/javascript-inheritance-done-right/
     //
     var GxTriangle = function (parent) {    // (SVGDoc) ->
-      //assert (arguments.length);    // not meant to be inherited further
-
       var self= this;
 
       Gx.call( this, parent, function (g) {   // tbd. how to do this?
         self._use= g.use(sym);
       });
 
-      console.log(this);
       this.origin( originX, originY );
 
       this._xxx = "xxx";
@@ -317,9 +314,6 @@ describe('gx', function () {    // Test 'gx.js' operations
 
     SVG.extend( SVG.Doc, {
       gxTriangle: function () {
-        // tbd. could be
-        //  return this.put( new GxTriangle );
-        //
         return new GxTriangle(this);
       }
     });
