@@ -1,5 +1,9 @@
 /*
 * gx.js
+*
+* References:
+*   Inheritance and the prototype chain
+*     -> https://developer.mozilla.org/en-US/docs/Web/JavaScript/Inheritance_and_the_prototype_chain
 */
 /*jshint devel:true */
 
@@ -13,24 +17,6 @@ var Gx;
   assert(true);
   assert(Rx.Subject);
 
-  // Prepare a prototype object for a class.
-  //
-  // Like 'Object.create' but takes a normal table of methods instead of the (more boilerplate heavy) properties object.
-  // The parameters are intentionally akin to 'Object.create'.
-  //
-  // The class constructor (and calling the supertype constructor within it) still needs to be done separately (it's
-  // actually a good thing; same as with 'Object.create').
-  //
-  var create = function (Super, methods) {   // (Class, { method: function [, ...] }) -> prototype Object
-    var pt = Object.create(Super);
-
-    for( var k in methods ) {
-      pt[k]= methods[k];
-    }
-
-    return pt;
-  }
-
   //--- Gx ---
   //
   // ._g2: SVG.Group  Inner group. Origin translation and rotation happen for this group.
@@ -42,12 +28,14 @@ var Gx;
   // Note: It is unsure, whether use of two groups or handling one group and maintaining two matrices is the better
   //      approach, performance-wise. We can try these at some stage, if moving/rotating needs boosting. AKa080516
   //
-  Gx = function (parent, populateF) {    // ( SVG.Doc, (SVG.Container) -> ) ->
+  Gx = function (parent, populateF) {    // ( SVG.Doc, (SVG.Container) -> )
+    //if (!arguments.length) return;    // use in getting a prototype holder (enable if 'prototype: new Gx' is being used in derived types)
+
     var g = parent.group();
     var g2 = g.group();
     populateF(g2);
 
-    // X.call(this);   // no super class constructor to call
+    // X.call(this, ...);   // no super class constructor to call
 
     this._g = g;
     this._g2 = g2;
@@ -55,14 +43,11 @@ var Gx;
     this._obsRotDeg = null;
   };
 
-  // --- Static methods ---
-  //
-  Gx.create = create;
-
-  Gx.prototype = Gx.create( Object, {
+  Gx.prototype = {
+    prototype: null,     // marking we are the base
+    constructor: Gx,
 
     // --- Public methods ---
-    //
 
     // Set the origin for the contents of the 'Gx' (ie. affect the offset how it's shown). Changing the offset later
     // allows eg. wobbling of the entity; that's why we keep the option of changing the origin after creation open,
@@ -139,7 +124,7 @@ var Gx;
 
       return tmp;
     }
-  });
+  };
 
   /*
   * Restrict creation to 'SVG.Document' (not e.g. under 'SVG.G'), to keep svg.js subordinate to Gx system
@@ -149,8 +134,9 @@ var Gx;
     gx: function (populateF) {  // ( (SVG.Container) -> ) -> Gx
 
       // tbd. According to the svg.js documentation, this would be:
+      //      (this can probably be done if 'svg.js' provides a way to create nodes in the wild, without attaching to a certain SVG) AKa170516
       //  <<
-      //    return this.put(new Gx(this, populateF));
+      //    return this.put(new Gx(populateF));
       //  <<
       //
       return new Gx(this, populateF);

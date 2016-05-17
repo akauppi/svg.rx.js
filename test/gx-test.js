@@ -268,6 +268,10 @@ describe('gx', function () {    // Test 'gx.js' operations
     //
     var o = createTriangle(R);
 
+    var sym = o.sym,
+      originX = o.originX,
+      originY = o.originY;
+
     //--- GxTriangle ---
     //
     // Use:
@@ -284,88 +288,41 @@ describe('gx', function () {    // Test 'gx.js' operations
     //    -> https://ncombo.wordpress.com/2013/07/11/javascript-inheritance-done-right/
     //
     var GxTriangle = function (parent) {    // (SVGDoc) ->
+      //assert (arguments.length);    // not meant to be inherited further
+
       var self= this;
 
-      // super class's constructor
-      //
-      Gx.call(this, parent, function (g) {
-        self._use= g.use(o.sym);
+      Gx.call( this, parent, function (g) {   // tbd. how to do this?
+        self._use= g.use(sym);
       });
 
-      this.origin( o.originX, o.originY );
+      console.log(this);
+      this.origin( originX, originY );
 
       this._xxx = "xxx";
-    }
+    };
 
-    // Note: There's a whole land behind the 'Object.create' 'propertiesObject' parameter (optional) that allows things
-    //    like getters and setters. However, didn't get it initially to work. AKa150516
+    // Note: Use 'Object.assign()' to merge two prototype tables together. 'Object.create()' would use a properties table
+    //      (more elaborate); these approaches can be also used together. AKa170516
     //
-    //    See -> https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/create
+    // Note: Problem with 'Object.assign()' would be that 'x instanceof Super' no longer holds; each type would simply
+    //      show as the topmost class. We might want more. 'Object.create()' seems to work right (and we might wish
+    //      eventually to use the property tables). AKa170516
     //
-    GxTriangle.prototype = Object.create( Gx.prototype );
+    GxTriangle.prototype = Object.create(Gx.prototype);
 
-    // The way recommended in the blog (link above).
-    //
     GxTriangle.prototype.xxx = function () {
-      console.log( "WITHIN .xxx" );
       return this._xxx;
     }
 
-    // 'Object.create' documentation mentions this, but the blog (see above) says it's not needed.
-    //
-    // tbd. disable
-    GxTriangle.prototype.constructor = GxTriangle;
-
     SVG.extend( SVG.Doc, {
       gxTriangle: function () {
-        return new GxTriangle(this);    // tbd. maybe we shouldn't use 'new' (see the blog)
+        // tbd. could be
+        //  return this.put( new GxTriangle );
+        //
+        return new GxTriangle(this);
       }
     });
-
-    /*** REMOVE
-    var GxTriangle = SVG.invent( {
-      create: function (parent) {   // (SVG.Doc) ->
-        var self= this;
-
-        console.log("CREATE", this);
-
-        // tbd. how to add the 'Gx'?
-        //
-        Gx.call( this, parent, function(g) {
-          self._use= g.use(sym);
-        } );
-
-        this._xxx = "xxx";
-      },
-
-      // hmm... This is optional, and caused problems if enabled. AKa150516
-      //  >>
-      //    TypeError: undefined is not an object (evaluating 'parent.group')create@src/gx.js:32:21
-      //    invent@lib/svg.min.js:1:2938
-      //    gx-test.js:293:32
-      //  >>
-      //inherit: Gx,
-
-      extend: {
-        xxx: function () {
-          return this._xxx;
-        }
-      },
-
-      // Add method to SVG parent elements, for creating the object
-      //
-      construct: {
-        gxTriangle: function () {
-          console.log("CONSTRUCT");
-          return new GxTriangle(this);
-        }
-      },
-
-      // Restrict creation to under 'SVG.Document' (like 'Gx' is)
-      //
-      parent: SVG.Document
-    });
-    ***/
 
     var gxt= svg.gxTriangle().pos(X,Y);
 
