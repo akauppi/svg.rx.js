@@ -145,6 +145,31 @@ var Gx;
     }
   };
 
+  //--- Static methods ---
+
+  /*
+  * Caching service. Allows creation of a value just once, for an SVG element. The initial use case is to create
+  * an 'SVG.Symbol' just once for each 'SVG.Doc' that needs it.
+  *
+  * Note: 'key' is intended to be sufficiently unique.
+  */
+  Gx.cache = function (el, key, f) {      // ( SVG.Element, String, (SVG.Element) -> T ) -> T
+
+    var v = el.remember(key);
+    if (v === undefined) {
+      v= f(el);
+      assert( v !== undefined );
+
+      el.remember(key,v);
+      console.log( "Set in cache", v );
+
+    } else {
+      console.log( "Fetched from cache: ", v );
+    }
+
+    return v;
+  }
+
   /*
   * Restrict creation to 'SVG.Document' (not e.g. under 'SVG.G'), to keep svg.js subordinate to Gx system
   * (so we can eventually replace it, and/or add support for raw SVG for describing the elements).

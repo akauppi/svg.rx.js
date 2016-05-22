@@ -355,4 +355,26 @@ describe('gx', function () {    // Test 'gx.js' operations
     el.hasClass("some").should.be.false;
   });
 
+  it ('should have a caching feature \'Gx.cache\'', function () {
+    var el= svg;
+    var KEY = "~gx-test-cache";
+    var VAL = {};
+
+    // On the first round, the function should get called
+    //
+    var v= Gx.cache( el, KEY, function () {
+      return VAL;
+    } );
+
+    v.should.be.equal(VAL);
+
+    // On the second round, the function should not get called
+    //
+    v= Gx.cache( el, KEY, function () {
+      assert(false);
+    } );
+
+    v.should.be.equal(VAL);
+  });
+
 });
