@@ -4,6 +4,7 @@
 /*jshint devel: true */
 /*globals assert, Gx */
 
+var RAD2DEG = (360.0 / Math.PI);
 
 /*
 * '.gxTriangle' component
@@ -49,8 +50,18 @@
       return sym;
     } ) );
 
+    Gx.call( this, parent, use, "gxTriangle" );
+
+    this.origin( originX, originY );
+
+    this._xxx = "xxx";
+
+    this.draggable( function () {   // drag started
+      self.select();
+    });
+
     (function () {  // scope
-      var g2 = parent.group().addClass("handle").back();
+      var g2 = self.el().group().addClass("handle").back();
         //
         g2.line(0,0,D,0);
         var dot= g2.circle(15).center(D,0);
@@ -71,16 +82,6 @@
           } );
       } );
     })();
-
-    Gx.call( this, parent, use, "gxTriangle" );
-
-    this.origin( originX, originY );
-
-    this._xxx = "xxx";
-
-    this.draggable( function () {   // drag started
-      self.select();
-    });
   };
 
   GxTriangle.prototype = Object.create(Gx.prototype);

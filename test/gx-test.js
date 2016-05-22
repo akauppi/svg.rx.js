@@ -234,7 +234,7 @@ describe('gx', function () {    // Test 'gx.js' operations
     var o = createTriangle(R);
 
     var el;
-    var gx= svg.gx( function(g) { el= g.use(o.sym); } )
+    var gx= svg.gx( el= svg.use(o.sym) )
             .origin( o.originX, o.originY );
 
     gx.pos(X,Y);

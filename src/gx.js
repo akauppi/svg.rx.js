@@ -19,8 +19,8 @@ var Gx;
 
   //--- Gx ---
   //
-  // ._g2: SVG.Group  Inner group. Origin translation and rotation happen for this group.
-  // ._g: SVG.Group   Outer group. Positioning happens for this group.
+  // ._g: SVG.Group         Outer group. Positioning happens for this group.
+  // ._inner: SVG.Element   Inner element (from the caller). Origin translation and rotation happen for this group.
   //
   // ._obsPos: [observable of {x:Num,y:Num}]    non-null if it has been subscribed at least once
   // ._obsRotDeg: [observable of Num]           -''-
@@ -37,18 +37,25 @@ var Gx;
   //
   Gx = function (parent, elOrF, className) {    // ( SVG.Doc, SVG.Element | (SVG.Container) -> [, String] )
     var g = parent.group();
-    var g2 = g.group();
+    var el;
 
     if (typeof elOrF=== "function") {
-      elOrF(g2);
+      alert( "This is no longer a used path" );
+      el = g.group();
+      elOrF(el);
     } else {
-      g2.add(elOrF);
+      el = elOrF;
+      g.add(elOrF);
+    }
+
+    if (className) {
+      g.addClass(className);
     }
 
     // X.call(this, ...);   // no super class constructor to call
 
     this._g = g;
-    this._g2 = g2;
+    this._inner = el;
     this._obsPos = null;
     this._obsRotDeg = null;
   };
@@ -66,7 +73,7 @@ var Gx;
     origin: function (x, y) {   // (Num, Num) -> this
 
       var deg= this._rotDeg();
-      this._g2.rotate(0).translate(-x,-y).rotate(deg);    // works :)
+      this._inner.rotate(0).translate(-x,-y).rotate(deg);    // works :)
 
       return this;
     },
@@ -95,7 +102,7 @@ var Gx;
       if (deg === undefined) {
         return this._rotDeg();
       } else {
-        this._g2.rotate(deg);     // replace earlier rotation (keep origin translation)
+        this._inner.rotate(deg);     // replace earlier rotation (keep origin translation)
         if (this._obsRotDeg) {
           this._obsRotDeg.next(deg);
         }
@@ -135,7 +142,7 @@ var Gx;
       // Note: The returned value is not necessarily normalized to [0,360) range (e.g. setting to '123' causes
       //      the angle '-237' to be read). We do the normalization here. AKa080516
       //
-      var deg = this._g2.transform("rotation");   // this should be in the (-360,360) range, though?
+      var deg = this._inner.transform("rotation");   // this should be in the (-360,360) range, though?
 
       var tmp = (deg+360)%360;
       assert( tmp >= 0 && tmp < 360 );

@@ -20,7 +20,7 @@ describe('gx.draggable', function () {    // test 'gx.draggable.js' features
 
   var r;
   function create() {
-    return svg.gx( function(g) { r= g.rect(SIDE,SIDE); } )
+    return svg.gx( r= svg.rect(SIDE,SIDE) )
             .origin( SIDE/2, SIDE/2 );
   }
 
