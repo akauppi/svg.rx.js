@@ -318,8 +318,11 @@ describe('gx', function () {    // Test 'gx.js' operations
 
     // 'isInstanceOf' should acknowledge both of the relations
     //
-    (gxt instanceof GxSub).should.be.true;
-    (gxt instanceof Gx).should.be.true;
+    //(gxt instanceof GxSub).should.be.true;
+    //(gxt instanceof Gx).should.be.true;
+
+    gxt.should.be.an.instanceof(GxSub);
+    gxt.should.be.an.instanceof(Gx);
 
     svg.circle(10).center(X,Y).addClass("debug");
     svg.circle(2*R).center(X,Y).addClass("debug");
@@ -342,7 +345,7 @@ describe('gx', function () {    // Test 'gx.js' operations
   it ('should be possible to get the top level SVG element of the \'gx\'', function () {
     var gx = create();
 
-    var el = gx.el();
+    var el = gx.el(true);
 
     el.should.be.equal(gx._g);    // checking against implementation detail (i.e. that it's the top level container)
 
@@ -353,6 +356,35 @@ describe('gx', function () {    // Test 'gx.js' operations
 
     el.removeClass("some");
     el.hasClass("some").should.be.false;
+  });
+
+  // This is for adding more stuff to the object
+  //
+  // Note: Something in this test makes it run longer (and get red-tagged in Mocha UI): ~108ms AKa220516
+  //
+  it ('should be possible to get the inner container SVG element of the \'gx\'', function () {
+    var X= 100,
+      Y= 50,
+      DEG= 45;
+
+    var gx = create().pos(X,Y).rotDeg(DEG);
+
+    var inner = gx.el();
+
+    // Add another entry, see if it's a sibling of 'r'
+    //
+    var circle= inner.circle(20);
+
+    var siblings = r.siblings();
+
+    console.log( "siblings", siblings);   // expecting 'r' and 'circle'
+
+    // Note: For some reason, both '.should.contain' and '.should.include' are actually slow (~100ms) and cause the
+    //      red tag (unnecessarily) for this test. Don't use them. (this is with Mocha 2.4.5) AKa220516
+    //
+    //siblings.should.contain(circle);
+
+    siblings.includes(circle).should.be.true;     // provides no such flag
   });
 
   it ('should have a caching feature \'Gx.cache\'', function () {

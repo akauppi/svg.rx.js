@@ -37,25 +37,23 @@ var Gx;
   //
   Gx = function (parent, elOrF, className) {    // ( SVG.Doc, SVG.Element | (SVG.Container) -> [, String] )
     var g = parent.group();
-    var el;
+    var inner = g.group();
 
     if (typeof elOrF=== "function") {
       alert( "This is no longer a used path" );
-      el = g.group();
-      elOrF(el);
+      elOrF(inner);
     } else {
-      el = elOrF;
-      g.add(elOrF);
+      inner.add(elOrF);
     }
 
     if (className) {
-      g.addClass(className);
+      g.addClass(className);    // add class to the top level group
     }
 
     // X.call(this, ...);   // no super class constructor to call
 
     this._g = g;
-    this._inner = el;
+    this._inner = inner;
     this._obsPos = null;
     this._obsRotDeg = null;
   };
@@ -122,12 +120,15 @@ var Gx;
       return this._obsRotDeg= this._obsRotDeg || new Rx.Subject;
     },
 
-    // Return the top level element of the 'Gx'
+    // Return the top level, or the inner element of the 'Gx'
     //
-    //  for 'addClass', 'removeClass' etc. SVG-level actions
+    //  for 'addClass', 'removeClass' etc. SVG-level actions, look for the top level element ('top'==true)
+    //  for adding more elements to the component, just call '.el()'
     //
-    el: function () {   // () -> SVG.Container
-      return this._g;
+    // Note: It is possible we merge these two group levels, later. If we do, the 'top' parameter can be ignored. AKa220516
+    //
+    el: function (top) {   // ( [Boolean] ) -> SVG.Container
+      return top ? this._g : this._inner;
     },
 
     //--- Private methods ---
@@ -142,7 +143,7 @@ var Gx;
       // Note: The returned value is not necessarily normalized to [0,360) range (e.g. setting to '123' causes
       //      the angle '-237' to be read). We do the normalization here. AKa080516
       //
-      var deg = this._inner.transform("rotation");   // this should be in the (-360,360) range, though?
+      var deg = this._inner.transform("rotation");
 
       var tmp = (deg+360)%360;
       assert( tmp >= 0 && tmp < 360 );

@@ -19,8 +19,7 @@ var RAD2DEG = (360.0 / Math.PI);
   // Note: The symbol needs to be defined completely in the positive x/y quadrant; the rest is not going to be visible.
   //
   var R=30,     // radius of the triangle
-    B= R*Math.sqrt(3)/2,
-    D = 1.8*B;    // distance of the rotation handle from the origin
+    B= R*Math.sqrt(3)/2;
 
   var originX = R,
     originY = R;
@@ -50,21 +49,16 @@ var RAD2DEG = (360.0 / Math.PI);
       return sym;
     } ) );
 
-    Gx.call( this, parent, use, "gxTriangle" );
+    // tbd. Could detach this from each triangle, and only show/drag along the selected one. Less entries in the DOM.
+    //    And/or... having it as a separate 'Gx'. AKa220516
+    //
+    var handle = (function () {  // scope
+      var D = 1.8*B;    // distance of the rotation handle from the origin
 
-    this.origin( originX, originY );
-
-    this._xxx = "xxx";
-
-    this.draggable( function () {   // drag started
-      self.select();
-    });
-
-    (function () {  // scope
-      var g2 = self.el().group().addClass("handle").back();
+      var g = parent.group().addClass("handle");
         //
-        g2.line(0,0,D,0);
-        var dot= g2.circle(15).center(D,0);
+        g.line(0,0,D,0);
+        var dot= g.circle(15).center(D,0);
 
       // Make handle change the rotation of the group
       //
@@ -73,7 +67,6 @@ var RAD2DEG = (360.0 / Math.PI);
           var preDeg = self.rotDeg();    // keep initial rotation
 
           dragObs.subscribe( function(o) {       // {x:Int,y:Int}
-
             console.log(o.y, o.x);
             var rad = Math.atan2(o.y,o.x);
             self.rotDeg(preDeg + rad * RAD2DEG);
@@ -81,7 +74,24 @@ var RAD2DEG = (360.0 / Math.PI);
           function () {   // drag ended
           } );
       } );
+
+      return g;
     })();
+
+    var group = parent.group();
+      //
+      group.add(use);
+      group.add(handle);
+
+    Gx.call( this, parent, group, "gxTriangle" );
+
+    this.origin( originX, originY );
+
+    this._xxx = "xxx";
+
+    this.draggable( function () {   // drag started
+      self.select();
+    });
   };
 
   GxTriangle.prototype = Object.create(Gx.prototype);
@@ -90,7 +100,7 @@ var RAD2DEG = (360.0 / Math.PI);
   * Marks the triangle as selected; clears an earlier selection
   */
   GxTriangle.prototype.select = function () {
-    var el = this.el();
+    var el = this.el(true);
 
     el.parent().select(".selected").removeClass("selected");
     el.addClass("selected");
