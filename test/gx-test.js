@@ -20,7 +20,7 @@ describe('gx', function () {    // Test 'gx.js' operations
 
   var r;
   function create() {
-    return svg.gx( function(g) { r= g.rect(SIDE,SIDE); } )
+    return svg.gx( r= svg.rect(SIDE,SIDE) )
             .origin( SIDE/2, SIDE/2 );
   }
 
@@ -337,6 +337,22 @@ describe('gx', function () {    // Test 'gx.js' operations
 
     p2.x.should.be.closeTo( X+R, 0.01 );
     p2.y.should.be.closeTo( Y+B, 0.01 );
+  });
+
+  it ('should be possible to get the top level SVG element of the \'gx\'', function () {
+    var gx = create();
+
+    var el = gx.el();
+
+    el.should.be.equal(gx._g);    // checking against implementation detail (i.e. that it's the top level container)
+
+    (el instanceof SVG.Element).should.be.true;    // if it is, ".addClass" etc. will work
+
+    el.addClass("some");
+    el.hasClass("some").should.be.true;
+
+    el.removeClass("some");
+    el.hasClass("some").should.be.false;
   });
 
 });

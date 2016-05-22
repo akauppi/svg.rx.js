@@ -116,6 +116,14 @@ var Gx;
       return this._obsRotDeg= this._obsRotDeg || new Rx.Subject;
     },
 
+    // Return the top level element of the 'Gx'
+    //
+    //  for 'addClass', 'removeClass' etc. SVG-level actions
+    //
+    el: function () {   // () -> SVG.Container
+      return this._g;
+    },
+
     //--- Private methods ---
 
     _pos: function() {    // () -> {x:Num,y:Num}
