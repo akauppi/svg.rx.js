@@ -7,6 +7,50 @@
 var RAD2DEG = (360.0 / Math.PI);
 
 /*
+* '.gxTriangleHandler' component
+*
+* This component is used by 'gxTriangle' to allow the selected triangle be rotated.
+*
+* tbd. Can we hide this to within the 'gxTriangle' definitions. AKa220516
+*/
+/*** disabled
+(function () {
+  "use strict";
+
+  assert(Gx);
+
+  //--- GxTriangleHandler ---
+  //
+  var tieHandler = function (gxt) {    // (GxTriangle) ->
+    var self= this;
+
+    var g = gxt.el(false).group();  // inner element (this will rotate together with 'gtx')
+      //
+      g.line(0,0,D,0);
+      var dot= g.circle(15).center(D,0);
+
+    // Make handle change the rotation of the group
+    //
+    dot.rx_draggable()      // observable of observables of {x:int,y:int}
+      .subscribe( function(dragObs) {
+        var preDeg = gxt.rotDeg();    // keep initial rotation
+
+        dragObs.subscribe( function(o) {       // {x:Int,y:Int}
+          console.log(o.y, o.x);
+          var rad = Math.atan2(o.y,o.x);
+          gxt.rotDeg(preDeg + rad * RAD2DEG);
+        },
+        function () {   // drag ended
+        } );
+    } );
+
+    Gx.call( this, g.svg(), g, "gxTriangle" );
+  };
+
+})();
+***/
+
+/*
 * '.gxTriangle' component
 */
 (function () {
@@ -19,10 +63,44 @@ var RAD2DEG = (360.0 / Math.PI);
   // Note: The symbol needs to be defined completely in the positive x/y quadrant; the rest is not going to be visible.
   //
   var R=30,     // radius of the triangle
-    B= R*Math.sqrt(3)/2;
+    B= R*Math.sqrt(3)/2,
+    D= 1.8 * B;    // distance of the line to the handler circle
 
   var originX = R,
     originY = R;
+
+  //--- rotational handler ---
+  //
+  // The rotational handler is attached to each 'GxTriangle'. The cost of this are some SVG elements per entry,
+  // but doing so allows us to have multiple triangles simultaneously rotatable.
+  //
+  // There may be other ways to this, and it's not initially happening, anyways. But theoretically, on a large
+  // touch table, this could be a useful feature. AKa220516
+  //
+  var addHandler = function (gxt) {    // (GxTriangle) ->
+
+    var g = gxt.el(false).group().back();  // inner element (this will rotate together with 'gtx')
+      //
+      g.line(0,0,D,0);
+      var dot= g.circle(15).center(D,0);
+
+    g.move(originX, originY);
+
+    // Make handle change the rotation of the group
+    //
+    dot.rx_draggable()      // observable of observables of {x:int,y:int}
+      .subscribe( function(dragObs) {
+        var preDeg = gxt.rotDeg();    // keep initial rotation
+
+        dragObs.subscribe( function(o) {       // {x:Int,y:Int}
+          console.log(o.y, o.x);
+          var rad = Math.atan2(o.y,o.x);
+          gxt.rotDeg(preDeg + rad * RAD2DEG);
+        },
+        function () {   // drag ended
+        } );
+    } );
+  }
 
   //--- GxTriangle ---
   //
@@ -38,7 +116,7 @@ var RAD2DEG = (360.0 / Math.PI);
 
     // Create the symbol, if first time here for 'parent'.
     //
-    var use = parent.use( Gx.cache( parent, "_gxTriangle.sym", function (svg) {
+    var use = parent.use( Gx.cache( parent, "GxTriangle.symbol", function (svg) {
       var sym = svg.symbol();
 
       sym.path( "M"+(2*R)+","+R+
@@ -49,41 +127,9 @@ var RAD2DEG = (360.0 / Math.PI);
       return sym;
     } ) );
 
-    // tbd. Could detach this from each triangle, and only show/drag along the selected one. Less entries in the DOM.
-    //    And/or... having it as a separate 'Gx'. AKa220516
-    //
-    var handle = (function () {  // scope
-      var D = 1.8*B;    // distance of the rotation handle from the origin
+    Gx.call( this, parent, use, "gxTriangle" );
 
-      var g = parent.group().addClass("handle");
-        //
-        g.line(0,0,D,0);
-        var dot= g.circle(15).center(D,0);
-
-      // Make handle change the rotation of the group
-      //
-      dot.rx_draggable()      // observable of observables of {x:int,y:int}
-        .subscribe( function(dragObs) {
-          var preDeg = self.rotDeg();    // keep initial rotation
-
-          dragObs.subscribe( function(o) {       // {x:Int,y:Int}
-            console.log(o.y, o.x);
-            var rad = Math.atan2(o.y,o.x);
-            self.rotDeg(preDeg + rad * RAD2DEG);
-          },
-          function () {   // drag ended
-          } );
-      } );
-
-      return g;
-    })();
-
-    var group = parent.group();
-      //
-      group.add(use);
-      group.add(handle);
-
-    Gx.call( this, parent, group, "gxTriangle" );
+    addHandler(this);
 
     this.origin( originX, originY );
 
