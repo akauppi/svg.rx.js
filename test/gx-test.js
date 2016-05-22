@@ -272,53 +272,45 @@ describe('gx', function () {    // Test 'gx.js' operations
       originX = o.originX,
       originY = o.originY;
 
-    //--- GxTriangle ---
+    //--- GxSub ---
     //
     // Use:
-    //    <parent>.gxTriangle()       // () -> GxTriangle
+    //    <parent>.gxSub()       // () -> GxSub
     //
     // ._xxx: String    Dummy member for testing
     // ._use: SVG.Use   Access for testing
-    //
-    // Note: Using bare ES5 derivation, since didn't get the 'SVG.invent' to work for us (also, better not to rely
-    //      on 'svg.js' at this higher level). AKa150516
     //
     // References:
     //    JavaScript Inheritance Done Right (blog)
     //    -> https://ncombo.wordpress.com/2013/07/11/javascript-inheritance-done-right/
     //
-    var GxTriangle = function (parent) {    // (SVGDoc) ->
+    var GxSub = function (parent) {    // (SVGDoc) ->
       var self= this;
 
-      Gx.call( this, parent, function (g) {   // tbd. how to do this?
-        self._use= g.use(sym);
-      });
+      Gx.call( this, parent, self._use = parent.use(sym) );
 
       this.origin( originX, originY );
 
       this._xxx = "xxx";
     };
 
-    // Note: Use 'Object.assign()' to merge two prototype tables together. 'Object.create()' would use a properties table
-    //      (more elaborate); these approaches can be also used together. AKa170516
+    // Note: Problem with 'Object.assign()' (which merges tables to a new one) would be that 'x instanceof Super' no
+    //      longer holds; each type would simply show as the topmost class. We might want more. 'Object.create()' seems
+    //      to work right (and we might wish eventually to use the property tables). AKa170516
     //
-    // Note: Problem with 'Object.assign()' would be that 'x instanceof Super' no longer holds; each type would simply
-    //      show as the topmost class. We might want more. 'Object.create()' seems to work right (and we might wish
-    //      eventually to use the property tables). AKa170516
-    //
-    GxTriangle.prototype = Object.create(Gx.prototype);
+    GxSub.prototype = Object.create(Gx.prototype);
 
-    GxTriangle.prototype.xxx = function () {
+    GxSub.prototype.xxx = function () {
       return this._xxx;
     }
 
     SVG.extend( SVG.Doc, {
-      gxTriangle: function () {
-        return new GxTriangle(this);
+      gxSub: function () {
+        return new GxSub(this);
       }
     });
 
-    var gxt= svg.gxTriangle().pos(X,Y);
+    var gxt= svg.gxSub().pos(X,Y);
 
     // extended methods should work
     //
@@ -326,7 +318,7 @@ describe('gx', function () {    // Test 'gx.js' operations
 
     // 'isInstanceOf' should acknowledge both of the relations
     //
-    (gxt instanceof GxTriangle).should.be.true;
+    (gxt instanceof GxSub).should.be.true;
     (gxt instanceof Gx).should.be.true;
 
     svg.circle(10).center(X,Y).addClass("debug");

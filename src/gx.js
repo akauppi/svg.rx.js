@@ -28,10 +28,23 @@ var Gx;
   // Note: It is unsure, whether use of two groups or handling one group and maintaining two matrices is the better
   //      approach, performance-wise. We can try these at some stage, if moving/rotating needs boosting. AKa080516
   //
-  Gx = function (parent, populateF) {    // ( SVG.Doc, (SVG.Container) -> )
+  // Note: In creation, the second parameter can be either
+  //      - an SVG.Element (in this case it needs to be in the 'parent' SVG.Doc)
+  //      - a callback to add stuff to the right group
+  //
+  //      NOTE: We're looking at the right way to deal with these things, and the callback variant might be on the
+  //          way out (it makes the calling code unnecessarily complex). AKa220516
+  //
+  Gx = function (parent, fOrEl) {    // ( SVG.Doc, (SVG.Container) -> or SVG.Element )
     var g = parent.group();
     var g2 = g.group();
-    populateF(g2);
+
+    if (typeof fOrEl === "function") {
+      var f = fOrEl;
+      f(g2);
+    } else {
+      g2.add(fOrEl);    // tbd. does this work
+    }
 
     // X.call(this, ...);   // no super class constructor to call
 
