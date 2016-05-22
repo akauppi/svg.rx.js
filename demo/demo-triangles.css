@@ -1,17 +1,17 @@
 @import url("demo.css");
 
-.my_triangle {
+.gxTriangle {
   fill: blue;
 }
-.my_triangle .handle {
+.gxTriangle .handle {
   visibility: hidden;
 }
 
-.my_triangle.selected {
+.gxTriangle.selected {
   stroke-width: 3px;
   stroke: red;
 }
-.my_triangle.selected .handle {
+.gxTriangle.selected .handle {
   fill: red;
   visibility: initial;
 }

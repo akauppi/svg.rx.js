@@ -362,7 +362,8 @@ describe('gx', function () {    // Test 'gx.js' operations
 
     // On the first round, the function should get called
     //
-    var v= Gx.cache( el, KEY, function () {
+    var v= Gx.cache( el, KEY, function (el2) {
+      el2.should.be.equal(el);    // it should provide 'el' parameter (just for convenience, and smaller scope)
       return VAL;
     } );
 

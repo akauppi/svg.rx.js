@@ -2,181 +2,102 @@
 * demo-triangles.js
 */
 /*jshint devel: true */
-/*globals assert */
+/*globals assert, Gx */
 
-function selectTriangle(el) {
-  "use strict";
-
-  el.parent().select(".selected").removeClass("selected");
-  el.addClass("selected");
-}
 
 /*
-* A custom SVG component
+* '.gxTriangle' component
 */
-(function() {
+(function () {
   "use strict";
-  assert(assert);
 
-  var RAD2DEG = 180.0 / Math.PI;
+  assert(Gx);
 
-  // A function used when hiding out svg.js methods
+  // Define the triangle just once, as a symbol. Then 'use' it.
   //
-  function notSupported (s) {   // (String) -> () -> never returns
-    return function () {
-      throw "Access to method '"+s+"' not supported in 'svg.rx.js'";
-    }
-  }
-
-  SVG.Rx = SVG.Rx || {};
-
-  function dragIt( el ) {     // (SVGElement) ->
-    el.rx_draggable().subscribe( function (dragObs) {
-
-      // Drag started
-      selectTriangle(el);
-
-      dragObs.subscribe( function (o) {
-        //console.log(o);
-        el.translate( o.x, o.y );
-      });
-    });
-  }
-
-  //--- SVG.Rx.MyTriangle ---
+  // Note: The symbol needs to be defined completely in the positive x/y quadrant; the rest is not going to be visible.
   //
-  //  ._locked: Boolean
+  var R=30,     // radius of the triangle
+    B= R*Math.sqrt(3)/2,
+    D = 1.8*B;    // distance of the rotation handle from the origin
+
+  var originX = R,
+    originY = R;
+
+  //--- GxTriangle ---
   //
-  //  .lock(Boolean)
-  //  .isLocked()
-  //  .tieFrom( Observable of {x:Num, y:Num, angle:Num} )
-  //  .tieTo( Observable of {x:Num, y:Num, angle:Num} )
+  // Use:
+  //    <parent>.gxTriangle()       // () -> GxTriangle
   //
-  // Note: The size of the object is defined here, by the parameter, instead of using a '.scale' in the parent
-  //      method. Using 'scale' would cause problems with further movements - now we can keep things simple. AKa140216
+  // ._xxx: String    tbd. describe members here
   //
-  SVG.Rx.MyTriangle = SVG.invent({
-    create: function (r) {   // (Num) ->
-      var self= this;
+  // .select()        Marks the triangle as the selected one (clears an earlier selection)
+  //
+  var GxTriangle = function (parent) {    // (SVG.Doc) ->
+    var self= this;
 
-      this.constructor.call(this, SVG.create('g'));
+    // Create the symbol, if first time here for 'parent'.
+    //
+    var use = parent.use( Gx.cache( parent, "_gxTriangle.sym", function (svg) {
+      var sym = svg.symbol();
 
-      this._locked = false;
-
-      // Path via the tips: (UNIT,0), (-UNIT/2,(± UNIT*sqrt(3)/2))
-      //
-      // tbd. eventually make this path into a symbol.
-      //
-      var B= r*Math.sqrt(3)/2;
-
-      var p = "M"+r+",0"+
-        "L"+(-r/2)+","+B+
+      sym.path( "M"+(2*R)+","+R+
+        "l"+(-3*R/2)+","+B+
         "l0,-"+(2*B)+
-        "z";
+        "z");
 
-      this.path(p);
+      return sym;
+    } ) );
 
-      var dist = 1.8*B;
-      var g2 = this.group().addClass("handle").back();
+    (function () {  // scope
+      var g2 = parent.group().addClass("handle").back();
         //
-        g2.line(0,0,dist,0);
-        var dot= g2.circle(15).center(dist,0);
+        g2.line(0,0,D,0);
+        var dot= g2.circle(15).center(D,0);
 
       // Make handle change the rotation of the group
       //
       dot.rx_draggable()      // observable of observables of {x:int,y:int}
         .subscribe( function(dragObs) {
-          // keep initial rotation
-          var preDeg = self.transform('rotation');    // just gives the rads
+          var preDeg = self.rotDeg();    // keep initial rotation
 
           dragObs.subscribe( function(o) {       // {x:Int,y:Int}
 
             console.log(o.y, o.x);
             var rad = Math.atan2(o.y,o.x);
-            self.rotate(preDeg + rad * RAD2DEG,0,0);
+            self.rotDeg(preDeg + rad * RAD2DEG);
           },
           function () {   // drag ended
           } );
       } );
+    })();
 
-      //this.translate(r/2,B);   // make rotational center the triangle's origin
+    Gx.call( this, parent, use, "gxTriangle" );
 
-      dragIt(this);   // all triangles draggable (unless locked, tbd.)
+    this.origin( originX, originY );
 
-      this.addClass("my_triangle");
-    },
-    inherit: SVG.G,
+    this._xxx = "xxx";
 
-    construct: {          // parent method to create these
-      my_triangle: function (r) {   // ([Num=10]) -> SVG.Rx.MyTriangle    | this = parent
+    this.draggable( function () {   // drag started
+      self.select();
+    });
+  };
 
-        var el= this.put(new SVG.Rx.MyTriangle(r));
+  GxTriangle.prototype = Object.create(Gx.prototype);
 
-        return el;
-      }
-    },
+  /*
+  * Marks the triangle as selected; clears an earlier selection
+  */
+  GxTriangle.prototype.select = function () {
+    var el = this.el();
 
-    extend: {
-      // Lock the triangle so it won't move or rotate (either when directly manipulated or via changes in the
-      // connecting paths.
-      //
-      lock: function (b) {    // (Boolean) -> this
-        this._locked = b;
-        return this;
-      },
+    el.parent().select(".selected").removeClass("selected");
+    el.addClass("selected");
+  }
 
-      // Check if the triangle is locked
-      //
-      isLocked: function () {    // () -> Boolean
-        return this._locked;
-      },
-
-/***
-      // Add an incoming connection (there may be 0,1 or 2 in real application)
-      //
-      _tieFrom: function (obs) {   // (Observable of {x:Num, y:Num, rad:Num}) -> this
-
-        // tbd. Should create a tail
-        //
-        obs.subscribe( function (ev) {
-          // tbd. Should
-        } );
-        return this;
-      },
-
-      // Add an outgoing connection (there may be 0,1 or 2 in real application)
-      //
-      tieTo: function (o) {   // (MyTriangle) -> this
-        this._joinedToObs.push(obs);
-
-        o._tieFrom(this._obs);    // our movements will try to affect the upstream triangle
-        return this;
-      }
-***/
-
-      // Overrides of 'SVG.G' and 'SVG.Element'
-      //
-      //x: notSupported('x'),
-      //y: notSupported('y'),
-      //move: notSupported('move'),
-
-      //cx: notSupported('cx'),
-      //cy: notSupported('cy'),
-      //center: notSupported('center'),
-
-      // note: 'width', 'height' and 'size' are constant, since we handle all movement and rotation via the transforms.
-      //      There is no real need for them. AKa070216,AKa140216
-      //
-      //width: notSupported('width'),
-      //height: notSupported('height'),
-      //size: notSupported('size'),
-
-      /***
-      rotateRad: function (rad) {      // (Num) -> this
-        var RAD_TO_DEG = 180.0 / Math.PI;
-        this.rotate( rad * RAD_TO_DEG );
-      }
-      ***/
+  SVG.extend( SVG.Doc, {
+    gxTriangle: function () {
+      return new GxTriangle(this);
     }
   });
 
@@ -187,25 +108,15 @@ function selectTriangle(el) {
 */
 (function() {
   "use strict";
-  assert(assert);
 
   var R= 30;
   var RAD2DEG = 180.0 / Math.PI;
 
   var svg = SVG("cradle");
 
-  var t1 = svg.my_triangle(R).move(100,100);
-  var t2 = svg.my_triangle(R).move(200,150);
-    t2.rotate(-40);
-  var t3 = svg.my_triangle(R).move(300,200);
-
-  // Note: svg.js 2.x transform methods are absolute, but the 3.0 version will make them relative.
-  //      We can take that approach with svg.rx.js already now. AKa140216
-  //
-  //      See -> https://github.com/wout/svg.js/blob/master/CHANGELOG.md
-  //
-  //var r1 = svg.rect(100,10).move(500,100);
-  //var r1b = svg.rect(100,10).move(500,100).rotate(-90).rotate(-45);
+  var t1 = svg.gxTriangle(R).pos(100,100);
+  var t2 = svg.gxTriangle(R).pos(200,150).rotDeg(-40);
+  var t3 = svg.gxTriangle(R).pos(300,200);
 
   //t1.tieTo(t2);
   //t2.tieTo(t3);
@@ -233,13 +144,13 @@ function selectTriangle(el) {
     var hasShift = window.event.shiftKey;   // state of Shift at last event
 
     if (canvasDrags === 1 && !hasShift) {   // create new triangle
-      var t= svg.my_triangle(R);   // ready, visible
+      var t= svg.gxTriangle(R);   // ready, visible
       var circle= svg.circle(10);         // ready, hidden
       var rect= svg.rect().width(2*30).height(2*30).addClass("debug");
 
-      t.rotate( Math.random() * 360 );
+      t.rotDeg( Math.random() * 360 );
 
-      selectTriangle(t);
+      t.select(t);
 
       dragObs.subscribe(
         function (o) {
@@ -247,7 +158,7 @@ function selectTriangle(el) {
 
           // Note: Don't use a group's '.move' or '.center'
           //
-          t.translate(o.x, o.y);    // 'x','y' are the actual touch/pointer coords, because we are tracking 'svg'
+          t.pos(o.x, o.y);    // 'x','y' are the actual touch/pointer coords, because we are tracking 'svg'
 
           circle.center(o.x,o.y).show();
           rect.center(o.x,o.y);
@@ -273,7 +184,7 @@ function selectTriangle(el) {
             var selY = selected.transform("y");
 
             var rad= Math.atan2(o.y - selY, o.x - selX);
-            selected.rotate(rad * RAD2DEG, 0,0);
+            selected.rotDeg(rad * RAD2DEG);
           },
           null,   // error handling
           null // end of drag
@@ -282,3 +193,4 @@ function selectTriangle(el) {
     }
   });
 })();
+

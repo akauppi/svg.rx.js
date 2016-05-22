@@ -35,15 +35,14 @@ var Gx;
   //      NOTE: We're looking at the right way to deal with these things, and the callback variant might be on the
   //          way out (it makes the calling code unnecessarily complex). AKa220516
   //
-  Gx = function (parent, fOrEl) {    // ( SVG.Doc, (SVG.Container) -> or SVG.Element )
+  Gx = function (parent, elOrF, className) {    // ( SVG.Doc, SVG.Element | (SVG.Container) -> [, String] )
     var g = parent.group();
     var g2 = g.group();
 
-    if (typeof fOrEl === "function") {
-      var f = fOrEl;
-      f(g2);
+    if (typeof elOrF=== "function") {
+      elOrF(g2);
     } else {
-      g2.add(fOrEl);    // tbd. does this work
+      g2.add(elOrF);
     }
 
     // X.call(this, ...);   // no super class constructor to call
@@ -161,10 +160,7 @@ var Gx;
       assert( v !== undefined );
 
       el.remember(key,v);
-      console.log( "Set in cache", v );
-
-    } else {
-      console.log( "Fetched from cache: ", v );
+      //console.log( "Set in cache", v );
     }
 
     return v;
@@ -175,8 +171,8 @@ var Gx;
   * (so we can eventually replace it, and/or add support for raw SVG for describing the elements).
   */
   SVG.extend( SVG.Doc, {
-    gx: function (populateF) {  // ( (SVG.Container) -> ) -> Gx
-      return new Gx(this, populateF);
+    gx: function (elOrF, className) {  // ( SVG.Element | (SVG.Container) -> [, String] ) -> Gx
+      return new Gx(this, elOrF, className);
     }
   });
 
