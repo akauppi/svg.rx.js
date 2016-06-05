@@ -59,6 +59,23 @@ describe('gx', function () {    // Test 'gx.js' operations
     o.y.should.be.closeTo( -SIDE/2, 0.01 );
   });
 
+  it ('should be possible to create a \'Gx\' with multiple elements', function () {
+    var a= svg.rect();
+    var b= svg.circle();
+
+    var gx = svg.gx( [a,b] );
+
+    var tmp= a.siblings();    // Array of SVG.Element's   Note: includes also itself
+
+    // Mocha note: for some reason, '.should.contain' takes 80..100ms and is listed with a red flag in the results.
+    //
+    //tmp.should.contain(b);
+
+    tmp.includes(b).should.be.true;   // no slow flag
+
+    tmp.length.should.be.equal(2);
+  });
+
   it ('should be moveable', function () {
     var X= 200,
       Y= 100;
@@ -320,9 +337,6 @@ describe('gx', function () {    // Test 'gx.js' operations
 
     // 'isInstanceOf' should acknowledge both of the relations
     //
-    //(gxt instanceof GxSub).should.be.true;
-    //(gxt instanceof Gx).should.be.true;
-
     gxt.should.be.an.instanceof(GxSub);
     gxt.should.be.an.instanceof(Gx);
 
@@ -344,53 +358,30 @@ describe('gx', function () {    // Test 'gx.js' operations
     p2.y.should.be.closeTo( Y+B, 0.01 );
   });
 
-  // Nope. We discontinued that feature. AKa
-  //
-  // tbd. '.addClass', '.removeClass', '.hasClass', and '.parent()' (at least) need to be given tests. AKa050616
-  //
-  xit ('should be possible to get the top level SVG element of the \'gx\'', function () {
+  it ('should be possible to add/remove/check classes for the \'gx\' top level element', function () {
     var gx = create();
+    var CLASS = "testing";
 
-    var el = gx.el(true);
+    // Check also implementation (that it gets to SVG level), because classes matter to CSS.
+    //
+    var check = function () {   // () -> Boolean
+      var tmp= svg.select("."+CLASS);   // 'SVG.Set'
+      return tmp.length() != 0;
+    }
 
-    el.should.be.equal(gx._g);    // checking against implementation detail (i.e. that it's the top level container)
+    gx.addClass( CLASS );
+    gx.hasClass(CLASS).should.be.true;
+    check().should.be.true;
 
-    (el instanceof SVG.Element).should.be.true;    // if it is, ".addClass" etc. will work
-
-    el.addClass("some");
-    el.hasClass("some").should.be.true;
-
-    el.removeClass("some");
-    el.hasClass("some").should.be.false;
+    gx.removeClass( CLASS );
+    gx.hasClass(CLASS).should.be.false;
+    check().should.be.false;
   });
 
-  // This is for adding more stuff to the object
-  //
-  // Note: Something in this test makes it run longer (and get red-tagged in Mocha UI): ~108ms AKa220516
-  //
-  // disabled. Now multiple elements can be given in the constructor. tbd. Need to make test for that! AKa050616
-  //
-  xit ('should be possible to get the inner container SVG element of the \'gx\'', function () {
-    var X= 100,
-      Y= 50,
-      DEG= 45;
+  it ('should be possible to get the SVG parent of the \'Gx\'', function () {
+    var gx = create();
 
-    var gx = create().pos(X,Y).rotDeg(DEG);
-
-    var inner = gx.el();
-
-    // Add another entry, see if it's a sibling of 'r'
-    //
-    var circle= inner.circle(20);
-
-    var siblings = r.siblings();    // should have 'r' and 'circle'
-
-    // Note: For some reason, both '.should.contain' and '.should.include' are actually slow (~100ms) and cause the
-    //      red tag (unnecessarily) for this test. Don't use them. (this is with Mocha 2.4.5) AKa220516
-    //
-    //siblings.should.contain(circle);
-
-    siblings.includes(circle).should.be.true;     // provides no such flag
+    gx.parent().should.be.equal(svg);
   });
 
   it ('should have a caching feature \'Gx.cache\'', function () {

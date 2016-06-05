@@ -229,8 +229,8 @@ var Gx;
   * (so we can eventually replace it, and/or add support for raw SVG for describing the elements).
   */
   SVG.extend( SVG.Doc, {
-    gx: function (elOrF, className) {  // ( SVG.Element | (SVG.Container) -> [, String] ) -> Gx
-      return new Gx(this, elOrF, className);
+    gx: function (elOrArrayOrF, className) {  // ( SVG.Element | Array of SVG.Element's | (SVG.Container) -> [, String] ) -> Gx
+      return new Gx(this, elOrArrayOrF, className);
     }
   });
 
