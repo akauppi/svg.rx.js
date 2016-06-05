@@ -22,8 +22,15 @@
 
 - Once ES7 `Observable`s are out, check if they are enough for us (i.e. would we still need/benefit from RxJS) (not urgent)
 
-- backpressure using RxJS 5 (try with `demo4` on a tablet):
-  - if the drag produces more coordinates than the subscriber can handle, we'd be okay always skipping to the latest one. How to formulate this in RxJS? (ask in StackOverflow) AKa251015
+## Backpressure 
+
+- if the drag produces more coordinates than the subscriber can handle, we'd be okay always skipping to the latest one. AKa251015
+  
+Note that RxJS states this about [backpressure](https://github.com/Reactive-Extensions/RxJS/blob/master/doc/gettingstarted/backpressure.md#future-work):
+
+>In future versions of RxJS, the idea of the controlled observable will be baked into the subscription itself which then allows the backpressure to be an essential part of the contract or requesting n number of items.
+
+With this in mind, we might be best off just waiting for RxJS to develop in this direction, and handling all the drag events until it does. AKa050616
 
 ## One Day...
 
