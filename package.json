@@ -15,7 +15,7 @@
   ],
   "repository": "github:akauppi/svg.rx.js",
   "dependencies": {
-    "@reactivex/rxjs": "5.0.0-beta.4",
+    "@reactivex/rxjs": "5.0.0-beta.8",
     "svg.js": "^2.2.5",
     "systemjs": "^0.19.17"
   },
@@ -24,7 +24,7 @@
     "gh-pages": "^0.5.0",
     "http-server": "^0.8.5",
     "jshint": "^2.8.0",
-    "mocha": "^2.4.5",
+    "mocha": "^2.5.3",
     "mocha-phantomjs": "^4.0.2"
   },
   "scripts": {
