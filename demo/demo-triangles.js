@@ -4,51 +4,7 @@
 /*jshint devel: true */
 /*globals assert, Gx */
 
-var RAD2DEG = (360.0 / Math.PI);
-
-/*
-* '.gxTriangleHandler' component
-*
-* This component is used by 'gxTriangle' to allow the selected triangle be rotated.
-*
-* tbd. Can we hide this to within the 'gxTriangle' definitions. AKa220516
-*/
-/*** disabled
-(function () {
-  "use strict";
-
-  assert(Gx);
-
-  //--- GxTriangleHandler ---
-  //
-  var tieHandler = function (gxt) {    // (GxTriangle) ->
-    var self= this;
-
-    var g = gxt.el(false).group();  // inner element (this will rotate together with 'gtx')
-      //
-      g.line(0,0,D,0);
-      var dot= g.circle(15).center(D,0);
-
-    // Make handle change the rotation of the group
-    //
-    dot.rx_draggable()      // observable of observables of {x:int,y:int}
-      .subscribe( function(dragObs) {
-        var preDeg = gxt.rotDeg();    // keep initial rotation
-
-        dragObs.subscribe( function(o) {       // {x:Int,y:Int}
-          console.log(o.y, o.x);
-          var rad = Math.atan2(o.y,o.x);
-          gxt.rotDeg(preDeg + rad * RAD2DEG);
-        },
-        function () {   // drag ended
-        } );
-    } );
-
-    Gx.call( this, g.svg(), g, "gxTriangle" );
-  };
-
-})();
-***/
+var RAD2DEG = (180.0 / Math.PI);
 
 /*
 * '.gxTriangle' component
@@ -64,7 +20,7 @@ var RAD2DEG = (360.0 / Math.PI);
   //
   var R=30,     // radius of the triangle
     B= R*Math.sqrt(3)/2,
-    D= 1.8 * B;    // distance of the line to the handler circle
+    D= 2.0 * B;    // distance of the line to the handler circle
 
   var originX = R,
     originY = R;
@@ -79,10 +35,12 @@ var RAD2DEG = (360.0 / Math.PI);
   //
   var addHandler = function (gxt) {    // (GxTriangle) ->
 
-    var g = gxt.el(false).group().back();  // inner element (this will rotate together with 'gtx')
+    var g = gxt.el(false).group().addClass("handle").back();  // inner element (this will rotate together with 'gtx')
       //
       g.line(0,0,D,0);
       var dot= g.circle(15).center(D,0);
+      //
+      g.circle(1.9*R).center(0,0).front().addClass("debug");   // to see where the triangle rotates
 
     g.move(originX, originY);
 
@@ -93,7 +51,7 @@ var RAD2DEG = (360.0 / Math.PI);
         var preDeg = gxt.rotDeg();    // keep initial rotation
 
         dragObs.subscribe( function(o) {       // {x:Int,y:Int}
-          console.log(o.y, o.x);
+          //console.log(o.x, o.y);
           var rad = Math.atan2(o.y,o.x);
           gxt.rotDeg(preDeg + rad * RAD2DEG);
         },
@@ -205,7 +163,8 @@ var RAD2DEG = (360.0 / Math.PI);
       var circle= svg.circle(10);         // ready, hidden
       var rect= svg.rect().width(2*30).height(2*30).addClass("debug");
 
-      t.rotDeg( Math.random() * 360 );
+      // tbd. enable
+      //t.rotDeg( Math.random() * 360 );
 
       t.select(t);
 
@@ -229,10 +188,9 @@ var RAD2DEG = (360.0 / Math.PI);
         }
       );
     } else if ((canvasDrags === 2) || (canvasDrags === 1 && hasShift)) {   // rotate selected triangle
-      var selected = svg.select(".selected").members[0];
+      var selected = svg.select(".selected").members[0].asGx;
 
-      console.log("Should rotate!");
-      console.log(selected);
+      console.log("Should rotate!", selected);
 
       if (selected) {
         dragObs.subscribe(

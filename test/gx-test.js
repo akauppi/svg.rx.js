@@ -375,9 +375,7 @@ describe('gx', function () {    // Test 'gx.js' operations
     //
     var circle= inner.circle(20);
 
-    var siblings = r.siblings();
-
-    console.log( "siblings", siblings);   // expecting 'r' and 'circle'
+    var siblings = r.siblings();    // should have 'r' and 'circle'
 
     // Note: For some reason, both '.should.contain' and '.should.include' are actually slow (~100ms) and cause the
     //      red tag (unnecessarily) for this test. Don't use them. (this is with Mocha 2.4.5) AKa220516
@@ -408,6 +406,21 @@ describe('gx', function () {    // Test 'gx.js' operations
     } );
 
     v.should.be.equal(VAL);
+  });
+
+  it ('should have a way back from \'svg.js\' land (e.g. after finding matching elements by a selector)', function () {
+    var CLASS= "myTestClass";
+    var gx= create();
+
+    var g= gx.el(true);   // top element
+
+    g.addClass( CLASS );
+
+    var hits= svg.select( "."+CLASS );
+
+    console.log("hits",hits);
+    hits[0].asGx.should.be(gx);
+    hits.length.should.be(1);
   });
 
 });

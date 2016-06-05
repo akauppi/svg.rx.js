@@ -52,10 +52,21 @@ var Gx;
 
     // X.call(this, ...);   // no super class constructor to call
 
+    // Make a path back to 'Gx' land (e.g. if getting a group by searching for certain CSS classes).
+    //
+    g.asGx = this;
+
     this._g = g;
     this._inner = inner;
     this._obsPos = null;
     this._obsRotDeg = null;
+
+    // Note: Storing the inner origin might not be absolutely required - we should be able to recover that from the
+    //    transformation of '._inner'. This is "for now" (storing less state is a good thing, we should strive for
+    //    uncovering such things from SVG instead of keeping a cache). AKa050616
+    //
+    this._originX = null;
+    this._originY = null;
   };
 
   Gx.prototype = {
@@ -69,6 +80,9 @@ var Gx;
     // though it might not actually be needed. AKa080516
     //
     origin: function (x, y) {   // (Num, Num) -> this
+
+      this._originX = x;
+      this._originY = y;
 
       var deg= this._rotDeg();
       this._inner.rotate(0).translate(-x,-y).rotate(deg);    // works :)
@@ -96,11 +110,18 @@ var Gx;
 
     // Rotate the 'Gx', or ask the rotation
     //
-    rotDeg: function(deg) {   // (Num) -> this or () -> Num
+    rotDeg: function (deg) {   // (Num) -> this or () -> Num
       if (deg === undefined) {
         return this._rotDeg();
       } else {
-        this._inner.rotate(deg);     // replace earlier rotation (keep origin translation)
+        // Get the origin
+        //
+        var xo = this._originX;
+        var yo = this._originY;
+
+        console.log(xo,yo);
+        this._inner.rotate(deg,xo,yo);     // replace earlier rotation (keep origin translation)
+
         if (this._obsRotDeg) {
           this._obsRotDeg.next(deg);
         }
@@ -133,12 +154,12 @@ var Gx;
 
     //--- Private methods ---
 
-    _pos: function() {    // () -> {x:Num,y:Num}
+    _pos: function () {    // () -> {x:Num,y:Num}
       var o = this._g.transform();
       return {x: o.x, y: o.y}
     },
 
-    _rotDeg: function() {     // () -> Num
+    _rotDeg: function () {     // () -> Num
 
       // Note: The returned value is not necessarily normalized to [0,360) range (e.g. setting to '123' causes
       //      the angle '-237' to be read). We do the normalization here. AKa080516
