@@ -18,3 +18,9 @@ rect.debug {
 text.debug {
   fill: red;
 }
+
+circle.debug {
+  stroke-width: 1px;
+  stroke: red;
+  fill: none;
+}

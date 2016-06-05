@@ -65,8 +65,8 @@ var Gx;
     //    transformation of '._inner'. This is "for now" (storing less state is a good thing, we should strive for
     //    uncovering such things from SVG instead of keeping a cache). AKa050616
     //
-    this._originX = null;
-    this._originY = null;
+    //this._originX = null;
+    //this._originY = null;
   };
 
   Gx.prototype = {
@@ -80,10 +80,6 @@ var Gx;
     // though it might not actually be needed. AKa080516
     //
     origin: function (x, y) {   // (Num, Num) -> this
-
-      this._originX = x;
-      this._originY = y;
-
       var deg= this._rotDeg();
       this._inner.rotate(0).translate(-x,-y).rotate(deg);    // works :)
 
@@ -116,10 +112,15 @@ var Gx;
       } else {
         // Get the origin
         //
-        var xo = this._originX;
-        var yo = this._originY;
+        // Note: If the '.transformedX|Y' members are not standard (they work on Safari and Firefox), we may need
+        //      to cache the values given to '.offset()'. We're just trying to minimize cached state that may lead
+        //      to bugs. AKa050616
+        //
+        var t = this._inner.transform();
+        var xo = - t.transformedX;
+        var yo = - t.transformedY;
+        //console.log(xo,yo, t);
 
-        console.log(xo,yo);
         this._inner.rotate(deg,xo,yo);     // replace earlier rotation (keep origin translation)
 
         if (this._obsRotDeg) {

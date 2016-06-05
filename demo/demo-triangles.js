@@ -40,7 +40,7 @@ var RAD2DEG = (180.0 / Math.PI);
       g.line(0,0,D,0);
       var dot= g.circle(15).center(D,0);
       //
-      g.circle(1.9*R).center(0,0).front().addClass("debug");   // to see where the triangle rotates
+      //g.circle(1.9*R).center(0,0).front().addClass("debug");   // to see where the triangle rotates
 
     g.move(originX, originY);
 
@@ -170,7 +170,7 @@ var RAD2DEG = (180.0 / Math.PI);
 
       dragObs.subscribe(
         function (o) {
-          console.log( "Dragging: "+ o.x + " "+ o.y );
+          //console.log( "Dragging: "+ o.x + " "+ o.y );
 
           // Note: Don't use a group's '.move' or '.center'
           //
