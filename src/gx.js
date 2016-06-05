@@ -167,19 +167,9 @@ var Gx;
       return this._g.parent();
     },
 
-    /*** remove AKa050616
-    // Return the inner element of the 'Gx'
-    //
-    // This can be used for adding more elements to the component, after its creation.
-    //
-    // Note: It is unclear, do we really want to have extra elements be added like this. The creator could also do
-    //      a group managed by themselves that allows the same, if they really need dynamic addition/removal.
-    //      Doing things with CSS visibility is normally way better. AKa050616
-    //
-    el: function () {   // () -> SVG.Container
-      return this._inner;
+    clickable: function (f) {   // ( () -> ) ->
+      this._g.click(f);
     },
-    ***/
 
     //--- Private methods ---
 

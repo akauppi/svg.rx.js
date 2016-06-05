@@ -1,5 +1,5 @@
 /*
-* demo-triangles.js
+* demo/triangles.js
 */
 /*jshint devel: true */
 /*globals assert, Gx */
@@ -14,10 +14,6 @@ var RAD2DEG = (180.0 / Math.PI);
 
   assert(Gx);
 
-  // Define the triangle just once, as a symbol. Then 'use' it.
-  //
-  // Note: The symbol needs to be defined completely in the positive x/y quadrant; the rest is not going to be visible.
-  //
   var R=30,     // radius of the triangle
     B= R*Math.sqrt(3)/2,
     D= 2.0 * B;    // distance of the line to the handler circle
@@ -127,7 +123,6 @@ var RAD2DEG = (180.0 / Math.PI);
   "use strict";
 
   var R= 30;
-  var RAD2DEG = 180.0 / Math.PI;
 
   var svg = SVG("cradle");
 
