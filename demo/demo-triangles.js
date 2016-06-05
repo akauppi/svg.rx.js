@@ -33,9 +33,9 @@ var RAD2DEG = (180.0 / Math.PI);
   // There may be other ways to this, and it's not initially happening, anyways. But theoretically, on a large
   // touch table, this could be a useful feature. AKa220516
   //
-  var addHandler = function (gxt) {    // (GxTriangle) ->
+  var addHandler = function (gxt, parent) {    // (GxTriangle, SVG.Container) -> Svg.Element
 
-    var g = gxt.el(false).group().addClass("handle").back();  // inner element (this will rotate together with 'gtx')
+    var g = parent.group().addClass("handle").back();  // inner element (this will rotate together with 'gtx')
       //
       g.line(0,0,D,0);
       var dot= g.circle(15).center(D,0);
@@ -58,6 +58,8 @@ var RAD2DEG = (180.0 / Math.PI);
         function () {   // drag ended
         } );
     } );
+
+    return g;
   }
 
   //--- GxTriangle ---
@@ -85,13 +87,15 @@ var RAD2DEG = (180.0 / Math.PI);
       return sym;
     } ) );
 
-    Gx.call( this, parent, use, "gxTriangle" );
+    var el = addHandler(this, parent);
 
-    addHandler(this);
+    Gx.call( this, parent, [use, el], "gxTriangle" );
+
+    el.back();
 
     this.origin( originX, originY );
 
-    this._xxx = "xxx";
+    //this._xxx = "xxx";
 
     this.draggable( function () {   // drag started
       self.select();
@@ -104,10 +108,8 @@ var RAD2DEG = (180.0 / Math.PI);
   * Marks the triangle as selected; clears an earlier selection
   */
   GxTriangle.prototype.select = function () {
-    var el = this.el(true);
-
-    el.parent().select(".selected").removeClass("selected");
-    el.addClass("selected");
+    this.parent().select(".selected").removeClass("selected");
+    this.addClass("selected");
   }
 
   SVG.extend( SVG.Doc, {

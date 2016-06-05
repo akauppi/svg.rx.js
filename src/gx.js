@@ -17,6 +17,8 @@ var Gx;
   assert(true);
   assert(Rx.Subject);
 
+  assert(Array.isArray);    // ECMAScript 5.1
+
   //--- Gx ---
   //
   // ._g: SVG.Group         Outer group. Positioning happens for this group.
@@ -35,15 +37,19 @@ var Gx;
   //      NOTE: We're looking at the right way to deal with these things, and the callback variant might be on the
   //          way out (it makes the calling code unnecessarily complex). AKa220516
   //
-  Gx = function (parent, elOrF, className) {    // ( SVG.Doc, SVG.Element | (SVG.Container) -> [, String] )
+  Gx = function (parent, elOrArrOrF, className) {    // ( SVG.Doc, SVG.Element | array of SVG.Element's | (SVG.Container) -> [, String] )
     var g = parent.group();
     var inner = g.group();
 
-    if (typeof elOrF=== "function") {
+    if (typeof elOrArrOrF=== "function") {      // tbd. remove the function support
       alert( "This is no longer a used path" );
       elOrF(inner);
+    } else if (Array.isArray(elOrArrOrF)) {
+      elOrArrOrF.forEach( function (el) {
+        inner.add(el);
+      })
     } else {
-      inner.add(elOrF);
+      inner.add(elOrArrOrF);
     }
 
     if (className) {
@@ -54,19 +60,12 @@ var Gx;
 
     // Make a path back to 'Gx' land (e.g. if getting a group by searching for certain CSS classes).
     //
-    g.asGx = this;
+    g.remember("asGx", this);
 
     this._g = g;
     this._inner = inner;
     this._obsPos = null;
     this._obsRotDeg = null;
-
-    // Note: Storing the inner origin might not be absolutely required - we should be able to recover that from the
-    //    transformation of '._inner'. This is "for now" (storing less state is a good thing, we should strive for
-    //    uncovering such things from SVG instead of keeping a cache). AKa050616
-    //
-    //this._originX = null;
-    //this._originY = null;
   };
 
   Gx.prototype = {
@@ -78,6 +77,9 @@ var Gx;
     // Set the origin for the contents of the 'Gx' (ie. affect the offset how it's shown). Changing the offset later
     // allows eg. wobbling of the entity; that's why we keep the option of changing the origin after creation open,
     // though it might not actually be needed. AKa080516
+    //
+    // tbd. There's a test that shows changing the origin after rotation is not pixel perfect. Since we don't really
+    //    need this feature, could we just have a fixed origin, per element? AKa050616
     //
     origin: function (x, y) {   // (Num, Num) -> this
       var deg= this._rotDeg();
@@ -142,16 +144,42 @@ var Gx;
       return this._obsRotDeg= this._obsRotDeg || new Rx.Subject;
     },
 
-    // Return the top level, or the inner element of the 'Gx'
+    // Add/remove/check class on the Gx SVG element
     //
-    //  for 'addClass', 'removeClass' etc. SVG-level actions, look for the top level element ('top'==true)
-    //  for adding more elements to the component, just call '.el()'
-    //
-    // Note: It is possible we merge these two group levels, later. If we do, the 'top' parameter can be ignored. AKa220516
-    //
-    el: function (top) {   // ( [Boolean] ) -> SVG.Container
-      return top ? this._g : this._inner;
+    addClass: function (s) {    // (String) -> this
+      this._g.addClass(s);
+      return this;
     },
+
+    removeClass: function (s) {   // (String) -> this
+      this._g.removeClass(s);
+      return this;
+    },
+
+    hasClass: function (s) {   // (String) -> Boolean
+      return this._g.hasClass(s);
+    },
+
+    // Return the 'svg.js' parent keeping this element. Used for accessing the other elements, e.g. to switch off their
+    // "selected" class.
+    //
+    parent: function () {   // () -> SVG.Container
+      return this._g.parent();
+    },
+
+    /*** remove AKa050616
+    // Return the inner element of the 'Gx'
+    //
+    // This can be used for adding more elements to the component, after its creation.
+    //
+    // Note: It is unclear, do we really want to have extra elements be added like this. The creator could also do
+    //      a group managed by themselves that allows the same, if they really need dynamic addition/removal.
+    //      Doing things with CSS visibility is normally way better. AKa050616
+    //
+    el: function () {   // () -> SVG.Container
+      return this._inner;
+    },
+    ***/
 
     //--- Private methods ---
 
