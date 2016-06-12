@@ -9,18 +9,28 @@ div#cradle {
 
 /* DEBUG
 */
+.debug {
+  stroke-width: 1px;
+  stroke: red;
+  fill: none;
+}
+
+/*
 rect.debug {
   stroke-width: 1px;
   stroke: red;
   fill-opacity: 0;
 }
+*/
 
 text.debug {
   fill: red;
 }
 
+/*
 circle.debug {
   stroke-width: 1px;
   stroke: red;
   fill: none;
 }
+*/

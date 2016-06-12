@@ -144,7 +144,7 @@ var Gx;
       return this._obsRotDeg= this._obsRotDeg || new Rx.Subject;
     },
 
-    // Add/remove/check class on the Gx SVG element
+    // Add/remove/check/toggle class on the Gx SVG element
     //
     addClass: function (s) {    // (String) -> this
       this._g.addClass(s);
@@ -158,6 +158,14 @@ var Gx;
 
     hasClass: function (s) {   // (String) -> Boolean
       return this._g.hasClass(s);
+    },
+
+    // Note: with 'toggleClass' we could return the new '.hasClass' of that element. svg.js returns 'this', so let's
+    //    keep it that way, for now. AKa120616
+    //
+    toggleClass: function (s) {   // (String) -> this
+      this._g.toggleClass(s);
+      return this;
     },
 
     // Return the 'svg.js' parent keeping this element. Used for accessing the other elements, e.g. to switch off their

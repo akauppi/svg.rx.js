@@ -1,17 +1,7 @@
 @import url("demo.css");
 
-.gxTriangle {
+.gxPetal.selected {
   fill: blue;
-}
-.gxTriangle .handle {
-  visibility: hidden;
-}
-
-.gxTriangle.selected {
   stroke-width: 3px;
-  stroke: red;
-}
-.gxTriangle.selected .handle {
-  fill: red;
-  visibility: initial;
+  stroke: black;
 }
