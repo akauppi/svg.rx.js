@@ -44,7 +44,7 @@ Use the latter IP from the phone to open the demo.
 
 ![](images/safari_remote_inspection.png)
 
-Reference:
+References:
 
 - [Remote debugging iOS Safari on OS X, Windows and Linux](https://blog.idrsolutions.com/2015/02/remote-debugging-ios-safari-on-os-x-windows-and-linux/)
 

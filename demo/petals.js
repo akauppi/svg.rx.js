@@ -106,7 +106,9 @@ var GxPetal;
       //      in CSS and simply changing the class to 'selected' would activate those. AKa120616
       //
       var zoom = self.hasClass("selected") ? 1.4 : 1.0;
-      self._g.scale( zoom, 0.0, 0.0 );
+      //self._g.scale( zoom, 0.0, 0.0 );
+
+      self._g.animate(50).scale( zoom, 0.0, 0.0 );
     });
   };
 

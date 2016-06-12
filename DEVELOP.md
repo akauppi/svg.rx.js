@@ -19,11 +19,11 @@ Chrome has a wonderful [Android Remote Debugging](https://developer.chrome.com/d
 1. enable the USB debugging mode in your device (see the link)
 2. open desktop Chrome at `chrome:inspect`
 
-You can use the "Port forwarding" feature, together with a lightweight node based http-server, to test code changes without publishing to the Internet:
+You can use the "Port forwarding" feature, together with a lightweight `node` based http-server, to test code changes without publishing to the Internet:
 
 1. run `npm run serve` on the command line. This serves the `demo/` folder in `localhost:8080`
 2. enable the "Port forwarding" in desktop Chrome (under `chrome:inspect`)
-3. browse the demos with the phone/tablet
+3. browse the demos with the phone/tablet: `http://localhost:8080`
 
 It really couldn't be easier!
 
