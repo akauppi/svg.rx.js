@@ -97,10 +97,16 @@ var GxPetal;
       parent.rect( x+R1x, 2*R1y ).move(A+50-originX,50-originY).addClass("debug");
     }
 
-    // tbd. Add touch / click handler, for making the petal grow/shrink.
-
+    // Touch / click handler, making the petal grow/shrink.
+    //
     this.clickable( function () {   // clicked
       self.toggleClass("selected");
+
+      // Note: Unlike HTML, SVG doesn't seem to have scaling support from CSS. Ideally, we'd express such things
+      //      in CSS and simply changing the class to 'selected' would activate those. AKa120616
+      //
+      var zoom = self.hasClass("selected") ? 1.4 : 1.0;
+      self._g.scale( zoom, 0.0, 0.0 );
     });
   };
 
@@ -142,8 +148,6 @@ var GxPetal;
     START_DEG = -90 - (colors.length-1)/2 * GAP_DEG;    // angle of the first petal
 
   colors.forEach( function (color,i) {
-    //console.log(color);
-
     new GxPetal(svg,color).pos(X,Y).rotDeg(START_DEG+i*GAP_DEG);
   } );
 })();

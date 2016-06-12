@@ -179,6 +179,17 @@ var Gx;
       this._g.click(f);
     },
 
+    /***
+    // Scale
+    //
+    // tbd. maybe also other transformations
+    // tbd. #nottested
+    //
+    scale: function (d) {   // (Number) -> this
+      this._g.scale(d);
+    },
+    ***/
+
     //--- Private methods ---
 
     _pos: function () {    // () -> {x:Num,y:Num}
