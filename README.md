@@ -80,10 +80,8 @@ The demos work both as sample code and as manual tests.
 - [src/svg.rx.js](src/svg.rx.js)
 
 |Note|
-|-|
-| The code is currently using RxJS 5.0.0 beta4. Once RxJS 5 becomes available via node.js, we're moving to it. Check the [current situation](https://www.npmjs.com/package/rxjs) of RxJS releases for npm. |
-
-<!-- 5.0.0-beta7 as of AKa010516 -->
+|---|
+| The code is currently using RxJS 5.0.0 beta. Once RxJS 5 becomes available via node.js, we're moving to it. Check the [current situation](https://www.npmjs.com/package/rxjs) of RxJS releases for npm. |
 
 
 ## Tests 
@@ -93,7 +91,7 @@ All claimed features should have tests.
 Run the tests:
 
 ```
-$ npm run test
+$ npm test
 ```
 
 Alternatively, you can run the tests in a browser:
