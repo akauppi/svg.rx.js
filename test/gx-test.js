@@ -71,14 +71,10 @@ describe('gx', function () {    // Test 'gx.js' operations
     //
     if (false) {
       tmp.should.contain(b);              // "72ms".."79ms" or so slow flag
+    } else if (false) {   // Note: PhantomJS 2.1.1 does not support 'Array#includes'. AKa190616
+      tmp.includes(b).should.be.true;     // no slow flag (works only in browser)
     } else {
-      // Note: The remedy works in the browser, but not in 'npm test', for some reason. AKa190616
-      //
-      //  More specifically, PhantomJS 2.1.1 does not seem to support 'Array#includes'. AKa190616
-      //
-      //tmp.includes(b).should.be.true;   // no slow flag
-
-      tmp.indexOf(b).should.be.least(0);   // no slow flag
+      tmp.indexOf(b).should.be.least(0);  // no slow flag
     }
 
     tmp.length.should.be.equal(2);
