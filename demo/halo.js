@@ -27,17 +27,22 @@ var RAD2DEG = (180.0 / Math.PI);
   var trans = function (el) {   // SVG.Use -> SVG.Use (same)
     el.translate(9,9);    // make the center its (0,0); we know the viewbox is 18,18
     el.scale(0.06);
-    return el;
+
+    // Note: If we pass 'use' entities to the 'svg.gxHalo()' they won't be properly rotated. Wrap in a group. AKa210616
+    //
+    var g= el.parent().group();
+    g.add(el);
+    return g;
   }
 
   // tbd. using 'use' as elems doesn't seem to work - why don't they move? AKa210616
 
   var halo = svg.gxHalo(R1, R2, [
-    {el: trans(use1), f: function () { console.log("forward"); }},
-    {el: trans(use2), f: function () { console.log("trash"); }},
-    {el: svg.rect(18,18), f: function () { console.log("forward"); }},
-    {el: svg.rect(18,18).style( {fill: "blue" }), f: function () { console.log("forward"); }},
-    {el: svg.rect(18,18).style( {fill: "red" }), f: function () { console.log("forward"); }}
+    {el: trans(use1), f: function () { console.log("1"); }},
+    {el: trans(use2), f: function () { console.log("2"); }},
+    {el: svg.rect(18,18), f: function () { console.log("3"); }},
+    {el: svg.rect(18,18).style( {fill: "blue" }), f: function () { console.log("4"); }},
+    {el: svg.rect(18,18).style( {fill: "red" }), f: function () { console.log("5"); }}
   ]);
 
   halo.pos(X,Y);
