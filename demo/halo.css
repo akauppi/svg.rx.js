@@ -1,0 +1,23 @@
+@import url("demo.css");
+
+/*
+.gxPetal.selected {
+  fill: blue;
+  stroke-width: 3px;
+  stroke: black;
+}
+*/
+
+svg#symbols {
+  display: none;
+}
+
+.gxHalo path {
+  fill: white;      /* Note: 'none' would not receive clicks */
+  stroke-width: 1px;
+  stroke: black;
+}
+
+.gxHalo .selected path {
+  fill: lightGray;
+}
