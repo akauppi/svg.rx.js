@@ -8,16 +8,12 @@
 }
 */
 
-svg#symbols {
-  display: none;
-}
-
-.gxHalo path {
+.gxHalo path.arc {
   fill: white;      /* Note: 'none' would not receive clicks */
   stroke-width: 1px;
   stroke: black;
 }
 
-.gxHalo .selected path {
+.gxHalo .selected path.arc {
   fill: lightGray;
 }

@@ -62,6 +62,8 @@
         "z"
       );
 
+      path.addClass("arc");   // to be able to limit styling to us
+
       var arc= path.rotate( rad * RAD_TO_DEG, 0,0 );
 
       // Calculate the position for the icon. We don't want to rotate it.
@@ -97,7 +99,8 @@
       ***/
 
       gg.click( function () {
-        alert("clicked");
+        //alert("clicked");
+
         // Currently just toggle (needs at least: toggle by changing background and/or icon), just click, disabled. tbd.
         //
         gg.toggleClass("selected");
