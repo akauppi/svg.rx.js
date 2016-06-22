@@ -27,8 +27,12 @@
 
     var spread_rad = 2*Math.PI / choices.length;
 
+    var n= choices.length;
+
     g.circle(2*r1).center(0,0).addClass("debug");
     g.circle(2*r2).center(0,0).addClass("debug");
+
+    var rMid = (r1+r2)/2;
 
     // Make a group with path and the inner stuff given (caller will translate)
     //
@@ -36,33 +40,61 @@
     //
     // Note: All this could be within the 'forEach' scope, instead of separate function.
     //
-    var addArcWithElem = function (_g,el,rad,f) {   // (SVG.G, SVG.Element, Number, () ->) -> SVG.G
+    var addArcWithElem = function (_g,el,i,f) {   // (SVG.G, SVG.Element, Int, () ->) -> SVG.G
       var gg= _g.group();
 
+      var rad = -(Math.PI/2) - i/n * (2.0*Math.PI);   // counter-clockwise, starting from top
+
+      // Make the path at 0 rad and rotate to rightful place.
+      //
       var a = Math.cos(spread_rad/2),
         b = Math.sin(spread_rad/2);
 
-      // Note: The position of 'a' and 'b' is like this because we're drawing the arc -PI rotated (on negative Y axis).
-      //
-      var rx1= r1*b,
-        ry1= r1*a,
-        rx2= r2*b,
-        ry2= r2*a;
+      var rx1= r1*a,
+        ry1= r1*b,
+        rx2= r2*a,
+        ry2= r2*b;
 
-      gg.path( "M"+(-rx2)+","+(-ry2)+
-        "A"+r2+","+r2+",0,0,1,"+rx2+","+(-ry2)+     // larger arc, left to right
-        "L"+(rx1)+","+(-ry1)+
-        "A"+r1+","+r1+",0,0,0,"+(-rx1)+","+(-ry1)+  // smaller arc, right to left
+      var path = gg.path( "M"+rx2+","+(-ry2)+
+        "A"+r2+","+r2+",0,0,1,"+rx2+","+ry2+     // larger arc, clockwise
+        "L"+rx1+","+ry1+
+        "A"+r1+","+r1+",0,0,0,"+rx1+","+(-ry1)+  // smaller arc, counter-clockwise
         "z"
       );
 
-      // Can use '.move' since the element has been translated to have (0,0) as the attachement point to the halo.
-      //
-      gg.add(el);
-      el.move( 0, -(r1+r2)/2.0 )
-        .rotate( (-rad)* RAD_TO_DEG, 0,0 );
+      var arc= path.rotate( rad * RAD_TO_DEG, 0,0 );
 
-      gg.rotate( rad * RAD_TO_DEG, 0,0 );
+      // Calculate the position for the icon. We don't want to rotate it.
+      //
+      var rMid = (r1+r2)/2.0;
+
+      var dx = rMid * Math.cos(rad);
+      var dy = rMid * Math.sin(rad);
+
+      el.center(dx,dy);
+
+      gg.add(arc);
+      gg.add(el);
+
+      /*** remove?
+      if (true) {
+        // Can use '.move' since the element has been translated to have (0,0) as the attachement point to the halo.
+        //
+        gg.add(el);
+        el.center( 0, -(r1+r2)/2.0 );
+          //.rotate( (-rad)* RAD_TO_DEG, 0,0 );
+      } else {
+        // Just place the icon in the right position, without joining it in the group (this way, it does not need to
+        // be rotated
+        //
+        var c = Math.cos(rad/2),
+          d = Math.sin(rad/2),
+          dx = rMid * d,
+          dy = rMid * c;
+
+        el.center(dx,dy);
+      }
+      ***/
 
       gg.click( function () {
         alert("clicked");
@@ -73,18 +105,13 @@
       });
     }
 
-    var n= choices.length;
-
     // Add sections, one per elem
     //
     choices.forEach( function (x,i) {
       var el= x.el;
       var f= x.f;
 
-      var rad = (i/n) * (2.0*Math.PI);
-
-      console.log(rad);
-      addArcWithElem(g,el,rad,f);
+      addArcWithElem(g,el,i,f);
     });
 
     Gx.call( this, parent, g, "gxHalo" );

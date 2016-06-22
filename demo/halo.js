@@ -15,7 +15,7 @@ var RAD2DEG = (180.0 / Math.PI);
   var R1 = 20,
     R2 = 50,
     X= 100,
-    Y= 50;
+    Y= 55;
 
   var svg = SVG( document.body );
 
