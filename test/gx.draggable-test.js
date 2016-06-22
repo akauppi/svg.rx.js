@@ -6,7 +6,7 @@
 
 chai.should();
 
-describe('gx.draggable', function () {    // test 'gx.draggable.js' features
+describe('gx.draggable', function () {
 
   var DEG2RAD = Math.PI / 180.0;
 

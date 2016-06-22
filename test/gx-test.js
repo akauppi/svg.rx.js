@@ -6,7 +6,7 @@
 
 chai.should();
 
-describe('gx', function () {    // Test 'gx.js' operations
+describe('gx', function () {
 
   var DEG2RAD = Math.PI / 180.0;
 
