@@ -32,11 +32,11 @@ if (true) (function() {
     el2.path( "M10.5 13h1c0.276 0 0.5-0.224 0.5-0.5v-3c0-0.276-0.224-0.5-0.5-0.5h-1c-0.276 0-0.5 0.224-0.5 0.5v3c0 0.276 0.224 0.5 0.5 0.5z" );
 
   var halo = svg.gxHalo(R1, R2, [
-    {el: el1, f: function () { console.log("1"); }},
+    {el: el1, f: function () { console.log("1"); }, disabled: true},
     {el: el2, f: function () { console.log("2"); }},
     {el: svg.rect(18,18), f: function () { console.log("3"); }},
-    {el: svg.rect(18,18).style( {fill: "blue" }), f: function () { console.log("4"); }},
-    {el: svg.rect(18,18).style( {fill: "red" }), f: function () { console.log("5"); }}
+    {el: svg.circle(18,18).style( {fill: "blue" }), f: function () { console.log("4"); }},
+    {el: svg.circle(18,18).style( {fill: "red" }), f: function () { console.log("5"); }}
   ]);
 
   halo.pos(X,Y);
@@ -86,8 +86,8 @@ if (true) (function() {
     // Note: These adjustments just *happen* to bring the right outcome (on default zooming level, in Safari and Chrome).
     //      We should make this more systematic, so any scaling and zooming would work. AKa040716
     //
+    el.scale(0.04, 9,9);
     el.translate(-8,1);    // make the center its (0,0); we know the viewbox is 18,18
-    el.scale(0.04);
 
     // Note: If we pass 'use' entities to the 'svg.gxHalo()' they won't be properly rotated (actually - translated).
     //    Wrap in a group. AKa210616
@@ -109,11 +109,11 @@ if (true) (function() {
   // tbd. using 'use' as elems doesn't seem to work - why don't they move? AKa210616
 
   var halo = svg.gxHalo(R1, R2, [
-    {el: trans(use1), f: function () { console.log("1"); }},
+    {el: trans(use1), f: function () { console.log("1"); }, disabled: true},
     {el: trans(use2), f: function () { console.log("2"); }},
     {el: svg.rect(18,18), f: function () { console.log("3"); }},
-    {el: svg.rect(18,18).style( {fill: "blue" }), f: function () { console.log("4"); }},
-    {el: svg.rect(18,18).style( {fill: "red" }), f: function () { console.log("5"); }}
+    {el: svg.circle(18,18).style( {fill: "blue" }), f: function () { console.log("4"); }},
+    {el: svg.circle(18,18).style( {fill: "red" }), f: function () { console.log("5"); }}
   ]);
 
   halo.pos(X,Y);

@@ -11,3 +11,12 @@
 .gxHalo .selected path.arc {
   fill: lightGray;
 }
+
+.gxHalo .disabled {
+  stroke: #888;
+  fill: #888;
+}
+.gxHalo .disabled path.arc {
+  fill: #ddd;
+  opacity: 0.5;
+}

@@ -40,7 +40,11 @@
     //
     // Note: All this could be within the 'forEach' scope, instead of separate function.
     //
-    var addArcWithElem = function (_g,el,i,f) {   // (SVG.G, SVG.Element, Int, () ->) -> SVG.G
+    var addArcWithElem = function (_g,x,i) {   // (SVG.G, {el: SVG.Element, f: () ->, disabled: Boolean|undefined}, Int, () ->) -> SVG.G
+      var el = x.el,
+        f = x.f,
+        disabled = x.disabled || false;
+
       var gg= _g.group();
 
       var rad = -(Math.PI/2) - i/n * (2.0*Math.PI);   // counter-clockwise, starting from top
@@ -78,6 +82,10 @@
       gg.add(arc);
       gg.add(el);
 
+      if (disabled) {
+        gg.addClass("disabled");
+      }
+
       /*** remove?
       if (true) {
         // Can use '.move' since the element has been translated to have (0,0) as the attachement point to the halo.
@@ -101,20 +109,22 @@
       gg.click( function () {
         //alert("clicked");
 
-        // Currently just toggle (needs at least: toggle by changing background and/or icon), just click, disabled. tbd.
+        // If disabled, do nothing
         //
-        gg.toggleClass("selected");
-        f();
+        if (gg.hasClass("disabled")) {
+        } else {
+          // Currently just toggle (needs at least: toggle by changing background and/or icon), just click, disabled. tbd.
+          //
+          gg.toggleClass("selected");
+          f();
+        }
       });
     }
 
     // Add sections, one per elem
     //
     choices.forEach( function (x,i) {
-      var el= x.el;
-      var f= x.f;
-
-      addArcWithElem(g,el,i,f);
+      addArcWithElem(g,x,i);
     });
 
     Gx.call( this, parent, g, "gxHalo" );
