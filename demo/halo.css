@@ -1,13 +1,7 @@
 @import url("demo.css");
 
-/*
-.gxPetal.selected {
-  fill: blue;
-  stroke-width: 3px;
-  stroke: black;
-}
+/* Note: The arcs _are_ drawn antialiased, though at least in Safari the edges still seem jerky. AKa030716
 */
-
 .gxHalo path.arc {
   fill: white;      /* Note: 'none' would not receive clicks */
   stroke-width: 1px;
