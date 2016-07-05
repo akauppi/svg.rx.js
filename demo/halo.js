@@ -79,15 +79,18 @@ if (true) (function() {
   // Refer to the symbols in an external SVG file
   //
   var use1= svg.use("icon-forward", "halo-icons.svg");
-  var use2= svg.use("icon-trash", "halo-icons.svg");
+  //var use2= svg.use("icon-trash", "halo-icons.svg");
+
+  //var use1= svg.use("icon-forward", "halo-icons.svg");   // tbd. do arrow backward
+  var use2= svg.use("icon-letter", "halo-icons.svg");
 
   var trans = function (el) {   // SVG.Use -> SVG.Use (same)
 
     // Note: These adjustments just *happen* to bring the right outcome (on default zooming level, in Safari and Chrome).
     //      We should make this more systematic, so any scaling and zooming would work. AKa040716
     //
-    el.scale(0.04, 9,9);
-    el.translate(-8,1);    // make the center its (0,0); we know the viewbox is 18,18
+    el.scale(0.06, 9,9);
+    el.translate(-16,2);
 
     // Note: If we pass 'use' entities to the 'svg.gxHalo()' they won't be properly rotated (actually - translated).
     //    Wrap in a group. AKa210616
