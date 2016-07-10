@@ -8,12 +8,14 @@ var RAD2DEG = (180.0 / Math.PI);
 
 var svg = SVG( document.body );
 
+var rotDeg_obs;
+
 /*
 * Halo demo, not using symbols (works)
 *
 * Note: This method scales by the browser zooming changes (symbols + use don't).
 */
-if (true) (function() {
+(function() {
   "use strict";
 
   var R1 = 20,
@@ -21,27 +23,31 @@ if (true) (function() {
     X= 100,
     Y= 75;
 
-  var arrowRight = svg.path("M16.711 8.29l-6-5.996c-0.391-0.391-1.026-0.391-1.417 0s-0.391 1.025 0 1.417l4.293 4.29h-11.59c-0.553 0-1.001 0.448-1.001 1s0.448 1 1.001 1h11.59l-4.292 4.29c-0.391 0.391-0.391 1.025 0.001 1.417s1.026 0.391 1.417 0l6-5.997c0.196-0.196 0.294-0.453 0.294-0.71s-0.097-0.514-0.294-0.71z");
+  // Note: Plain path does not change position like when it's placed in a group. Why not? AKa100716
+  //
+  var arrowRight = svg.group()
+    .path("M16.711 8.29l-6-5.996c-0.391-0.391-1.026-0.391-1.417 0s-0.391 1.025 0 1.417l4.293 4.29h-11.59c-0.553 0-1.001 0.448-1.001 1s0.448 1 1.001 1h11.59l-4.292 4.29c-0.391 0.391-0.391 1.025 0.001 1.417s1.026 0.391 1.417 0l6-5.997c0.196-0.196 0.294-0.453 0.294-0.71s-0.097-0.514-0.294-0.71z")
+    .translate(-9,-9);
 
   //var arrowLeft = arrowRight.clone().scale(-1,1);
 
   var trash = svg.group();
     //
-    trash.path( "M17 5h-4v-3c0-0.552-0.448-1-1-1h-6c-0.552 0-1 0.448-1 1v3h-4c-0.552 0-1 0.448-1 1v1h2v9c0 0.552 0.448 1 1 1h12c0.552 0 1-0.448 1-1v-9h2v-1c0-0.552-0.448-1-1-1zM7 3h4v2h-4v-2zM14 15h-10v-8h10v8z" );
-    trash.path( "M6.5 13h1c0.276 0 0.5-0.224 0.5-0.5v-3c0-0.276-0.224-0.5-0.5-0.5h-1c-0.276 0-0.5 0.224-0.5 0.5v3c0 0.276 0.224 0.5 0.5 0.5z" );
-    trash.path( "M10.5 13h1c0.276 0 0.5-0.224 0.5-0.5v-3c0-0.276-0.224-0.5-0.5-0.5h-1c-0.276 0-0.5 0.224-0.5 0.5v3c0 0.276 0.224 0.5 0.5 0.5z" );
+    trash.path( "M17 5h-4v-3c0-0.552-0.448-1-1-1h-6c-0.552 0-1 0.448-1 1v3h-4c-0.552 0-1 0.448-1 1v1h2v9c0 0.552 0.448 1 1 1h12c0.552 0 1-0.448 1-1v-9h2v-1c0-0.552-0.448-1-1-1zM7 3h4v2h-4v-2zM14 15h-10v-8h10v8z" )
+    trash.path( "M6.5 13h1c0.276 0 0.5-0.224 0.5-0.5v-3c0-0.276-0.224-0.5-0.5-0.5h-1c-0.276 0-0.5 0.224-0.5 0.5v3c0 0.276 0.224 0.5 0.5 0.5z" )
+    trash.path( "M10.5 13h1c0.276 0 0.5-0.224 0.5-0.5v-3c0-0.276-0.224-0.5-0.5-0.5h-1c-0.276 0-0.5 0.224-0.5 0.5v3c0 0.276 0.224 0.5 0.5 0.5z" )
+    trash.translate(-9,-9);
 
   var letter = svg.path("M512 96h-448c-17.672 0-32 14.328-32 32v320c0 17.672 14.328 32 32 32h448c17.672 0 32-14.328 32-32v-320c0-17.672-14.328-32-32-32zM467.781 160l-179.781 122.602-179.781-122.602h359.562zM480 400c0 8.836-7.156 16-16 16h-352c-8.844 0-16-7.164-16-16v-171.602l175.906 119.141c4.969 2.977 10.532 4.461 16.094 4.461s11.125-1.484 16.094-4.461l175.906-119.141v171.602z")
-    .scale(16/512, 0,0)
+    .scale(18/512, 0,0)
     .translate(-28,-32);    // tbd. Why is this needed? Places the icon suitably
 
   var widthDeg = 50;
 
-  var rr;
   var halo = svg.gxHalo(R1, R2, widthDeg, [
-    {el: arrowRight, f: function () { console.log("1"); }, disabled: Rx.Observable.from([true]), upright: true },
+    {el: arrowRight, f: function () { console.log("1"); }, _disabled: Rx.Observable.from([true]), upright: true },
     {el: trash, el2: letter, f: function () { console.log("2"); }, upright: true },
-    {el: rr= svg.rect(18,18).translate(-9,-9), f: function () { console.log("3"); }, upright: true },
+    {el: svg.rect(18,18).translate(-9,-9), f: function () { console.log("3"); }, upright: true },
     {el: svg.circle(18,18).translate(-9,-9).style( {fill: "blue" }), f: function () { console.log("4"); this.toggleClass("selected"); }, flash: false},
     {el: svg.circle(18,18).translate(-9,-9).style( {fill: "red" }), f: function () { console.log("5"); }}
   ]);
@@ -52,27 +58,26 @@ if (true) (function() {
   //
   //halo.rotDeg(45);
 
-  rr.rotate(45);
-
   // Add a rim that can be used for interactive rotation
   //
-  var rim = svg.circle(2*R2).center(X,Y).addClass("rim").back();
+  var rim = svg.circle(2*R2).translate(-R2,-R2).move(X,Y).addClass("rim").back();
     //
     // This clipped the wrong way (wanted to clip the smaller circle out). AKa100716
     //rim.clipWith( svg.circle(2*R1).move(X,Y) );
 
-  svg.circle(2*R1).center(X,Y).style({ fill: "white"}).front();
+  svg.circle(2*R1).center(X,Y).style({ fill: "purple"}).front();
 
   rim.rx_draggable().subscribe( function (dragObs) {
-    // tbd. 'preDeg' gives 'undefined' for some reason
-    //var preDeg = halo.rotDeg();    // keep initial rotation
-    //console.log(preDeg);
+    var preDeg = halo.rotDeg();    // keep initial rotation
+    console.log(preDeg);
 
     // tbd. Should make a simpler rotational dragging API, saying which coordinate we wish to rotate around. AKa100716
     //
+    // tbd. This does not work exactly as we'd like, but enough to test stuff anyways. AKa100716
+    //
     dragObs.subscribe(
       function (o) {    // ({x: Number, y: Number}) ->
-        //console.log( "Dragging: "+ o.x + " "+ o.y );
+        console.log( "Dragging: "+ o.x + " "+ o.y );
 
         var rad = Math.atan2(o.y,o.x);
         halo.rotDeg(/*preDeg +*/ rad * RAD2DEG);
@@ -82,6 +87,79 @@ if (true) (function() {
     );
   } );
 
+  rotDeg_obs = halo.obsRotDeg();
+})();
+
+/*
+* Place symbols in squares and see how they would rotate (they should rotate in place).
+*/
+(function() {
+  "use strict";
+
+  var X= 300,
+    Y= 20,
+    BOX_SIZE= 50,
+    ROWS= 3,
+    COLS= 3;
+
+  // Draw the grid
+  //
+  for( var i=0; i<COLS; i++ ) {
+    for( var j=0; j<ROWS; j++ ) {
+      var x= X+ BOX_SIZE*i,
+        y= Y+ BOX_SIZE*j;
+
+        svg.rect(BOX_SIZE, BOX_SIZE).move(x,y).addClass("debug");
+        svg.rect(32, 32).center(x+BOX_SIZE/2,y+BOX_SIZE/2).addClass("debug");
+    }
+  }
+
+  // Symbols. All translated so that their center is (0,0)
+  //
+  var arrowRight =
+    svg.path("M16.711 8.29l-6-5.996c-0.391-0.391-1.026-0.391-1.417 0s-0.391 1.025 0 1.417l4.293 4.29h-11.59c-0.553 0-1.001 0.448-1.001 1s0.448 1 1.001 1h11.59l-4.292 4.29c-0.391 0.391-0.391 1.025 0.001 1.417s1.026 0.391 1.417 0l6-5.997c0.196-0.196 0.294-0.453 0.294-0.71s-0.097-0.514-0.294-0.71z")
+      .translate(-9,-9);
+
+  var arrowLeft = arrowRight.clone().scale(-1,1);
+
+  var trash = svg.group();
+    //
+    trash.path( "M17 5h-4v-3c0-0.552-0.448-1-1-1h-6c-0.552 0-1 0.448-1 1v3h-4c-0.552 0-1 0.448-1 1v1h2v9c0 0.552 0.448 1 1 1h12c0.552 0 1-0.448 1-1v-9h2v-1c0-0.552-0.448-1-1-1zM7 3h4v2h-4v-2zM14 15h-10v-8h10v8z" );
+    trash.path( "M6.5 13h1c0.276 0 0.5-0.224 0.5-0.5v-3c0-0.276-0.224-0.5-0.5-0.5h-1c-0.276 0-0.5 0.224-0.5 0.5v3c0 0.276 0.224 0.5 0.5 0.5z" );
+    trash.path( "M10.5 13h1c0.276 0 0.5-0.224 0.5-0.5v-3c0-0.276-0.224-0.5-0.5-0.5h-1c-0.276 0-0.5 0.224-0.5 0.5v3c0 0.276 0.224 0.5 0.5 0.5z" );
+    trash.translate(-9,-9);
+
+  var letter = svg.path("M512 96h-448c-17.672 0-32 14.328-32 32v320c0 17.672 14.328 32 32 32h448c17.672 0 32-14.328 32-32v-320c0-17.672-14.328-32-32-32zM467.781 160l-179.781 122.602-179.781-122.602h359.562zM480 400c0 8.836-7.156 16-16 16h-352c-8.844 0-16-7.164-16-16v-171.602l175.906 119.141c4.969 2.977 10.532 4.461 16.094 4.461s11.125-1.484 16.094-4.461l175.906-119.141v171.602z")
+    .scale(18/512, 0,0)
+    //.translate(-28,-32);    // tbd. Why is this needed? Places the icon suitably
+
+  var square = svg.rect(18,18).translate(-9,-9);
+
+  // Should figure how to load an outside icon to specific measures, and moveable. tbd. AKa100716
+  //
+  var use1= svg.use("icon-forward", "halo-icons.svg");
+  var use2= svg.use("icon-letter", "halo-icons.svg");
+
+  var els= [arrowRight, arrowLeft, trash, letter, use1, use2, square];
+
+  els.forEach( function (el,k) {
+    var i= k%COLS,
+      j= Math.floor(k/COLS) %ROWS;
+
+    var x= X + (i+0.5) * BOX_SIZE,
+      y= Y + (j+0.5) * BOX_SIZE;
+
+    console.log( "Setting "+k+" to", x, y );
+    el.move(x,y);
+  } );
+
+  // Tie to the rim's rotational stream
+  //
+  rotDeg_obs.subscribe( function (deg) {
+    els.forEach( function (el,i) {
+      el.rotate(deg);   // follow the rotation, around their origin
+    } );
+  } );
 })();
 
 /*

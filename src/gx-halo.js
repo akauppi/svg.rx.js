@@ -228,24 +228,6 @@
 
   assert( Gx.prototype.rotDeg );    // check there is a method we are overriding
 
-  // Override Gx's 'rotDeg' so that the menu entries stay vertically aligned. Base (rad 0) is east.
-  //
-  // This can be used by client code to rotate, but also *needs* to be called once, after 'gxHalo' creation, to put
-  // the things in right places.
-  //
-  // Note: We don't want to use regular rotation for the icons, but rather make sure they remain upright. That *could*
-  //    be the default behaviour for 'use' and symbols, but we had other problems getting that to work. AKa100716
-  //
-  GxHalo.prototype.rotDeg = function (deg) {    // (Number) -> ()
-    var self= this;
-
-    //var gs = self.children();   // the groups that cover 'path' for arc and the menu icon
-
-    // tbd.
-
-    Gx.prototype.rotDeg.call( this, deg );
-  }
-
   // tbd. Where and how we want to use the menu is still open (from 'SVG.Doc' or any 'Gx'?). AKa190616
   //
   SVG.extend( SVG.Doc, {
