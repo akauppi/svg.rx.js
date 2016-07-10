@@ -22,5 +22,9 @@
 }
 .gxHalo .disabled path.arc {
   fill: #ddd;
-  opacity: 0.5;
+  /*opacity: 0.5;*/
+}
+
+.rim {
+  fill: pink
 }

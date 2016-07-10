@@ -46,6 +46,9 @@
   //    .noflash:   set to 'true' for not getting the transitional flash.
   //    .upright:   If 'true', the menu item is kept vertical even when the menu rotates.
   //
+  // Note: The menu items are placed by their origin, which is expected to be in the center of those items.
+  //        Use '.translate' on the items to reach this.
+  //
   // Members:
   //    ._spread_rad: Number
   //
@@ -64,10 +67,6 @@
     // Get an observable to when the group gets rotated.
     //
     var rotDeg_obs = self.obsRotDeg();
-
-    rotDeg_obs.subscribe( function (deg) {
-      console.log( "We got rotated: ", deg );
-    });
 
     spread_deg = spread_deg || (360 / choices.length);
 
@@ -130,14 +129,10 @@
       var dx = rMid * Math.cos(rad);
       var dy = rMid * Math.sin(rad);
 
-      // tbd. Some of the menu items are groups. 'svg.js' handling of them (or SVG itself) is elaborate, since it does
-      //    not allow transformations on the groups, it seems. We'd like to a) point the origin for the groups, b) then
-      //    here position simply by using '.move'. To be worked on once we, hopefully, break free from 'svg.js'. AKa100716
-      //
-      el.center(dx,dy);
+      el.move(dx,dy);
 
       if (el2) {
-        el2.center(dx,dy);
+        el2.move(dx,dy);
       }
 
       // Add the elements to the group
@@ -164,9 +159,9 @@
       //
       if (upright) {
         rotDeg_obs.subscribe( function (deg) {
-          el.rotate(deg,0,0);
+          el.rotate(-deg,0,0);
           if (el2) {
-            el2.rotate(deg,0,0);
+            el2.rotate(-deg,0,0);
           }
         });
       }

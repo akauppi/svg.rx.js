@@ -23,7 +23,7 @@ if (true) (function() {
 
   var arrowRight = svg.path("M16.711 8.29l-6-5.996c-0.391-0.391-1.026-0.391-1.417 0s-0.391 1.025 0 1.417l4.293 4.29h-11.59c-0.553 0-1.001 0.448-1.001 1s0.448 1 1.001 1h11.59l-4.292 4.29c-0.391 0.391-0.391 1.025 0.001 1.417s1.026 0.391 1.417 0l6-5.997c0.196-0.196 0.294-0.453 0.294-0.71s-0.097-0.514-0.294-0.71z");
 
-  var arrowLeft = arrowRight.clone().scale(-1,1);
+  //var arrowLeft = arrowRight.clone().scale(-1,1);
 
   var trash = svg.group();
     //
@@ -37,19 +37,50 @@ if (true) (function() {
 
   var widthDeg = 50;
 
+  var rr;
   var halo = svg.gxHalo(R1, R2, widthDeg, [
-    {el: arrowRight, el2: arrowLeft, f: function () { console.log("1"); }, disabled: Rx.Observable.from([true]), upright: true },
+    {el: arrowRight, f: function () { console.log("1"); }, disabled: Rx.Observable.from([true]), upright: true },
     {el: trash, el2: letter, f: function () { console.log("2"); }, upright: true },
-    {el: svg.rect(18,18), f: function () { console.log("3"); }, upright: true },
-    {el: svg.circle(18,18).style( {fill: "blue" }), f: function () { console.log("4"); this.toggleClass("selected"); }, flash: false},
-    {el: svg.circle(18,18).style( {fill: "red" }), f: function () { console.log("5"); }}
+    {el: rr= svg.rect(18,18).translate(-9,-9), f: function () { console.log("3"); }, upright: true },
+    {el: svg.circle(18,18).translate(-9,-9).style( {fill: "blue" }), f: function () { console.log("4"); this.toggleClass("selected"); }, flash: false},
+    {el: svg.circle(18,18).translate(-9,-9).style( {fill: "red" }), f: function () { console.log("5"); }}
   ]);
 
   halo.pos(X,Y);
 
   // Check that icons remain upright even when rotated
   //
-  halo.rotDeg(20);
+  //halo.rotDeg(45);
+
+  rr.rotate(45);
+
+  // Add a rim that can be used for interactive rotation
+  //
+  var rim = svg.circle(2*R2).center(X,Y).addClass("rim").back();
+    //
+    // This clipped the wrong way (wanted to clip the smaller circle out). AKa100716
+    //rim.clipWith( svg.circle(2*R1).move(X,Y) );
+
+  svg.circle(2*R1).center(X,Y).style({ fill: "white"}).front();
+
+  rim.rx_draggable().subscribe( function (dragObs) {
+    // tbd. 'preDeg' gives 'undefined' for some reason
+    //var preDeg = halo.rotDeg();    // keep initial rotation
+    //console.log(preDeg);
+
+    // tbd. Should make a simpler rotational dragging API, saying which coordinate we wish to rotate around. AKa100716
+    //
+    dragObs.subscribe(
+      function (o) {    // ({x: Number, y: Number}) ->
+        //console.log( "Dragging: "+ o.x + " "+ o.y );
+
+        var rad = Math.atan2(o.y,o.x);
+        halo.rotDeg(/*preDeg +*/ rad * RAD2DEG);
+      },
+      null,   // error handling
+      null    // end of drag
+    );
+  } );
 
 })();
 
