@@ -12,6 +12,10 @@
   fill: lightGray;
 }
 
+.gxHalo .flash path.arc {
+  fill: gray;
+}
+
 .gxHalo .disabled {
   stroke: #888;
   fill: #888;

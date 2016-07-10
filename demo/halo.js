@@ -31,15 +31,15 @@ if (true) (function() {
 
   var letter = svg.path("M512 96h-448c-17.672 0-32 14.328-32 32v320c0 17.672 14.328 32 32 32h448c17.672 0 32-14.328 32-32v-320c0-17.672-14.328-32-32-32zM467.781 160l-179.781 122.602-179.781-122.602h359.562zM480 400c0 8.836-7.156 16-16 16h-352c-8.844 0-16-7.164-16-16v-171.602l175.906 119.141c4.969 2.977 10.532 4.461 16.094 4.461s11.125-1.484 16.094-4.461l175.906-119.141v171.602z")
     .scale(16/512, 0,0)
-    .translate(-8,-8);
+    .translate(-28,-32);    // tbd. Why is this needed? Places the icon suitably
 
   var widthDeg = 50;
 
   var halo = svg.gxHalo(R1, R2, widthDeg, [
-    {el: arrowRight, f: function () { console.log("1"); }, disabled: true},
+    {el: arrowRight, f: function () { console.log("1"); }, disabled: Rx.Observable.from([true])},
     {el: trash, el2: letter, f: function () { console.log("2"); }},
     {el: svg.rect(18,18), f: function () { console.log("3"); }},
-    {el: svg.circle(18,18).style( {fill: "blue" }), f: function () { console.log("4"); }},
+    {el: svg.circle(18,18).style( {fill: "blue" }), f: function () { console.log("4"); this.toggleClass("selected"); }, flash: false},
     {el: svg.circle(18,18).style( {fill: "red" }), f: function () { console.log("5"); }}
   ]);
 

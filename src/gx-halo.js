@@ -29,6 +29,8 @@
   //    .el2: The alternative element, swapped when clicked (optional)
   //    .f:   The callback function
   //            Note: setting a menu entry to '.selected' or not is intentionally left to the callback
+  //    .disabled:  Observable of boolean, telling the 'disabled' (true) or enabled (false) state of the entry
+  //    .noflash: Boolean, set to 'true' for not getting the transitional flash.
   //
   // Members:
   //    ._spread_rad: Number
@@ -37,7 +39,7 @@
   //    ._rot:      Place a single menu item to its place
   //    .rotDeg:    Override of the 'Gx' rotation, rotating also the menu items so they remain upright.
   //
-  var GxHalo = function (parent, r1, r2, spread_deg, choices) {    // (SVG.Container, Number, Number, Number, array of {el: SVG.Elem, el2: [SVG.Elem], f: () ->}) ->
+  var GxHalo = function (parent, r1, r2, spread_deg, choices) {    // (SVG.Container, Number, Number, Number, array of {el: SVG.Elem, el2: [SVG.Elem], f: () ->}, ...) ->
     var self= this;
 
     var g = parent.group();
@@ -57,11 +59,13 @@
     //
     // Note: All this could be within the 'forEach' scope, instead of separate function.
     //
-    var addG = function (_g,x,i) {   // (SVG.G, {el: SVG.Element, el2: [SVG.Element], f: () ->, disabled: [Boolean]}, Int) -> SVG.G
+    var addG = function (_g,x,i) {   // (SVG.G, {el: SVG.Element, el2: [SVG.Element], f: () ->, disabled_obs: [observable of Boolean], flash: [Boolean|Int]}, Int) -> SVG.G
       var el = x.el,
         el2 = x.el2,
         f = x.f,
-        disabled = x.disabled || false;
+        disabled_obs = x.disabled,
+        flash_ms = (x.flash === undefined || x.flash === true) ? 20 :
+          x.flash ? x.flash : 0;
 
       var gg= _g.group();
 
@@ -86,9 +90,11 @@
 
       // Angle of the center
       //
+      // Go counterclockwise
+      //
       var rad = (function () {    // scope
         var ii= i - (choices.length)/2 +0.5;
-        return Math.PI + spread_rad * ii;
+        return - (Math.PI + spread_rad * ii);
       })();
 
       arc.rotate( rad * RAD_TO_DEG, 0,0 );
@@ -117,10 +123,13 @@
         gg.add(el2.hide());
       }
 
-      // Initial disabled state
+      // Visualize the disabled state
       //
-      if (disabled) {
-        gg.addClass("disabled");
+      if (disabled_obs) {
+        disabled_obs.subscribe( function (b) {    // (boolean) -> ()
+          if (b) gg.addClass("disabled")
+          else gg.removeClass("disabled");
+        })
       }
 
       // Click handler
@@ -142,8 +151,18 @@
             }
           }
 
-          // tbd. Should we do the call so that 'gg' is the 'this'. AKa100716
-          f();
+          // Make a flash to visually indicate the click
+          //
+          // tbd. Once we have animation support in 'rx', should do this kind of things with it - or with CSS alone. AKa100716
+          //
+          if (flash_ms > 0) {
+            gg.addClass("flash");
+            window.setTimeout( function () { gg.removeClass("flash"); }, flash_ms );
+          }
+
+          // Call with the menu item being 'this'; allows easy changing of its class.
+          //
+          f.call(gg);
         }
       });
 
