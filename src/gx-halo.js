@@ -14,6 +14,19 @@
   var RAD_TO_DEG = 180.0 / Math.PI;
   var DEG_TO_RAD = 1/RAD_TO_DEG;
 
+  /*
+  * MenuItemOpts: {
+  *   .el:  SVG.Elem
+  *   .el2: [SVG.Elem]
+  *   .f:   () ->       // with the menu item group as 'this'
+  *   .disabled: [Observable of boolean]
+  *   .flash: [Int|Boolean]
+  *   .upright: [Boolean]
+  * }
+  *
+  * ^-- Above is a commentary object definition that we can use in the prototypes below.
+  */
+
   //--- GxHalo -> Gx
   //
   // Use:
@@ -24,13 +37,14 @@
   // 'spread_deg':  Spread of each menu item (optional)
   //              If provided, one can make menus which are arc-like, instead of covering the whole circle (default).
   //
-  // 'oN':
+  // 'MenuItemOpts':
   //    .el:  The initial (or only) element
   //    .el2: The alternative element, swapped when clicked (optional)
   //    .f:   The callback function
   //            Note: setting a menu entry to '.selected' or not is intentionally left to the callback
   //    .disabled:  Observable of boolean, telling the 'disabled' (true) or enabled (false) state of the entry
-  //    .noflash: Boolean, set to 'true' for not getting the transitional flash.
+  //    .noflash:   set to 'true' for not getting the transitional flash.
+  //    .upright:   If 'true', the menu item is kept vertical even when the menu rotates.
   //
   // Members:
   //    ._spread_rad: Number
@@ -39,10 +53,21 @@
   //    ._rot:      Place a single menu item to its place
   //    .rotDeg:    Override of the 'Gx' rotation, rotating also the menu items so they remain upright.
   //
-  var GxHalo = function (parent, r1, r2, spread_deg, choices) {    // (SVG.Container, Number, Number, Number, array of {el: SVG.Elem, el2: [SVG.Elem], f: () ->}, ...) ->
+  var GxHalo = function (parent, r1, r2, spread_deg, choices) {    // (SVG.Container, Number, Number, Number, array of MenuItemOpts) ->
     var self= this;
 
     var g = parent.group();
+
+    Gx.call( self, parent, g, "gxHalo" );
+    //this.origin(0,0);
+
+    // Get an observable to when the group gets rotated.
+    //
+    var rotDeg_obs = self.obsRotDeg();
+
+    rotDeg_obs.subscribe( function (deg) {
+      console.log( "We got rotated: ", deg );
+    });
 
     spread_deg = spread_deg || (360 / choices.length);
 
@@ -59,13 +84,14 @@
     //
     // Note: All this could be within the 'forEach' scope, instead of separate function.
     //
-    var addG = function (_g,x,i) {   // (SVG.G, {el: SVG.Element, el2: [SVG.Element], f: () ->, disabled_obs: [observable of Boolean], flash: [Boolean|Int]}, Int) -> SVG.G
+    var addG = function (_g,x,i) {   // (SVG.G, MenuItemOpts, Int) -> SVG.G
       var el = x.el,
         el2 = x.el2,
         f = x.f,
         disabled_obs = x.disabled,
         flash_ms = (x.flash === undefined || x.flash === true) ? 20 :
-          x.flash ? x.flash : 0;
+          x.flash ? x.flash : 0,
+        upright = x.upright;
 
       var gg= _g.group();
 
@@ -132,6 +158,19 @@
         })
       }
 
+      // Keep menu item upright if the menu is rotated
+      //
+      // tbd. This doesn't fully work, yet. AKa100716
+      //
+      if (upright) {
+        rotDeg_obs.subscribe( function (deg) {
+          el.rotate(deg,0,0);
+          if (el2) {
+            el2.rotate(deg,0,0);
+          }
+        });
+      }
+
       // Click handler
       //
       gg.click( function (ev) {
@@ -184,12 +223,6 @@
     choices.forEach( function (x,i) {
       addG(g,x,i);
     });
-
-    Gx.call( this, parent, g, "gxHalo" );
-
-    this.rotDeg(0);   // place the arcs and menu items to their initial places
-
-    this.origin(0,0);
   };
 
   GxHalo.prototype = Object.create(Gx.prototype);
@@ -214,6 +247,8 @@
     //var gs = self.children();   // the groups that cover 'path' for arc and the menu icon
 
     // tbd.
+
+    Gx.prototype.rotDeg.call( this, deg );
   }
 
   // tbd. Where and how we want to use the menu is still open (from 'SVG.Doc' or any 'Gx'?). AKa190616
