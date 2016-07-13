@@ -120,7 +120,11 @@ var rotDeg_obs;
     svg.path("M16.711 8.29l-6-5.996c-0.391-0.391-1.026-0.391-1.417 0s-0.391 1.025 0 1.417l4.293 4.29h-11.59c-0.553 0-1.001 0.448-1.001 1s0.448 1 1.001 1h11.59l-4.292 4.29c-0.391 0.391-0.391 1.025 0.001 1.417s1.026 0.391 1.417 0l6-5.997c0.196-0.196 0.294-0.453 0.294-0.71s-0.097-0.514-0.294-0.71z")
       .translate(-9,-9);
 
-  var arrowLeft = arrowRight.clone().scale(-1,1);
+  //console.log( arrowRight.bbox() );   // { x: 1, y: 2: width: 16, height: 14, ... }
+
+  var arrowLeft = arrowRight.clone().translate(-9,-9).transform( { scaleX: 1.3, cx: 0 } );
+
+  console.log( arrowLeft.bbox() );
 
   var trash = svg.group();
     //
@@ -128,6 +132,8 @@ var rotDeg_obs;
     trash.path( "M6.5 13h1c0.276 0 0.5-0.224 0.5-0.5v-3c0-0.276-0.224-0.5-0.5-0.5h-1c-0.276 0-0.5 0.224-0.5 0.5v3c0 0.276 0.224 0.5 0.5 0.5z" );
     trash.path( "M10.5 13h1c0.276 0 0.5-0.224 0.5-0.5v-3c0-0.276-0.224-0.5-0.5-0.5h-1c-0.276 0-0.5 0.224-0.5 0.5v3c0 0.276 0.224 0.5 0.5 0.5z" );
     trash.translate(-9,-9);
+
+  console.log( "Trash bbox", trash.bbox() );
 
   var letter = svg.path("M512 96h-448c-17.672 0-32 14.328-32 32v320c0 17.672 14.328 32 32 32h448c17.672 0 32-14.328 32-32v-320c0-17.672-14.328-32-32-32zM467.781 160l-179.781 122.602-179.781-122.602h359.562zM480 400c0 8.836-7.156 16-16 16h-352c-8.844 0-16-7.164-16-16v-171.602l175.906 119.141c4.969 2.977 10.532 4.461 16.094 4.461s11.125-1.484 16.094-4.461l175.906-119.141v171.602z")
     .scale(18/512, 0,0)
@@ -140,7 +146,14 @@ var rotDeg_obs;
   var use1= svg.use("icon-forward", "halo-icons.svg");
   var use2= svg.use("icon-letter", "halo-icons.svg");
 
-  var els= [arrowRight, arrowLeft, trash, letter, use1, use2, square];
+  //console.log( "Use1 bbox", use1.bbox() );    // all 0's - how to get the dimensions?
+  console.log( "Use1", use1 );
+
+  var els= [
+    arrowRight, arrowLeft, trash,
+    letter, use1, use2,
+    square
+  ];
 
   els.forEach( function (el,k) {
     var i= k%COLS,
@@ -149,7 +162,7 @@ var rotDeg_obs;
     var x= X + (i+0.5) * BOX_SIZE,
       y= Y + (j+0.5) * BOX_SIZE;
 
-    console.log( "Setting "+k+" to", x, y );
+    //console.log( "Setting "+k+" to", x, y );
     el.move(x,y);
   } );
 
