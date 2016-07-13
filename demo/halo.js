@@ -99,6 +99,7 @@ var rotDeg_obs;
   var X= 300,
     Y= 20,
     BOX_SIZE= 50,
+    SIZE2= 20,
     ROWS= 3,
     COLS= 3;
 
@@ -110,33 +111,43 @@ var rotDeg_obs;
         y= Y+ BOX_SIZE*j;
 
         svg.rect(BOX_SIZE, BOX_SIZE).move(x,y).addClass("debug");
-        svg.rect(32, 32).center(x+BOX_SIZE/2,y+BOX_SIZE/2).addClass("debug");
+        svg.rect(SIZE2, SIZE2).center(x+BOX_SIZE/2,y+BOX_SIZE/2).addClass("debug");
     }
   }
 
-  // Symbols. All translated so that their center is (0,0)
+  // Symbols
   //
   var arrowRight =
     svg.path("M16.711 8.29l-6-5.996c-0.391-0.391-1.026-0.391-1.417 0s-0.391 1.025 0 1.417l4.293 4.29h-11.59c-0.553 0-1.001 0.448-1.001 1s0.448 1 1.001 1h11.59l-4.292 4.29c-0.391 0.391-0.391 1.025 0.001 1.417s1.026 0.391 1.417 0l6-5.997c0.196-0.196 0.294-0.453 0.294-0.71s-0.097-0.514-0.294-0.71z")
-      .translate(-9,-9);
+      .translate(-8,-8)
 
   //console.log( arrowRight.bbox() );   // { x: 1, y: 2: width: 16, height: 14, ... }
 
-  var arrowLeft = arrowRight.clone().translate(-9,-9).transform( { scaleX: 1.3, cx: 0 } );
+  // Possible svg.js BUG:
+  //    Adding 'cx' to 'scaleX' does not actually seem to matter. svg.js docs say it should. AKa130716
+  //    -> https://github.com/wout/svg.js#transform
+  //
+  //    Similarily, also mixing 'rotation' and 'cx' or 'cy' (on a 'use' element) seems to ignore the 'cx' and 'cy'.
+  //
+  var arrowLeft = arrowRight.clone().translate(-9,-9).scale(2.0, 1.0);    // transform( { scaleX: 2.0 } );
 
-  console.log( arrowLeft.bbox() );
+  console.log( arrowLeft.bbox(), arrowLeft.x(), arrowLeft.y(), arrowLeft.width(), arrowLeft.height(), arrowLeft.cx() );
 
+  // Symbol in multiple parts.
+  //
+  // We need to apply '.translate()' to the paths themselves, not the group. Group is SVG is not for layout, but for
+  // handling attributes etc.
+  //
   var trash = svg.group();
     //
-    trash.path( "M17 5h-4v-3c0-0.552-0.448-1-1-1h-6c-0.552 0-1 0.448-1 1v3h-4c-0.552 0-1 0.448-1 1v1h2v9c0 0.552 0.448 1 1 1h12c0.552 0 1-0.448 1-1v-9h2v-1c0-0.552-0.448-1-1-1zM7 3h4v2h-4v-2zM14 15h-10v-8h10v8z" );
-    trash.path( "M6.5 13h1c0.276 0 0.5-0.224 0.5-0.5v-3c0-0.276-0.224-0.5-0.5-0.5h-1c-0.276 0-0.5 0.224-0.5 0.5v3c0 0.276 0.224 0.5 0.5 0.5z" );
-    trash.path( "M10.5 13h1c0.276 0 0.5-0.224 0.5-0.5v-3c0-0.276-0.224-0.5-0.5-0.5h-1c-0.276 0-0.5 0.224-0.5 0.5v3c0 0.276 0.224 0.5 0.5 0.5z" );
-    trash.translate(-9,-9);
+    trash.path( "M17 5h-4v-3c0-0.552-0.448-1-1-1h-6c-0.552 0-1 0.448-1 1v3h-4c-0.552 0-1 0.448-1 1v1h2v9c0 0.552 0.448 1 1 1h12c0.552 0 1-0.448 1-1v-9h2v-1c0-0.552-0.448-1-1-1zM7 3h4v2h-4v-2zM14 15h-10v-8h10v8z" ).translate(-9,-9);
+    trash.path( "M6.5 13h1c0.276 0 0.5-0.224 0.5-0.5v-3c0-0.276-0.224-0.5-0.5-0.5h-1c-0.276 0-0.5 0.224-0.5 0.5v3c0 0.276 0.224 0.5 0.5 0.5z" ).translate(-9,-9);
+    trash.path( "M10.5 13h1c0.276 0 0.5-0.224 0.5-0.5v-3c0-0.276-0.224-0.5-0.5-0.5h-1c-0.276 0-0.5 0.224-0.5 0.5v3c0 0.276 0.224 0.5 0.5 0.5z" ).translate(-9,-9);
 
-  console.log( "Trash bbox", trash.bbox() );
-
+  // tbd.
+  //
   var letter = svg.path("M512 96h-448c-17.672 0-32 14.328-32 32v320c0 17.672 14.328 32 32 32h448c17.672 0 32-14.328 32-32v-320c0-17.672-14.328-32-32-32zM467.781 160l-179.781 122.602-179.781-122.602h359.562zM480 400c0 8.836-7.156 16-16 16h-352c-8.844 0-16-7.164-16-16v-171.602l175.906 119.141c4.969 2.977 10.532 4.461 16.094 4.461s11.125-1.484 16.094-4.461l175.906-119.141v171.602z")
-    .scale(18/512, 0,0)
+    .scale(18/512)
     //.translate(-28,-32);    // tbd. Why is this needed? Places the icon suitably
 
   var square = svg.rect(18,18).translate(-9,-9);
@@ -146,8 +157,8 @@ var rotDeg_obs;
   var use1= svg.use("icon-forward", "halo-icons.svg");
   var use2= svg.use("icon-letter", "halo-icons.svg");
 
-  //console.log( "Use1 bbox", use1.bbox() );    // all 0's - how to get the dimensions?
-  console.log( "Use1", use1 );
+  use1.attr( {width: 18, height:18} ).translate(-9,-9);
+  use2.attr( {width: 18, height:18} ).translate(-9,-9);
 
   var els= [
     arrowRight, arrowLeft, trash,
@@ -162,8 +173,13 @@ var rotDeg_obs;
     var x= X + (i+0.5) * BOX_SIZE,
       y= Y + (j+0.5) * BOX_SIZE;
 
+    // Moving a 'path' (in svg.js) seems to actually edit its contents! i.e. moving is not a cheap operation for a path.
+    // It should be done by changing the matrix, instead.
+
     //console.log( "Setting "+k+" to", x, y );
     el.move(x,y);
+
+    //el.attr( {width:18});
   } );
 
   // Tie to the rim's rotational stream
