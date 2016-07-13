@@ -1,10 +1,15 @@
 # BUGS
 
-- in demo2, the knob does not follow the mouse precisely. This is because the drag stream gets the element x,y coordinates but moving the element is done with cx,cy.
+- `demo/halo.html` shows problems in the positioning of symbols. 
 
-<!-- Probably got this fixed today? AKa060116
-- In demo4, circles sometimes (now rare) remain on the screen. AKa271215, AKa060116
--->
+We should get the symbols within the red squares
+
+- so that they scale according to browser zoom changes (remain in the boxes)
+- so that rotating with the disc (pink part), rotates the symbols in place
+
+Also in `demo/halo.html`, the rotation of the disk is not correct, but that's a 
+minor bug.
+
 
 ## Testing system
 
