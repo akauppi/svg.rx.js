@@ -7,9 +7,10 @@ We should get the symbols within the red squares
 - so that they scale according to browser zoom changes (remain in the boxes)
 - so that rotating with the disc (pink part), rotates the symbols in place
 
+![](.images/halo_bug.png)
+
 Also in `demo/halo.html`, the rotation of the disk is not correct, but that's a 
 minor bug.
-
 
 ## Testing system
 
