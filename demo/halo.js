@@ -1,5 +1,7 @@
 /*
-* demo/halo.js
+* bugs/scaling.js
+*
+* Shows how svg.js does not seem to allow anchoring
 */
 /*jshint devel: true */
 /*globals assert, Gx */
@@ -122,17 +124,23 @@ var rotDeg_obs;
       .width(18).height(18)
       .translate(-9,-9)
 
-  //console.log( arrowRight.bbox() );   // { x: 1, y: 2: width: 16, height: 14, ... }
-
-  // Possible svg.js BUG:
-  //    Adding 'cx' to 'scaleX' does not actually seem to matter. svg.js docs say it should. AKa130716
-  //    -> https://github.com/wout/svg.js#transform
+  // In order to scale (mirror) the arrow, we need to give the 'cx' of the actual horizontal position of the arrow,
+  // in relation to the window. Why it is like this is not actually clear. It may (or may not) be something about 'svg.js'
+  // (hopefully one day we get rid of it!!! :). AKa170716
   //
-  //    Similarily, also mixing 'rotation' and 'cx' or 'cy' (on a 'use' element) seems to ignore the 'cx' and 'cy'.
+  // Interestingly, even if we do this "right", after the arrow is rotated, it goes completely heywire. :( AKa170716
   //
-  var arrowLeft = arrowRight.clone().translate(-9,-9).scale(2.0, 1.0);    // transform( { scaleX: 2.0 } );
+  //var arrowLeft_bad = arrowRight.clone().translate(-9,-9).transform( { scaleX: -1, cx: 0 } );   // this won't be visible, off the left edge
 
-  console.log( arrowLeft.bbox(), arrowLeft.x(), arrowLeft.y(), arrowLeft.width(), arrowLeft.height(), arrowLeft.cx() );
+  var arrowLeft = arrowRight.clone().translate(-9,-9).flip('x', 384);  //.transform( { scaleX: -1, cx: 384 } );
+
+  /*** disabled
+  // Let's make a group to wrap the mirrored arrow, and see if that helps. (nope)
+  //
+  var arrowLeftGrouped = svg.group();
+    //
+    arrowLeftGrouped.add( arrowRight.clone() ).translate(-9,-9).transform( { scaleX: -1, cx: 217 } );
+  ***/
 
   // Symbol in multiple parts.
   //
@@ -148,21 +156,20 @@ var rotDeg_obs;
     trash.path( "M10.5 13h1c0.276 0 0.5-0.224 0.5-0.5v-3c0-0.276-0.224-0.5-0.5-0.5h-1c-0.276 0-0.5 0.224-0.5 0.5v3c0 0.276 0.224 0.5 0.5 0.5z" )
       /*.width(18).height(18)*/ .translate(-9,-9);
 
-  // tbd.
-  //
   var letter = svg.path("M512 96h-448c-17.672 0-32 14.328-32 32v320c0 17.672 14.328 32 32 32h448c17.672 0 32-14.328 32-32v-320c0-17.672-14.328-32-32-32zM467.781 160l-179.781 122.602-179.781-122.602h359.562zM480 400c0 8.836-7.156 16-16 16h-352c-8.844 0-16-7.164-16-16v-171.602l175.906 119.141c4.969 2.977 10.532 4.461 16.094 4.461s11.125-1.484 16.094-4.461l175.906-119.141v171.602z")
     .width(18).height(18)
     .translate(-9,-9);
 
-  var square = svg.rect(18,18).translate(-9,-9);
-
-  // Should figure how to load an outside icon to specific measures, and moveable. tbd. AKa100716
+  // Load an outside icon. This is the way we'd actually like to treat icons, since it detaches the graphical design
+  // from the code. AKa170716
   //
   var use1= svg.use("icon-forward", "halo-icons.svg");
   var use2= svg.use("icon-letter", "halo-icons.svg");
 
   use1.attr( {width: 18, height:18} ).translate(-9,-9);
   use2.attr( {width: 18, height:18} ).translate(-9,-9);
+
+  var square = svg.rect(18,18).translate(-9,-9);
 
   var els= [
     arrowRight, arrowLeft, trash,
@@ -186,16 +193,46 @@ var rotDeg_obs;
     //el.attr( {width:18});
   } );
 
+  /*
+  * Return the center of an element, within the 'SVG.Doc'
+  */
+  var centerWithinDoc = function (el) {    // (SVG.Element) -> {x:Num,y:Num}
+    var x= el.cx(),
+      y= el.cy();
+
+    var m= el.screenCTM();
+
+    return {
+      x: m.e + x*m.a + y*m.c,
+      y: m.f + x*m.b + y*m.d
+    }
+  }
+
+  // After '.move', the 'use' elements get 'x' and 'y' attributes set. This also allows us to read the '.cx' and '.cy'.
+  //
+  console.log( use1.cx(), use2.y() );
+  //use1.rotate(20, 384, 95);
+
+  //use1.translate( -100, -100 );
+
   // Tie to the rim's rotational stream
   //
   rotDeg_obs.subscribe( function (deg) {
     els.forEach( function (el,i) {
-      el.rotate(deg);   // follow the rotation, around their origin
+
+      if (el instanceof SVG.G) {
+        el.rotate(deg);
+      } else {
+        var cx= el.cx(),
+          cy= el.cy();
+
+        el.rotate(deg, cx, cy);   // follow the rotation, around their origin
+      }
     } );
   } );
 })();
 
-/*
+/* REMOVE
 * Halo demo, using 'use' and symbols (fetched from external files)
 *
 * Note:
