@@ -46,7 +46,12 @@
   // 'el' is the element that is being tracked
   // 'elCoords' is the element, whose coordinate system is used (can be 'el', or e.g. its parent)
   //
-  function innerObs (el, oStart, moveObs, endObs, elCoords) {    // (SVG.Element|SVG.G|SVG.Doc, MouseEvent or Touch, observable of MouseEvent or Touch, observable of MouseEvent or Touch, [SVG.Element]) -> observable of {x:Int, y:Int}
+  // 'precise': If 'true', streams the exact position of the pointer/touch location. Otherwise hides that away and
+  //    treats any touch within the object the same (streams the position of the object, instead). Use 'true' if you
+  //    want to e.g. rotate by dragging a disk, in place. For normal drag, or rotational drag with a separate handle
+  //    object, use 'false'.
+  //
+  function innerObs (el, oStart, moveObs, endObs, elCoords, newMode) {    // (SVG.Element|SVG.G|SVG.Doc, MouseEvent or Touch, observable of MouseEvent or Touch, observable of MouseEvent or Touch, [SVG.Element], [true]) -> observable of {x:Int, y:Int}
 
     var isDoc = (el instanceof SVG.Doc);
 
@@ -72,10 +77,7 @@
       }
     }
 
-    //console.log(oStart);
-
-    // If 'el' is already the doc (or 'SVG.Nested', which we don't currently support), we can use that as the cradle
-    // for our point.
+    // If 'el' is already the doc (or 'SVG.Nested', which we don't support), we can use that as the cradle for our point.
     //
     var doc = isDoc ? el : /*el.parent(SVG.Nested) ||*/ el.parent(SVG.Doc);
 
@@ -110,17 +112,6 @@
     //      so it may make sense to have the initialization within if-else (instead of tertiary operator). AKa290316
     //
     var m = elCoords.screenCTM().inverse().native();
-
-    /** This worked. AKa210416
-    console.log(el);
-    if (el instanceof SVG.G) {
-      m = el.parent().screenCTM().inverse().native();
-    //} else if (el.parent() instanceof SVG.G) {      // NOTE: not sure if this is needed AKa130416
-      //m = el.parent().screenCTM().inverse().native();
-    } else {
-      m = el.screenCTM().inverse().native();
-    }
-    **/
 
     // Transform from screen to user coordinates
     //
@@ -164,7 +155,7 @@
     //
     var x_offset, y_offset;
 
-    if (isDoc) {
+    if (newMode || isDoc) {
       x_offset = y_offset = 0;
 
     } else if ((el instanceof SVG.Circle) || (el instanceof SVG.Ellipse)) {   // 'SVG.Circle', 'SVG.Ellipse' or 'SVG.Rx.Circle'
@@ -249,7 +240,7 @@
     //      reuses id's whereas iOS does not). The model chosen seems to be a good fit for allowing e.g. multiple
     //      users to work on a touch interface simultaneously, i.e. it feels more generic and expandable. AKa060116
     //
-    rx_touch: function (elCoords) {   // ([SVG.Element]) -> observable of observables of { x: Int, y: Int }
+    rx_touch: function (elCoords, precise) {   // ([SVG.Element], [Boolean]) -> observable of observables of { x: Int, y: Int }
 
       var self = this;    // to be used within further inner functions
 
@@ -293,7 +284,7 @@
 
         var cancelOrEndObs = Rx.Observable.merge( endObs, cancelObs );
 
-        return innerObs( self, touchStart, moveObs, cancelOrEndObs, elCoords )
+        return innerObs( self, touchStart, moveObs, cancelOrEndObs, elCoords, precise )
 
       }; // touchDragObs
 
@@ -317,7 +308,7 @@
     //      should see it from the application point of view. Also, shift etc. might be as important as the different
     //      buttons. AKa060116
     //
-    rx_mouse: function (elCoords) {   // ([SVG.Element]) -> observable of observables of {x:Int, y:Int}
+    rx_mouse: function (elCoords, precise) {   // ([SVG.Element], [Boolean]) -> observable of observables of {x:Int, y:Int}
       var self = this;
 
       // Just consider primary button
@@ -332,23 +323,58 @@
 
       return startObs.map( function (ev) {   // (MouseEvent) -> observable of {x:Int, y:Int}
         preventDefault(ev);
-        return innerObs( self, ev, moveObs, endObs, elCoords );
+        return innerObs( self, ev, moveObs, endObs, elCoords, precise );
       } );
     },
 
     //---
     // Create an observable for either mouse or touch drags
     //
+    // Note: Since we are handling drags here, 'precise' mode is off. It does not matter, where in the dragged object
+    //      one points/touches.
+    //
     // Returns:
     //  observable of observables of { x: Int, y: Int }
     //
-    rx_draggable: function (elCoords) {   // ([SVG.Element]) -> observable of observables of { x: Int, y: Int }
+    rx_draggable: function (elCoords, precise) {   // ([SVG.Element], [Boolean]) -> observable of observables of { x: Int, y: Int }
 
       return Rx.Observable.merge(
-        this.rx_mouse(elCoords),
-        this.rx_touch(elCoords)
+        this.rx_mouse(elCoords, precise),
+        this.rx_touch(elCoords, precise)
+      );
+    } //,
+
+    /*** disabled (the rotational thing is a bit more complex; may need e.g. menu items to be rotated in compensation. AKa170716
+    //---
+    // Create an observable for either mouse or touch rotational drags.
+    //
+    // If the 'elCoords' param is given, and is not the same as 'this', 'this' is taken to be a separate handle object
+    // and the precise position where it's dragged does not matter.
+    //
+    // If 'elCoords' is not given, or is same as 'this', the precise position matters (this is the case of rotating
+    // a disk).
+    //
+    // Returns:
+    //  observable of observables of Number (radians)
+    //
+    rx_rotateable: function (elCoords) {   // ([SVG.Element]) -> observable of observables of Number
+
+      elCoords = elCoords | this;
+      var precise = (elCoords === this);
+
+      return Rx.Observable.merge(
+        this.rx_mouse(elCoords, precise),
+        this.rx_touch(elCoords, precise)
+      ).map( function (o) {
+        var cx= elCoords.cx(),
+          cy= elCoords.cy();
+
+        var rad= Math.atan2(o.y-cy, o.x-cx);
+        return rad;
+      }
       );
     }
+    ***/
   });
 
 })();

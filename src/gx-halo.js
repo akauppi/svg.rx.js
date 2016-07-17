@@ -226,8 +226,6 @@
 
   // --- Methods ---
 
-  assert( Gx.prototype.rotDeg );    // check there is a method we are overriding
-
   // tbd. Where and how we want to use the menu is still open (from 'SVG.Doc' or any 'Gx'?). AKa190616
   //
   SVG.extend( SVG.Doc, {

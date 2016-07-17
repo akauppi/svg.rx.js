@@ -19,6 +19,9 @@ var Gx;
 
   assert(Array.isArray);    // ECMAScript 5.1
 
+  var RAD2DEG = 180 / Math.PI,
+    DEG2RAD = Math.PI / 180;
+
   //--- Gx ---
   //
   // ._g: SVG.Group         Outer group. Positioning happens for this group.
@@ -132,6 +135,16 @@ var Gx;
       }
     },
 
+    // Rotate the 'Gx', or ask the rotation (radiant version)
+    //
+    rotRad: function (rad) {   // (Num) -> this or () -> Num
+      if (rad === undefined) {
+        return this.rotDeg() * DEG2RAD;
+      } else {
+        return this.rotDeg( rad * RAD2DEG );
+      }
+    },
+
     // Subscribe to position changes
     //
     obsPos: function () {   // () -> observable of {x:Num,y:Num}
@@ -142,6 +155,12 @@ var Gx;
     //
     obsRotDeg: function () {   // () -> observable of Num
       return this._obsRotDeg= this._obsRotDeg || new Rx.Subject;
+    },
+
+    obsRotRad: function () {   // () -> observable of Num
+      return obsRotDeg().map( function (deg) {
+        return deg * DEG2RAD;
+      } );
     },
 
     // Add/remove/check/toggle class on the Gx SVG element

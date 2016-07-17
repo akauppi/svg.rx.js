@@ -21,9 +21,9 @@ var rotDeg_obs;
   "use strict";
 
   var R1 = 20,
-    R2 = 70,
-    X= 100,
-    Y= 75;
+    R2 = 120,
+    X= 140,
+    Y= 100;
 
   // Note: Plain path does not change position like when it's placed in a group. Why not? AKa100716
   //
@@ -56,33 +56,45 @@ var rotDeg_obs;
 
   halo.pos(X,Y);
 
-  // Check that icons remain upright even when rotated
-  //
-  //halo.rotDeg(45);
-
   // Add a rim that can be used for interactive rotation
   //
-  var rim = svg.circle(2*R2).translate(-R2,-R2).move(X,Y).addClass("rim").back();
+  // Note: By using 'translate' (and not 'center'), we keep the origin of the circle's coordinate system in its
+  //    center. This makes the rotation handling easier, later.
+  //
+  var R2_EXTRA = R2+5;
+  var rim = svg.circle(2*R2_EXTRA).translate(X,Y).addClass("rim").back();
     //
     // This clipped the wrong way (wanted to clip the smaller circle out). AKa100716
-    //rim.clipWith( svg.circle(2*R1).move(X,Y) );
+    //
+    // tbd. How to clip out the piece? AKa170716
+    //
+    //rim.clipWith( svg.circle(2*R1).center(X,Y) );
 
   svg.circle(2*R1).center(X,Y).style({ fill: "purple"}).front();
 
-  rim.rx_draggable().subscribe( function (dragObs) {
-    var preDeg = halo.rotDeg();    // keep initial rotation
-    console.log(preDeg);
+  // Note: For some reason, we need to explicitly remove 'cx', 'cy' attributes. Maybe 'svg.js' places them there;
+  //    anyways without this they would point to '(75,75)' and rotation code would not behave right.
+  //
+  rim.attr( {
+    cx: null,
+    cy: null
+  });
 
-    // tbd. Should make a simpler rotational dragging API, saying which coordinate we wish to rotate around. AKa100716
-    //
-    // tbd. This does not work exactly as we'd like, but enough to test stuff anyways. AKa100716
-    //
+  rim.rx_draggable(rim,true).subscribe( function (dragObs) {
+    var diffRad;   // while not actively dragged: undefined
+                   // while dragged: Number, providing the diff (in radians), needed due to the ability to point/touch anywhere on the disk
+
     dragObs.subscribe(
       function (o) {    // ({x: Number, y: Number}) ->
         console.log( "Dragging: "+ o.x + " "+ o.y );
 
-        var rad = Math.atan2(o.y,o.x);
-        halo.rotDeg(/*preDeg +*/ rad * RAD2DEG);
+        if ((!diffRad) && (diffRad !== 0)) {
+          diffRad = halo.rotRad() - Math.atan2(o.y, o.x);
+          // First drag coordinates don't move, yet
+        } else {
+          var rad = Math.atan2(o.y, o.x);
+          halo.rotRad(rad + diffRad);
+        }
       },
       null,   // error handling
       null    // end of drag
