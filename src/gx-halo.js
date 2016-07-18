@@ -159,9 +159,9 @@
       //
       if (upright) {
         rotDeg_obs.subscribe( function (deg) {
-          el.rotate(-deg,0,0);
+          el.rotate(-deg);
           if (el2) {
-            el2.rotate(-deg,0,0);
+            el2.rotate(-deg);
           }
         });
       }
