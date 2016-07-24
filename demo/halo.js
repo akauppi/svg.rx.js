@@ -55,8 +55,9 @@ var rotDeg_obs;
   // Note: The dimensions must match the icon's aspect ratio, using a box would cut off right edge.
   //      tbd. would be nice to get a programmatic way to sniff the ratio.
   //
-  var useExt= svg.use("icon-letter", "halo-icons.svg");
-  useExt.attr( {width: 36, height:27} ).translate(-18,-13.5);
+  var useExt= svg.use("icon-letter", "halo-icons.svg")
+    .width(36).height(27).translate(-18,-13.5);
+  //useExt.attr( {width: 36, height:27} ).translate(-18,-13.5);
 
   //use.move(0,0);
 

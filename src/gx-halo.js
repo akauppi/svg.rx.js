@@ -168,12 +168,23 @@
       //      User-Agent	Mozilla/5.0 (iPad; CPU OS 9_3_2 like Mac OS X) AppleWebKit/601.1.46 (KHTML, like Gecko) Version/9.0 Mobile/13F69 Safari/601.1
       //    - Chrome 51.0.2704.104 (iOS 9.3.2)
       //
+      //    Filed as a bug for Safari, number 27516559
+      //
+      //    The solution for Safari is probably just to use inline SVG elements, instead of the external icons,
+      //    until this is fixed. AKa250716
+      //
       if (upright) {
         rotDeg_obs.subscribe( function (deg) {
           function rot(elx) {
 
-            if (false) {   // Safari work-around? tbd.
-              elx.rotate(-deg);
+            // Testing remedy for Safari (but works also on the other browsers)
+            //
+            if (elx instanceof SVG.Use) {
+              var x = elx.x(),
+                y = elx.y(),
+                w = elx.width(),
+                h = elx.height();
+              elx.rotate(-deg, x+w/2,y+h/2);
             } else {
               elx.rotate(-deg);
             }
