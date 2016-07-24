@@ -1,0 +1,45 @@
+@import url("demo.css");
+
+rect.simple {
+  fill: blue;
+  fill-opacity: 0.8;
+}
+
+.transformed {
+  fill-opacity: 0.8;
+  stroke: brown;
+  stroke-width: 3 px;
+}
+
+rect.transformed {
+  fill: purple;
+}
+
+g.transformed {
+  fill: yellow;
+}
+
+svg.transformed {   /* nested SVG */
+  fill: gray;
+}
+
+use.transformed {
+  fill: lightgreen;
+}
+
+circle {
+  fill: red;
+}
+
+rect.sub {
+  fill: blue;
+  /*display: none;*/
+}
+use.showSub rect.sub {
+  fill: green;
+  /*display: initial;*/
+}
+
+circle.debug-blue {
+  fill: blue;
+}

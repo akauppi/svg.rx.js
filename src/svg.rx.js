@@ -6,37 +6,21 @@
 (function () {
   "use strict";
 
-  function assert(b,msg) {    // (boolish, String) =>
-    if (!b) {
-      throw ("Assert failed" + (msg ? ": "+msg : ""))
-    }
-  }
-  assert(true);   // just use it up (jshint)
+  assert(true);
 
-  var RxJS5 = (function() {   // tbd. can autodetect this if we want to support both RxJS4 and 5
-    var sub = new Rx.Subject();
-    (sub.unsubscribe || sub.dispose)();
-    return !!sub.unsubscribe;
-  })();
-
-  // Especially with RxJS5 coming up, we want to ensure our expectations.
+  // Check the things we will use of 'Rx'
   //
   assert( typeof Rx.Observable.fromEvent === "function" );
   assert( typeof Rx.Observable.merge === "function" );
 
-  // Note: RxJS does not seem to have what Scala calls '.collect': to both filter and convert.
+  // Note: RxJS5 does not have what Scala calls '.collect': to both filter and convert.
   //
-  // Ref. https://xgrommx.github.io/rx-book/content/guidelines/implementations/index.html#implement-new-operators-by-composing-existing-operators
+  // Ref.
+  //  -> http://stackoverflow.com/questions/35118707/rxjs5-how-to-map-and-filter-on-one-go-like-collect-in-scala
+  //  -> https://xgrommx.github.io/rx-book/content/guidelines/implementations/index.html#implement-new-operators-by-composing-existing-operators
   //
-  // tbd. Is it true RxJS does not have a built-in operator for this? Ask at StackOverflow (pointing to this line). AKa271215
-  //    ^-- ask about RxJS5 in particular AKa310116
-  //
-  Rx.Observable.prototype.filterAndSelect = function (f) {
-    if (RxJS5) {
-      return this.map(f).filter( function (x) { return x !== undefined; } );
-    } else {
-      return this.select(f).filter( function (x) { return x !== undefined; } );
-    }
+  Rx.Observable.prototype.mapAndFilterUndefinedOut = function (f) {
+    return this.map(f).filter( function (x) { return x !== undefined; } );
   }
 
   // JavaScript does not have an Array for range constructor.
@@ -51,15 +35,23 @@
 
   // Inner stream of drags. Handles coordinate transforms etc.
   //
+  // Note: The event handling code is originally based on 'svg.draggable.js' -> https://github.com/wout/svg.draggable.js
+  //      but we only enable stuff that we actually test (manually). I.e. 'SVG.Nested', 'SVG.Text' support remains
+  //      disabled until we need it, and there are demos that exercise those things.
+  //
   // References:
   //    MouseEvent -> https://developer.mozilla.org/en-US/docs/Web/API/MouseEvent
   //    Touch -> https://developer.mozilla.org/en-US/docs/Web/API/Touch
   //
-  // Note: The event handling code is originally based on 'svg.draggable.js' -> https://github.com/wout/svg.draggable.js
-  //      but we only enable stuff that we actually test (manually). I.e. 'SVG.Nested', 'SVG.Use', 'SVG.Text' support
-  //      remains disabled until we need it, and there are demos that exercise those things.
+  // 'el' is the element that is being tracked
+  // 'elCoords' is the element, whose coordinate system is used (can be 'el', or e.g. its parent)
   //
-  function innerObs (el, oStart, moveObs, endObs) {    // (SVG.Element|SVG.G|SVG.Doc, MouseEvent or Touch, observable of MouseEvent or Touch, observable of MouseEvent or Touch) -> observable of {x:Int, y:Int}
+  // 'precise': If 'true', streams the exact position of the pointer/touch location. Otherwise hides that away and
+  //    treats any touch within the object the same (streams the position of the object, instead). Use 'true' if you
+  //    want to e.g. rotate by dragging a disk, in place. For normal drag, or rotational drag with a separate handle
+  //    object, use 'false'.
+  //
+  function innerObs (el, oStart, moveObs, endObs, elCoords, newMode) {    // (SVG.Element|SVG.G|SVG.Doc, MouseEvent or Touch, observable of MouseEvent or Touch, observable of MouseEvent or Touch, [SVG.Element], [true]) -> observable of {x:Int, y:Int}
 
     var isDoc = (el instanceof SVG.Doc);
 
@@ -67,8 +59,25 @@
       throw "svg.rx.js does not support: "+ (typeof el);
     }
 
-    // If 'el' is already the doc (or 'SVG.Nested', which we don't currently support), we can use that as the cradle
-    // for our point.
+    if (el instanceof SVG.Text) {
+      console.log( "Warning: dragging might not work with "+ el );
+    }
+
+    // Select which element is used for reporting the coordinates.
+    //
+    // Note: For groups, do NOT include the group's transformation matrix, or things won't work when a group is rotated.
+    //
+    // For full power, the caller can provide the 'elCoords' (and actually, should).
+    //
+    if (!elCoords) {
+      if (el instanceof SVG.G) {
+        elCoords = el.parent();
+      } else {
+        elCoords = el;
+      }
+    }
+
+    // If 'el' is already the doc (or 'SVG.Nested', which we don't support), we can use that as the cradle for our point.
     //
     var doc = isDoc ? el : /*el.parent(SVG.Nested) ||*/ el.parent(SVG.Doc);
 
@@ -81,8 +90,28 @@
     //      See -> https://github.com/wout/svg.js/issues/437
     //             https://github.com/wout/svg.js/issues/403
     //
-    var buf = doc.node.createSVGPoint();          // point buffer (allocated just once per drag)
-    var m = el.screenCTM().inverse().native();    // calculated just once per drag
+    // tbd. The 'buf' should be cleared away when the dragging ends (currently, we are leaking point objects, one per
+    //      drag). AKa130316
+    //
+    // Note: If thinking of not cleaning the point buffer, but keeping it always there, consider that multiple objects
+    //      can be moved simultaneously (and their points may be cradled in the 'SVG.Doc'). The dynamic alloc/dealloc
+    //      is probably the simplest way to go. AKa130316
+    //
+    var buf = doc.node.createSVGPoint();    // point buffer (allocated just once per drag)
+
+    // Clean the allocated buffer
+    //
+    endObs.take(1).subscribe( function () {
+      buf = null;     // GC will clean it up
+    });
+
+    // If a group is observing the drag, we want its transform NOT to be included. Otherwise, we get problems if the group
+    // is rotated.
+    //
+    // Note: In the future, we might also do some group translation handling here (instead of in the calling code, see 'demo3'),
+    //      so it may make sense to have the initialization within if-else (instead of tertiary operator). AKa290316
+    //
+    var m = elCoords.screenCTM().inverse().native();
 
     // Transform from screen to user coordinates
     //
@@ -91,9 +120,13 @@
     // Note: The returned value is kept in 'buf' and will be overwritten on next call. Not to be forwarded further
     //      by the caller.
     //
+    // Note: Use '.client[XY]' (not '.screen[XY]') so that the position of the SVG cradle does not affect (the difference
+    //      becomes visible only when dragging is applied on 'svg' background, like in demo4).
+    //
     var transformP = function (o /*, offset*/) {   // (MouseEvent or Touch) -> SVGPoint (which has '.x' and '.y')
       buf.x = o.clientX;  // - (offset || 0)
       buf.y = o.clientY;
+
       return buf.matrixTransform(m);
     };
 
@@ -122,26 +155,24 @@
     //
     var x_offset, y_offset;
 
-    // tbd. We might be better off not doing any of this here, but in the application code. AKa170116
-
-    if (isDoc) {
+    if (newMode || isDoc) {
       x_offset = y_offset = 0;
 
     } else if ((el instanceof SVG.Circle) || (el instanceof SVG.Ellipse)) {   // 'SVG.Circle', 'SVG.Ellipse' or 'SVG.Rx.Circle'
       //
       // Do not access '.x' or '.y' on a circle - they are not needed, and 'SVG.Rx.Circle' does not implement them.
 
-      var center = el.center();   // {x:Num,y:Num}
+      // Note: Do not use 'el.center()' for reading coordinates; only '.cx()' and '.cy()' work as getters.
 
-      x_offset = p0.x - center.x;   // we are providing center's coordinates to the circle / ellipse being dragged
-      y_offset = p0.y - center.y;
+      // Note: Once we get 'svg.js' replaced, positioning centers and ellipses will always happen just by their center
+      //      (then we can remove this special handling).
 
-    } else if (typeof el.x === "function") {    // normal 'svg.js' elements (all have '.x' and '.y', even the circle
+      x_offset = p0.x - el.cx();   // we are providing center's coordinates to the circle / ellipse being dragged
+      y_offset = p0.y - el.cy();
+
+    } else if (typeof el.x === "function") {    // normal 'svg.js' elements (all have '.x' and '.y', even the circle)
       x_offset = p0.x - el.x();
       y_offset = p0.y - el.y();
-
-    } else {
-      throw "Unknown element: "+ typeof el;
     }
 
     // Note: some events actually come with the same x,y values (at least on Safari OS X) - removed by the
@@ -160,7 +191,7 @@
     //      the next drag event. Let's implement this on the application side (demo4) for now, since most cases would
     //      not need it. AKa140116
     //
-    return (moveObs.select /*RxJS4*/ || moveObs.map).call( moveObs, function (o) {
+    return moveObs.map( function (o) {
       var p = transformP(o);
 
       return {
@@ -176,7 +207,7 @@
   /*
   * Prevent default behaviour for 'mousedown' and 'touchstart', and bubbling up of the event to the parents.
   *
-  * Note: We're not having this with 'innerObs' since here the TouchEvent, not Touch, is needed.
+  * Note: this is not within 'innerObs' since here the TouchEvent, not Touch, is needed.
   */
   function preventDefault (evStart) {    // (MouseEvent or TouchEvent) ->
     // Prevent browser drag behavior
@@ -209,7 +240,7 @@
     //      reuses id's whereas iOS does not). The model chosen seems to be a good fit for allowing e.g. multiple
     //      users to work on a touch interface simultaneously, i.e. it feels more generic and expandable. AKa060116
     //
-    rx_touch: function () {   // () -> observable of observables of { x: Int, y: Int }
+    rx_touch: function (elCoords, precise) {   // ([SVG.Element], [Boolean]) -> observable of observables of { x: Int, y: Int }
 
       var self = this;    // to be used within further inner functions
 
@@ -245,15 +276,15 @@
           return undefined;   // will not pass this event further for the particular stream
         }
 
-        // Note: RxJS does not seem to have what Scala calls '.collect': to both filter and convert.
+        // Note: RxJS does not have what Scala calls '.collect': to both map and filter.
         //
-        var moveObs = moveAllObs.filterAndSelect(f);
-        var cancelObs = cancelAllObs.filterAndSelect(f);
-        var endObs = endAllObs.filterAndSelect(f);
+        var moveObs = moveAllObs.mapAndFilterUndefinedOut(f);
+        var cancelObs = cancelAllObs.mapAndFilterUndefinedOut(f);
+        var endObs = endAllObs.mapAndFilterUndefinedOut(f);
 
         var cancelOrEndObs = Rx.Observable.merge( endObs, cancelObs );
 
-        return innerObs( self, touchStart, moveObs, cancelOrEndObs )
+        return innerObs( self, touchStart, moveObs, cancelOrEndObs, elCoords, precise )
 
       }; // touchDragObs
 
@@ -262,21 +293,12 @@
       // Note: the '.selectMany' means that we can spawn multiple (0..n) values from within this one event, unlike the
       //      single one that '.select' would.
       //
-      if (RxJS5) {
-        return startAllObs.mergeMap( function (ev) {  // (TouchEvent) -> Array of observable of {x:Int, y:Int}
+      return startAllObs.mergeMap( function (ev) {  // (TouchEvent) -> Array of observable of {x:Int, y:Int}
 
-          return range( 0, ev.changedTouches.length ).map( function (i) {
-            return touchDragObs( ev, i );
-          } );
-        });
-      } else {
-        return startAllObs.selectMany( function (ev) {  // (TouchEvent) -> Array of observable of {x:Int, y:Int}
-
-          return range( 0, ev.changedTouches.length ).map( function (i) {
-            return touchDragObs( ev, i );
-          } );
-        });
-      }
+        return range( 0, ev.changedTouches.length ).map( function (i) {
+          return touchDragObs( ev, i );
+        } );
+      });
     },  // rx_touch
 
     //---
@@ -286,7 +308,7 @@
     //      should see it from the application point of view. Also, shift etc. might be as important as the different
     //      buttons. AKa060116
     //
-    rx_mouse: function () {   // () -> observable of observables of {x:Int, y:Int}
+    rx_mouse: function (elCoords, precise) {   // ([SVG.Element], [Boolean]) -> observable of observables of {x:Int, y:Int}
       var self = this;
 
       // Just consider primary button
@@ -299,33 +321,60 @@
       var moveObs =   Rx.Observable.fromEvent(window, "mousemove").filter(f);
       var endObs =    Rx.Observable.fromEvent(window, "mouseup").filter(f);
 
-      if (RxJS5) {
-        return startObs.map( function (ev) {   // (MouseEvent) -> observable of {x:Int, y:Int}
-          preventDefault(ev);
-          return innerObs( self, ev, moveObs, endObs );
-        } );
-
-      } else {  // RxJS4
-        return startObs.select( function (ev) {   // (MouseEvent) -> observable of {x:Int, y:Int}
-          preventDefault(ev);
-          return innerObs( self, ev, moveObs, endObs );
-        } );
-      }
+      return startObs.map( function (ev) {   // (MouseEvent) -> observable of {x:Int, y:Int}
+        preventDefault(ev);
+        return innerObs( self, ev, moveObs, endObs, elCoords, precise );
+      } );
     },
 
     //---
     // Create an observable for either mouse or touch drags
     //
+    // Note: Since we are handling drags here, 'precise' mode is off. It does not matter, where in the dragged object
+    //      one points/touches.
+    //
     // Returns:
     //  observable of observables of { x: Int, y: Int }
     //
-    rx_draggable: function () {   // () -> observable of observables of { x: Int, y: Int }
+    rx_draggable: function (elCoords, precise) {   // ([SVG.Element], [Boolean]) -> observable of observables of { x: Int, y: Int }
 
       return Rx.Observable.merge(
-        this.rx_mouse(),
-        this.rx_touch()
+        this.rx_mouse(elCoords, precise),
+        this.rx_touch(elCoords, precise)
+      );
+    } //,
+
+    /*** disabled (the rotational thing is a bit more complex; may need e.g. menu items to be rotated in compensation. AKa170716
+    //---
+    // Create an observable for either mouse or touch rotational drags.
+    //
+    // If the 'elCoords' param is given, and is not the same as 'this', 'this' is taken to be a separate handle object
+    // and the precise position where it's dragged does not matter.
+    //
+    // If 'elCoords' is not given, or is same as 'this', the precise position matters (this is the case of rotating
+    // a disk).
+    //
+    // Returns:
+    //  observable of observables of Number (radians)
+    //
+    rx_rotateable: function (elCoords) {   // ([SVG.Element]) -> observable of observables of Number
+
+      elCoords = elCoords | this;
+      var precise = (elCoords === this);
+
+      return Rx.Observable.merge(
+        this.rx_mouse(elCoords, precise),
+        this.rx_touch(elCoords, precise)
+      ).map( function (o) {
+        var cx= elCoords.cx(),
+          cy= elCoords.cy();
+
+        var rad= Math.atan2(o.y-cy, o.x-cx);
+        return rad;
+      }
       );
     }
+    ***/
   });
 
 })();

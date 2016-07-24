@@ -1,0 +1,30 @@
+@import url("demo.css");
+
+/* Note: The arcs _are_ drawn antialiased, though at least in Safari the edges still seem jerky. AKa030716
+*/
+.gxHalo path.arc {
+  fill: white;      /* Note: 'none' would not receive clicks */
+  stroke-width: 1px;
+  stroke: black;
+}
+
+.gxHalo .selected path.arc {
+  fill: lightGray;
+}
+
+.gxHalo .flash path.arc {
+  fill: gray;
+}
+
+.gxHalo .disabled {
+  stroke: #888;
+  fill: #888;
+}
+.gxHalo .disabled path.arc {
+  fill: #ddd;
+  /*opacity: 0.5;*/
+}
+
+.rim {
+  fill: pink
+}
