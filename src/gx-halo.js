@@ -155,14 +155,31 @@
 
       // Keep menu item upright if the menu is rotated
       //
-      // tbd. This doesn't fully work, yet. AKa100716
+      // Yay, a browser specific thing! For rotating a 'use' element pointing to an external icon,
+      // these do right:
+      //    - Firefox 47.0.1
+      //    - Chrome 47.0.2526.73 (OS X)
+      //    - Chrome 51.0.2704.81 (Android 6.0.1)
+      //
+      // These rotate wrong (Apple):
+      //    - Safari 9.1.2 on OS X (in 'demo/halo.html', the envelope does its own small circle outside of its slot)
+      //    - Safari Technology Preview 9.1.2 (Webkit 11602.1.41) -''-
+      //    - Safari (iOS 9.3.2)
+      //      User-Agent	Mozilla/5.0 (iPad; CPU OS 9_3_2 like Mac OS X) AppleWebKit/601.1.46 (KHTML, like Gecko) Version/9.0 Mobile/13F69 Safari/601.1
+      //    - Chrome 51.0.2704.104 (iOS 9.3.2)
       //
       if (upright) {
         rotDeg_obs.subscribe( function (deg) {
-          el.rotate(-deg);
-          if (el2) {
-            el2.rotate(-deg);
+          function rot(elx) {
+
+            if (false) {   // Safari work-around? tbd.
+              elx.rotate(-deg);
+            } else {
+              elx.rotate(-deg);
+            }
           }
+          rot(el);
+          if (el2) rot(el2);
         });
       }
 

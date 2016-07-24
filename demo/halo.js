@@ -40,13 +40,37 @@ var rotDeg_obs;
       /*.width(18).height(18)*/.translate(-9,-9);
 
   var letter = svg.path("M512 96h-448c-17.672 0-32 14.328-32 32v320c0 17.672 14.328 32 32 32h448c17.672 0 32-14.328 32-32v-320c0-17.672-14.328-32-32-32zM467.781 160l-179.781 122.602-179.781-122.602h359.562zM480 400c0 8.836-7.156 16-16 16h-352c-8.844 0-16-7.164-16-16v-171.602l175.906 119.141c4.969 2.977 10.532 4.461 16.094 4.461s11.125-1.484 16.094-4.461l175.906-119.141v171.602z")
-    .width(18).height(18).translate(-9,-9);
+    .width(22).height(16).translate(-11,-8);
 
-  var widthDeg = 50;
+  // Use, but a local symbol
+  //
+  /*** didn't work very well
+  var symLocal = svg.defs().path("M512 96h-448c-17.672 0-32 14.328-32 32v320c0 17.672 14.328 32 32 32h448c17.672 0 32-14.328 32-32v-320c0-17.672-14.328-32-32-32zM467.781 160l-179.781 122.602-179.781-122.602h359.562zM480 400c0 8.836-7.156 16-16 16h-352c-8.844 0-16-7.164-16-16v-171.602l175.906 119.141c4.969 2.977 10.532 4.461 16.094 4.461s11.125-1.484 16.094-4.461l175.906-119.141v171.602z")
+  var useLocal = svg.use(symLocal)
+    .attr( {width: 36, height: 27} ).translate(-18,-13.5);
+  ***/
+
+  // Pick a symbol from an external file (this would be the best way to use SVGs).
+  //
+  // Note: The dimensions must match the icon's aspect ratio, using a box would cut off right edge.
+  //      tbd. would be nice to get a programmatic way to sniff the ratio.
+  //
+  var useExt= svg.use("icon-letter", "halo-icons.svg");
+  useExt.attr( {width: 36, height:27} ).translate(-18,-13.5);
+
+  //use.move(0,0);
+
+  var widthDeg = 45;
 
   var halo = svg.gxHalo(R1, R2, widthDeg, [
     {el: arrowRight, f: function () { console.log("1"); }, _disabled: Rx.Observable.from([true]), upright: true },
     {el: trash, el2: letter, f: function () { console.log("2"); }, upright: true },
+
+    //{el: useLocal, f: function () { console.log("2b"); }, upright: false },
+
+    // If the 'use' has 'upright' off, it behaves fine. Rotating it doesn't.
+    //
+    {el: useExt, f: function () { console.log("2c"); }, upright: true },
     {el: svg.rect(18,18).translate(-9,-9), f: function () { console.log("3"); }, upright: true },
     {el: svg.circle(18,18).translate(-9,-9).style( {fill: "blue" }), f: function () { console.log("4"); this.toggleClass("selected"); }, flash: false},
     {el: svg.circle(18,18).translate(-9,-9).style( {fill: "red" }), f: function () { console.log("5"); }}
@@ -105,7 +129,7 @@ var rotDeg_obs;
 /*
 * Place symbols in squares and see how they would rotate (they should rotate in place).
 */
-(function() {
+if (true) (function() {
   "use strict";
 
   var X= 300,
