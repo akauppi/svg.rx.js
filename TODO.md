@@ -1,15 +1,10 @@
 # TODO
 
-- demo-triangles further
-
 - Using streams for an animation API
   - test with demo 4, at least
 
 - Clean up the code and documentation
 
-- `Rx.config.longStackSupport = true`
-  - "When running the same example again with the flag set at the top, our stack trace looks much nicer and indicates exactly where the error occurred:" Do we need that? [link](https://github.com/Reactive-Extensions/RxJS/blob/master/doc/gettingstarted/testing.md)
-    
 - Fix (or remove?) unnecessary demos (demo 2)
 
 - Consider if svg.js could be left out (direct access to browser's SVG API)

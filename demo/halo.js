@@ -40,7 +40,7 @@ var rotDeg_obs;
       /*.width(18).height(18)*/.translate(-9,-9);
 
   var letter = svg.path("M512 96h-448c-17.672 0-32 14.328-32 32v320c0 17.672 14.328 32 32 32h448c17.672 0 32-14.328 32-32v-320c0-17.672-14.328-32-32-32zM467.781 160l-179.781 122.602-179.781-122.602h359.562zM480 400c0 8.836-7.156 16-16 16h-352c-8.844 0-16-7.164-16-16v-171.602l175.906 119.141c4.969 2.977 10.532 4.461 16.094 4.461s11.125-1.484 16.094-4.461l175.906-119.141v171.602z")
-    .width(22).height(16).translate(-11,-8);
+    .width(18).height(12).translate(-9,-6);
 
   // Use, but a local symbol
   //
@@ -56,10 +56,7 @@ var rotDeg_obs;
   //      tbd. would be nice to get a programmatic way to sniff the ratio.
   //
   var useExt= svg.use("icon-letter", "halo-icons.svg")
-    .width(36).height(27).translate(-18,-13.5);
-  //useExt.attr( {width: 36, height:27} ).translate(-18,-13.5);
-
-  //use.move(0,0);
+    .width(22).height(18).translate(-11,-9);
 
   var widthDeg = 45;
 

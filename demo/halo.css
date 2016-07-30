@@ -28,3 +28,12 @@
 .rim {
   fill: pink
 }
+
+// tbd. What is the way we could style external origin icons, in CSS? AKa300716
+//
+/*** (this had no effect)
+.gxHalo use#SvgjsUse1014 {
+  stroke-width: 1px;
+  stroke: yellow;
+}
+***/
