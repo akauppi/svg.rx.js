@@ -40,7 +40,7 @@ var rotDeg_obs;
       /*.width(18).height(18)*/.translate(-9,-9);
 
   var letter = svg.path("M512 96h-448c-17.672 0-32 14.328-32 32v320c0 17.672 14.328 32 32 32h448c17.672 0 32-14.328 32-32v-320c0-17.672-14.328-32-32-32zM467.781 160l-179.781 122.602-179.781-122.602h359.562zM480 400c0 8.836-7.156 16-16 16h-352c-8.844 0-16-7.164-16-16v-171.602l175.906 119.141c4.969 2.977 10.532 4.461 16.094 4.461s11.125-1.484 16.094-4.461l175.906-119.141v171.602z")
-    .width(22).height(16).translate(-11,-8);
+    .width(18).height(12).translate(-9,-6);
 
   // Use, but a local symbol
   //
@@ -55,10 +55,8 @@ var rotDeg_obs;
   // Note: The dimensions must match the icon's aspect ratio, using a box would cut off right edge.
   //      tbd. would be nice to get a programmatic way to sniff the ratio.
   //
-  var useExt= svg.use("icon-letter", "halo-icons.svg");
-  useExt.attr( {width: 36, height:27} ).translate(-18,-13.5);
-
-  //use.move(0,0);
+  var useExt= svg.use("icon-letter", "halo-icons.svg")
+    .width(22).height(18).translate(-11,-9);
 
   var widthDeg = 45;
 
@@ -103,24 +101,92 @@ var rotDeg_obs;
   });
 
   rim.rx_draggable(rim,true).subscribe( function (dragObs) {
-    var diffRad;   // while not actively dragged: undefined
-                   // while dragged: Number, providing the diff (in radians), needed due to the ability to point/touch anywhere on the disk
 
-    dragObs.subscribe(
-      function (o) {    // ({x: Number, y: Number}) ->
-        console.log( "Dragging: "+ o.x + " "+ o.y );
+    // Make the dragging skip a trail (always go to latest value after earlier redraw has happened).
+    //
+    // Based on:
+    //  -> http://jsbin.com/gopodowaxa/edit?html,js,console
+    //  -> http://stackoverflow.com/questions/35343183/rxjs-control-observable-invocation#answer-35347136
+    //
+    // tbd. Should bake this into 'svg.rx.js' dragging itself, once it works. AKa300716
+    //
+    // Note: Wasn't able to get the 'controlledObs' flowing with 'controller' being a regular 'Subject' (tried with
+    //    '.next(true)' and '.startWith(true)'. As a 'BehaviorSubject' it works - is there any downside to that? AKa300716
+    //
+    // Note: NOT SURE, whether the 'zip' actually makes the dragging experience any better. How to check whether
+    //      coordinates are really skipped or not?
+    //
 
-        if ((!diffRad) && (diffRad !== 0)) {
-          diffRad = halo.rotRad() - Math.atan2(o.y, o.x);
-          // First drag coordinates don't move, yet
-        } else {
-          var rad = Math.atan2(o.y, o.x);
-          halo.rotRad(rad + diffRad);
-        }
-      },
-      null,   // error handling
-      null    // end of drag
-    );
+    if (true) {   // with 'auditTime'
+      var auditObs = dragObs.auditTime(0);    // 10, 20 (just 0 might actually wait until DOM rendering has happened, since it probably uses 'setTimeout' internally)
+
+      var diffRad;   // while not actively dragged: undefined
+                     // while dragged: Number, providing the diff (in radians), needed due to the ability to point/touch anywhere on the disk
+
+      auditObs.subscribe(
+        function (o) {    // ({x: Number, y: Number}) ->
+          //console.log( "Dragging: "+ o.x + " "+ o.y );
+
+          if ((!diffRad) && (diffRad !== 0)) {
+            diffRad = halo.rotRad() - Math.atan2(o.y, o.x);
+            // First drag coordinates don't move, yet
+          } else {
+            var rad = Math.atan2(o.y, o.x);
+            halo.rotRad(rad + diffRad);
+          }
+        },
+        null,   // error handling
+        null    // end of drag
+      );
+
+    } else {
+      // Using RxJS 'buffer' -> http://reactivex.io/rxjs/class/es6/Observable.js~Observable.html#instance-method-buffer
+      //
+      // Note: This collects the 'dragObs' values into an array. We only wish to use the last of those collected, but
+      //    there does not seem to be a method in RxJS5 for that.
+      //
+      var controller = new Rx.BehaviorSubject();
+
+      var controlledObs = dragObs.buffer(controller);
+
+      var diffRad;   // while not actively dragged: undefined
+                     // while dragged: Number, providing the diff (in radians), needed due to the ability to point/touch anywhere on the disk
+
+      controlledObs.subscribe(
+        function (os) {    // (array of {x: Number, y: Number}) ->
+          //console.log( "Dragging: "+ o.x + " "+ o.y );
+
+          if (os.length > 0) {
+            var o = os[os.length-1];
+
+            //console.log( os );
+
+            if (os.length > 1) {
+              console.log( "Skipping "+ (os.length-1) +" coordinates" );
+            }
+
+            if ((!diffRad) && (diffRad !== 0)) {
+              diffRad = halo.rotRad() - Math.atan2(o.y, o.x);
+              // First drag coordinates don't move, yet
+            } else {
+              var rad = Math.atan2(o.y, o.x);
+              halo.rotRad(rad + diffRad);
+            }
+          }
+
+          // The browsers punch in new coordinates at about 60fps (16ms intervals) (it's not a continuous stream).
+          //
+          // We'd actually want to know, when the SVG drawing has happened, on the screen, but that's probably not
+          // available in the browser, is it? If it was, tap for next coordinate only then. tbd. AKa310716
+          //
+          setTimeout( function () {
+            controller.next();    // let last of collected coordinates (or next) come through
+          }, 20 );
+        },
+        null,   // error handling
+        null    // end of drag
+      );
+    }
   } );
 
   rotDeg_obs = halo.obsRotDeg();
