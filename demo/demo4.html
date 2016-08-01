@@ -1,11 +1,13 @@
 <html>
 <head>
-  <!-- svg.rx.js dependencies
-  -->
+  <meta charset="UTF-8">
   <script src="lib/svg.min.js"></script>
-  <script src="lib/Rx.umd.min.js"></script>
+  <script src="lib/Rx.umd.js"></script>
+  <script src="lib/chai.js"></script>
+  <script>
+    var assert = chai.assert;
+  </script>
 
-  <script src="src/assert.js"></script>
   <script src="src/svg.rx.js"></script>
 
   <!-- Demo
@@ -19,6 +21,7 @@
     <br />Circles should be right under the fingers, also when the page is scrolled.
     <br />Dragging a finger completely out of the touch area will cancel a drag (the circle disappears).
     <br />Starting multiple drags at "precisely" the same time should be possible (try dual-finger tapping repeatedly).
+    <br />The circles should not lag behind - that is a sign of the event skipping not working correctly.
   </p>
   <div id="cradle">
   </div>
