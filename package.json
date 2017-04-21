@@ -31,7 +31,7 @@
     "gh-pages": "node_modules/.bin/gh-pages -d demo",
     "serve": "node_modules/.bin/http-server demo -p 8080",
     "jshint": "node_modules/.bin/jshint --verbose --show-non-errors --config jshint.json src/*.js demo/*.js",
-    "test": "node_modules/.bin/mocha-phantomjs test/index.html",
+    "test": "node_modules/.bin/mocha-phantomjs -p /usr/local/bin/phantomjs test/index.html",
     "": "",
     "//preserve": "npm run jshint",
     "//pregh-pages": "npm run jshint"

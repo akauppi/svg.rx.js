@@ -61,6 +61,13 @@ Install the tools and dependencies (needed for running demos):
 $ npm update
 ```
 
+Have PhantomJS installed, on the command line:
+
+```
+$ phantomjs --version
+2.1.1
+```
+
 ## Demos
 
 <!-- could embed a demo right here to give a feeling what it's about
@@ -99,6 +106,16 @@ Alternatively, you can run the tests in a browser:
 ```
 $ open test/index.html
 ```
+ 
+---
+
+Note: The `package.json` has a fixed path to `/usr/local/bin/phantomjs` binary. This works if you are on macOS and have installed `phantomjs` via HomeBrew.
+
+If you are on some other platform, try removing the `-p /usr/local/bin/phantomjs`.
+
+More info -> [mocha-phantomjs/issues/217](https://github.com/nathanboktae/mocha-phantomjs/issues/217)
+
+---
  
 ---
 
