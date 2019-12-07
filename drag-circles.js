@@ -1,5 +1,5 @@
 /*
-* demo4.js
+* drag-circles.js
 *
 * Multi-touch demo #1
 *
@@ -28,7 +28,6 @@
 
     dragObs.subscribe(
       function (o) {
-        //console.log( "Dragging: "+ o.x + " "+ o.y );
         circle.center(o.x, o.y);
 
         if (fresh) {
