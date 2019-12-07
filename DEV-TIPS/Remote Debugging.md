@@ -1,51 +1,56 @@
-# Remote debugging
+# Remote Debugging
+
+Multitouch events cannot really be emulated on a regular (non-touch) desktop device, like a Mac. To develop for them, you need to attach an Android or iOS device with a USB cable to the development machine.
+
+>This also expects that you are serving the demos locally, via `npm run serve`, e.g. in port 8080.
+
 
 ## Android Remote Debugging
 
-Multitouch events cannot really be emulated on a regular (non-touch) desktop device, like a Mac. 
-
 Luckily, Chrome has an [Android Remote Debugging](https://developer.chrome.com/devtools/docs/remote-debugging) mode that works really well.
 
-Follow the rules to set it up. No installation of Android tools on the desktop are necessary.
+Follow the guidance to set it up. No installation of Android tools on the desktop are necessary. 
 
 1. Enable USB debugging on the device
-2. Open Chrome, point to `chrome://inspect`
+2. Open Chrome on the desktop, point to `chrome://inspect`
 3. Check that the device is seen
-4. Use the tool to see inside the Android Browser
+4. Use the tool to see inside the Android Chrome instance
 
-![](images/chrome_inspect.png)
+<!-- here used to be some screenshots, but they were old
+-->
 
-![](images/chrome_remote_console.png)
+See [Access Local Servers](https://developers.google.com/web/tools/chrome-devtools/remote-debugging/local-server) for the next steps.
 
-You can also use "port forwarding" and "virtual host mapping" to run a web service locally, and use it from the tablet.
+1. Go to `Settings` in the desktop Chrome and tick `Port forwarding` on:
 
-<!-- tbd. Add pics and details when have tried that -->
+   ![](images/chrome-port-forwarding.png)
+
+2. Point the mobile Chrome to `localhost:8080`.
+
+You should see:
+
+![](images/chrome-demos.png)
+
+Have fun - remember to use multiple fingers!
+
+Refresh the mobile browser if you change the underlying code.
+
 
 ## iOS Remote Debugging
 
-Safari on iOS has a a similar remote debugging setup, as the Android browser. Unfortunately, it does not seem to have the "port forwarding" feature but that's okay.
+Safari has a a similar remote debugging setup, as Chrome:
 
-&nbsp;1. Enable remote debugging on iOS: `Settings` > `Safari` > `Advanced` > `Web Inspector`
+1. Enable remote debugging on iOS: `Settings` > `Safari` > `Advanced` > `Web Inspector`
 
-&nbsp;2. Serve the web pages via
+2. Open the demo hosted by your desktop (e.g. `http://192.168.1.234:8080`).
 
-```
-$ npm run serve
-...
-Available on:
-  http:127.0.0.1:8080
-  http:192.168.0.16:8080
-Hit CTRL-C to stop the server
-```
+3. Open in desktop Safari `Developer` > `iPad (...)` > web page
 
-Use the latter IP from the phone to open the demo.
+   ![](images/safari_remote_inspection.png)
 
-&nbsp;3. Open in desktop Safari `Developer` > `iPhone (...)` > web page
+Unlike Chrome, this does not seem to provide a mirror of the web rendering, but that's okay. You get access to the debugging tools.
 
-![](images/safari_remote_inspection.png)
+In fact, not mirroring the rendered contents may be better, since it allows us to more realistically see the performance while connected with the device.
 
-References:
+> 💡Hint: Tap `Connect via network` and you are not tied to the cable between the iOS device and the desktop. :)
 
-- [Remote debugging iOS Safari on OS X, Windows and Linux](https://blog.idrsolutions.com/2015/02/remote-debugging-ios-safari-on-os-x-windows-and-linux/)
-
-<br />

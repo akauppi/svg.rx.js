@@ -70,6 +70,8 @@ $ npm install
 
 ><font color=blue>👉 Currently, this gives some vulnerability warnings. We're catching up with time and hope to see them gone.</font>
 
+<!-- remove (replace with mention of installing Puppeteer; only needed for running the tests)
+-->
 Have PhantomJS installed, on the command line:
 
 ```
@@ -81,16 +83,27 @@ $ phantomjs --version
 
 ## Demos
 
-<!-- could embed a demo right here to give a feeling what it's about
--->
-
-<!-- then show the code of that demo, right here as well. AKa010516
--->
-
 - [sources](demo/)
 - [online](http://akauppi.github.io/svg.rx.js/index.html) - may not be the latest versions
 
 The demos work both as sample code and as manual tests.
+
+For the desktop, you can simply open `demo/index.html`.
+
+To use the demos from touch devices (iOS or Android), you need to serve them locally:
+
+```
+$ npm run serve
+...
+Starting up http-server, serving demo
+Available on:
+  http://127.0.0.1:8080
+  http://192.168.1.234:8080
+Hit CTRL-C to stop the server
+...
+```
+
+Then reach for that `http://192.168.1.234:8080` from your mobile device (in the same WLAN).
 
 
 ## Code

@@ -1,5 +1,5 @@
 /*
-* demo4.js
+* drag-circles.js
 *
 * Multi-touch demo #1
 *
