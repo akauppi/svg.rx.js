@@ -1,12 +1,11 @@
 /node_modules/
 #*.map
 
-# IntelliJ IDEA
-.idea/
-
-# Misc
-#
 /npm-debug.log
+/package-lock.json
+
+# IntelliJ IDEA folder '/.idea/' intentionally not included
+#/.idea/
 
 # OS X
 #

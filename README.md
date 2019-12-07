@@ -14,7 +14,9 @@ The intention is that also animations would be modeled to use `Rx.Observable`s, 
 
 The end game is to get a simple programming paradigm for making SVG-only animated, interactive applications that run fast in the browser.
 
-The reasons why this isn't already practical lie within the SVG details. It doesn't seem easy to make a group out of SVG elements that can be dragged and interacted with. We're intending to fix these shortcomings, with the `gx` object.
+The reasons why this isn't already practical lie within the SVG details. It doesn't seem easy to make a group out of SVG elements that can be dragged and interacted with. <strike>We're intending to fix these shortcomings, with the `gx` object.</strike>
+
+><font color=orange>tbd. In the mean time (2017-19), Svelte 3 emerged. Looking at integration with it, now.</font>
 
 ## Design goals
 
@@ -29,14 +31,19 @@ The reasons why this isn't already practical lie within the SVG details. It does
   
 ## Platform scope
 
-Scope of the project is SVG on modern browsers. That probably means IE9 and later, but in practice the code gets tested on:
+Scope of the project is SVG on modern browsers. That probably means no IE9..11 support (we can always add that later). In practice the code gets tested on:
 
-- Latest Safari on OS X
-- Latest Chrome on OS X
-- Safari on iOS 9
-  -  on iPhone 6 and iPad Lite
-- Latest Android browser 
+- Latest Safari on macOS
+- Latest Chrome on macOS
+- Safari on iOS 13
+  - on iPhone 8 and iPad Pro
+- Chrome on Android 9
+  - on Sony XPeria phone 
+
+<!-- hidden (but take back?)
+- Chrome on Latest Android browser 
   - on Nexus 7
+--> 
 
 If you find platforms where it doesn't work for you, [issues](https://github.com/akauppi/svg.rx.js/issues) and pull requests are the way to go.
 
@@ -58,8 +65,10 @@ Please send a PR if you need these - and provide a demo or test that proves when
 Install the tools and dependencies (needed for running demos):
 
 ```
-$ npm update
+$ npm install
 ```
+
+><font color=blue>👉 Currently, this gives some vulnerability warnings. We're catching up with time and hope to see them gone.</font>
 
 Have PhantomJS installed, on the command line:
 
@@ -67,6 +76,8 @@ Have PhantomJS installed, on the command line:
 $ phantomjs --version
 2.1.1
 ```
+
+><font color=orange>⚠️ PhantomJS is discontinued. Change tests to run with Puppeteer.</font>
 
 ## Demos
 
@@ -86,9 +97,9 @@ The demos work both as sample code and as manual tests.
 
 - [src/svg.rx.js](src/svg.rx.js)
 
-|Note|
-|---|
-| The code is currently using RxJS 5.0.0 beta. Once RxJS 5 becomes available via node.js, we're moving to it. Check the [current situation](https://www.npmjs.com/package/rxjs) of RxJS releases for npm. |
+>Note: The code is currently using RxJS 5.0.0 beta. Once RxJS 5 becomes available via node.js, we're moving to it. Check the [current situation](https://www.npmjs.com/package/rxjs) of RxJS releases for npm. |
+
+><font color=orange>⚠️ RxJS is now at 6.5.3 and 7.0.0-alpha.0. Upgrade to 6.x.</font>
 
 
 ## Tests 
@@ -116,8 +127,9 @@ If you are on some other platform, try removing the `-p /usr/local/bin/phantomjs
 More info -> [mocha-phantomjs/issues/217](https://github.com/nathanboktae/mocha-phantomjs/issues/217)
 
 ---
- 
----
+
+<!-- tbd. remove above, once we have Puppeteer in place.
+-->
 
 ## Usage 
 
@@ -153,7 +165,7 @@ If you only wish to handle mouse or touch, you can also use:
 ### Sample
 
 ```
-var outerObs = rect.rx_draggable();
+const outerObs = rect.rx_draggable();
     
 outerObs.subscribe( function(dragObs) {
     console.log("Drag started");
@@ -168,7 +180,7 @@ outerObs.subscribe( function(dragObs) {
 } );
 ```
 
-Note that the library does not move (drag) your object automatically. This is intentional and allows other kinds of dragging behaviour (e.g. constraints or circular following) to happen, instead of the usual 1:1 dragging.
+!!: The library does not move (drag) your object automatically. This is intentional and allows other kinds of dragging behaviour (e.g. constraints or circular following) to happen, instead of the usual 1:1 dragging.
 
 ---
 
@@ -203,4 +215,5 @@ These are presented for code comparisons. Their approach is the normal event cap
 - [How to Use npm as a Build Tool](http://blog.keithcirkel.co.uk/how-to-use-npm-as-a-build-tool/) - blog by Keith Cirkel
 - [Phantomjs, Mocha and Chai for functional testing](http://doublenegative.com/phantomjs-mocha-and-chai-for-functional-testing/) (blog, Thomas Clowes, Aug 2014)
 
+<!-- tbd. remove the Phantomjs mention once using Puppeteer? -->
 <br />
