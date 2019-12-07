@@ -1,7 +1,7 @@
 {
   "name": "svg.rx.js",
-  "version": "0.0.5-2019",
-  "description": "Bridge of SVG graphics (svg.js) and Reactive Extensions (rx-lite or rxjs).",
+  "version": "0.0.6-svelte-maybe",
+  "description": "Bridge of SVG graphics (svg.js) and Reactive Extensions (rxjs).",
   "keywords": [
     "svg",
     "rx",
@@ -13,30 +13,51 @@
   "files": [
     "src/"
   ],
+  "private": true,
   "repository": "github:akauppi/svg.rx.js",
   "dependencies": {
     "@reactivex/rxjs": "5.0.0-beta.10",
     "svg.js": "^2.3.2",
     "systemjs": "^0.19.31"
   },
+  "//devDependencies": {
+    "//jshint": "^2.8.0",
+    "//mocha-phantomjs": "^4.0.2",
+    "//chai": "^3.5.0",
+    "//mocha": "^6.2.2",
+    "//http-server": "^0.12.0"
+  },
   "devDependencies": {
-    "chai": "^3.5.0",
     "gh-pages": "^2.1.1",
-    "http-server": "^0.12.0",
-    "jshint": "^2.8.0",
-    "mocha": "^6.2.2",
-    "mocha-phantomjs": "^4.0.2"
+    "npm-run-all": "^4.1.5",
+    "rollup": "^1.27.4",
+    "rollup-plugin-commonjs": "^10.1.0",
+    "rollup-plugin-node-resolve": "^5.2.0",
+    "rollup-plugin-svelte": "^5.1.1",
+    "rollup-plugin-terser": "^5.1.2",
+    "sirv-cli": "^0.4.5",
+    "svelte": "^3.15.0"
   },
   "scripts": {
-    "gh-pages": "node_modules/.bin/gh-pages -d demo",
-    "serve": "node_modules/.bin/http-server demo -p 8080",
-    "jshint": "node_modules/.bin/jshint --verbose --show-non-errors --config jshint.json src/*.js demo/*.js",
-    "test": "node_modules/.bin/mocha-phantomjs -p /usr/local/bin/phantomjs test/index.html",
+    "gh-pages": "npx gh-pages -d demo",
+    "//serve": "npx http-server demo -p 8080",
+    "//jshint": "npx jshint --verbose --show-non-errors --config jshint.json src/*.js demo/*.js",
+    "//test": "node_modules/.bin/mocha-phantomjs -p /usr/local/bin/phantomjs test/index.html",
     "": "",
-    "//preserve": "npm run jshint",
-    "//pregh-pages": "npm run jshint"
+    "build": "rollup -c",
+    "dev": "run-p dev:_start dev:_watch",
+    "dev:_watch": "rollup -c -w",
+    "dev:_start": "sirv out/public --dev --single",
+    "clean": "(cd out/public && rm -f *.js *.css *.map)",
+    "//prepublishOnly": "build",
+    "//test": "mocha   # tbd.",
+    "//pretest": "build"
   },
-  "jshintConfig": {
+  "//jshintConfig": {
     "strict": "global"
-  }
+  },
+  "//comments": [
+    "TODO: PhantomJS on the way out. Svelte 3 on the way in.",
+    "Targets with '_' mean undocumented (not mentioned in the README) so you can rename with more ease."
+  ]
 }

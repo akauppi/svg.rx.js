@@ -16,6 +16,8 @@ Likewise, `demo/src` is a symbolic link to `src`.
 It is important to keep `demo/` self-sufficient (i.e. no paths leading up from it, other than via the symbolic links), because of the way it gets published (see below).
 
 >Note: `git` supports symbolic links fully, but some IDEs may get confused if you open the same file (say the source) as both `src/rx.svg.js` and `demo/src/rx.svg.js`. The solution is simple - try to only open one of them, or change tools.
+>
+>JetBrains IDE's have `Reload from Disk` content menu for resyncing a symbolic link.
 
 ## Testing on Android Browser
 

@@ -4,7 +4,7 @@
 /*jshint devel: true */
 /*globals assert, Gx */
 
-var RAD2DEG = (180.0 / Math.PI);
+const RAD2DEG = (180.0 / Math.PI);
 
 /*
 * '.gxTriangle' component

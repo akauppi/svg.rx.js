@@ -2,7 +2,7 @@
   // See "http://jshint.com/docs/options/",
 
   // Did not work with jshint 2.8.0. AKa241215
-  //"esversion": 5,
+  "esversion": 6,
 
   //--- Enforcing options (true = strict) ---
   "curly": true,

@@ -1,6 +1,9 @@
 /node_modules/
 #*.map
 
+/out/public/*
+!/out/public/index.html
+
 /npm-debug.log
 /package-lock.json
 
