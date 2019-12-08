@@ -1,8 +1,9 @@
 /node_modules/
 #*.map
 
-/out/public/*
-!/out/public/index.html
+/public/*
+!/public/index.html
+!/public/global.css
 
 /npm-debug.log
 /package-lock.json

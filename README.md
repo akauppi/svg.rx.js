@@ -28,6 +28,7 @@ The reasons why this isn't already practical lie within the SVG details. It does
 - providing the bare mechanisms needed, instead of trying to cater for a certain kind of application
 - value brewity of the code, and maintainability
 - provide support for both desktop and touch use cases, equally
+- embrace Svelte 3, as a development abstraction and toolchain
   
 ## Platform scope
 
@@ -35,14 +36,11 @@ Scope of the project is SVG on modern browsers. That probably means no IE9..11 s
 
 - Latest Safari on macOS
 - Latest Chrome on macOS
-- Safari on iOS 13
-  - on iPhone 8 and iPad Pro
-- Chrome on Android 9
-  - on Sony XPeria phone 
+- Safari on iOS 13 (iPad Pro)
+- Chrome on Android 9 (Sony Xperia phone) 
 
 <!-- hidden (but take back?)
-- Chrome on Latest Android browser 
-  - on Nexus 7
+- Chrome on Andoid xxx (Nexus 7)
 --> 
 
 If you find platforms where it doesn't work for you, [issues](https://github.com/akauppi/svg.rx.js/issues) and pull requests are the way to go.
@@ -57,6 +55,21 @@ If you find platforms where it doesn't work for you, [issues](https://github.com
 
 Please send a PR if you need these - and provide a demo or test that proves when the support works.
 
+## Following Svelte conventions
+
+The folder structure is derived from [Svelte template](https://github.com/sveltejs/template). In particular:
+
+```
+|- public      # files to host
+|   |- index.html
+|   |- global.css
+|   |- build      # output folder for the bundles
+|       |- ...
+|- src         # source files
+``` 
+
+We embrace Svelte as the building technology and wish to remain familiar in structure to developers using it, elsewhere.
+
 
 ---
 
@@ -67,8 +80,6 @@ Install the tools and dependencies (needed for running demos):
 ```
 $ npm install
 ```
-
-><font color=blue>👉 Currently, this gives some vulnerability warnings. We're catching up with time and hope to see them gone.</font>
 
 <!-- remove (replace with mention of installing Puppeteer; only needed for running the tests)
 -->
@@ -81,15 +92,44 @@ $ phantomjs --version
 
 ><font color=orange>⚠️ PhantomJS is discontinued. Change tests to run with Puppeteer.</font>
 
+
 ## Demos
 
-- [sources](demo/)
+- [sources](demo.svelte/)
 - [online](http://akauppi.github.io/svg.rx.js/index.html) - may not be the latest versions
+
+><font color=orange>Note: The online demos are currently from an older branch (2015-16); they are *not* what the source creates. WIP</font>
 
 The demos work both as sample code and as manual tests.
 
-For the desktop, you can simply open `demo/index.html`.
+```
+$ npm run dev
+...
+  Your application is ready~! 🚀
 
+  - Local:      http://0.0.0.0:5000
+  - Network:    http://192.168.1.234:5000
+
+────────────────── LOGS ──────────────────
+```
+
+This builds the demos and serves them. Changes to the code will be reflected in the browser, without need of refresh. 😏
+
+
+### Running on a mobile device
+
+Get to know your local IP, e.g. Option-click on the WLAN icon in macOS or use `ifconfig` on command line. Let's say it's `192.168.1.234`.
+
+Open the mobile device's browser at `http://192.168.1.234:5000`. 
+
+For remote debugging, see [DEV-TIPS/Remote debugging](DEV-TIPS/Remote%20debugging.md).
+
+
+
+```
+$ 
+
+<!-- REMOVE
 To use the demos from touch devices (iOS or Android), you need to serve them locally:
 
 ```
@@ -104,6 +144,7 @@ Hit CTRL-C to stop the server
 ```
 
 Then reach for that `http://192.168.1.234:8080` from your mobile device (in the same WLAN).
+-->
 
 
 ## Code
@@ -225,8 +266,9 @@ These are presented for code comparisons. Their approach is the normal event cap
 
 ### Background info
 
-- [How to Use npm as a Build Tool](http://blog.keithcirkel.co.uk/how-to-use-npm-as-a-build-tool/) - blog by Keith Cirkel
-- [Phantomjs, Mocha and Chai for functional testing](http://doublenegative.com/phantomjs-mocha-and-chai-for-functional-testing/) (blog, Thomas Clowes, Aug 2014)
-
+- [How to Use npm as a Build Tool](https://www.keithcirkel.co.uk/how-to-use-npm-as-a-build-tool/) - (blog, Dec 2014) by Keith Cirkel
+- [Phantomjs, Mocha and Chai for functional testing](https://thomasclowes.com/phantomjs-mocha-and-chai-for-functional-testing/) (blog, Aug 2014) by Thomas Clowes
+    
 <!-- tbd. remove the Phantomjs mention once using Puppeteer? -->
-<br />
+
+

@@ -3,7 +3,7 @@
 -->
 
 <script>
-
+    export let name;
 </script>
 
 <style>
@@ -26,5 +26,5 @@
 
 <!-- HTML -->
 <p>
-    HEY THERE!!!
+    HEY THERE {name}!!!
 </p>

@@ -3,7 +3,7 @@
 ## latest
 
 - started transition to 2019 tech :)
-- added mocha tests
+
 
 ## 0.0.5
 

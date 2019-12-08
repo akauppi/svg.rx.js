@@ -1,0 +1,25 @@
+/*
+* public/global.css
+*
+* Global CSS, read in by 'index.html' for all the pages.
+*/
+div#cradle {
+  _position: fixed;
+  top: 0;
+  left: 0;
+  /* Note: 99% lets also the right red edge to be shown, even if there are vertical scroll bars (OS X Safari) */
+  width: 99%;
+  border: 1px solid red;
+}
+
+/* DEBUG
+*/
+.debug {
+  stroke-width: 1px;
+  stroke: red;
+  fill: none;
+}
+
+text.debug {
+  fill: red;
+}

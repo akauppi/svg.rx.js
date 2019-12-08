@@ -1,63 +1,43 @@
 {
   "name": "svg.rx.js",
   "version": "0.0.6-svelte-maybe",
-  "description": "Bridge of SVG graphics (svg.js) and Reactive Extensions (rxjs).",
-  "keywords": [
-    "svg",
-    "rx",
-    "rxjs"
-  ],
-  "homepage": "https://github.com/akauppi/svg.rx.js",
-  "bugs": "https://github.com/akauppi/svg.rx.js/issues",
-  "license": "MIT",
-  "files": [
-    "src/"
-  ],
   "private": true,
-  "repository": "github:akauppi/svg.rx.js",
+  "//dependencies": {
+    "//systemjs": "^0.19.31"
+  },
   "dependencies": {
     "@reactivex/rxjs": "5.0.0-beta.10",
-    "svg.js": "^2.3.2",
-    "systemjs": "^0.19.31"
+    "svg.js": "^2.3.2"
   },
   "//devDependencies": {
     "//jshint": "^2.8.0",
     "//mocha-phantomjs": "^4.0.2",
     "//chai": "^3.5.0",
     "//mocha": "^6.2.2",
-    "//http-server": "^0.12.0"
+    "//http-server": "^0.12.0",
+    "//npm-run-all": "^4.1.5"
   },
   "devDependencies": {
     "gh-pages": "^2.1.1",
-    "npm-run-all": "^4.1.5",
-    "rollup": "^1.27.4",
+    "rollup": "^1.27.9",
     "rollup-plugin-commonjs": "^10.1.0",
+    "rollup-plugin-livereload": "^1.0.0",
     "rollup-plugin-node-resolve": "^5.2.0",
     "rollup-plugin-svelte": "^5.1.1",
     "rollup-plugin-terser": "^5.1.2",
     "sirv-cli": "^0.4.5",
     "svelte": "^3.15.0"
   },
-  "scripts": {
-    "gh-pages": "npx gh-pages -d demo",
+  "//scripts": {
     "//serve": "npx http-server demo -p 8080",
     "//jshint": "npx jshint --verbose --show-non-errors --config jshint.json src/*.js demo/*.js",
-    "//test": "node_modules/.bin/mocha-phantomjs -p /usr/local/bin/phantomjs test/index.html",
-    "": "",
+    "//test": "node_modules/.bin/mocha-phantomjs -p /usr/local/bin/phantomjs test/index.html"
+  },
+  "scripts": {
+    "gh-pages": "gh-pages -d demo",
+    "clean": "(rm public/build/* 2> /dev/null || true)",
     "build": "rollup -c",
-    "dev": "run-p dev:_start dev:_watch",
-    "dev:_watch": "rollup -c -w",
-    "dev:_start": "sirv out/public --dev --single",
-    "clean": "(cd out/public && rm -f *.js *.css *.map)",
-    "//prepublishOnly": "build",
-    "//test": "mocha   # tbd.",
-    "//pretest": "build"
-  },
-  "//jshintConfig": {
-    "strict": "global"
-  },
-  "//comments": [
-    "TODO: PhantomJS on the way out. Svelte 3 on the way in.",
-    "Targets with '_' mean undocumented (not mentioned in the README) so you can rename with more ease."
-  ]
+    "dev": "rollup -c -w",
+    "//start": "sirv public"
+  }
 }
