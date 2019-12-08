@@ -3,20 +3,15 @@
 - Using streams for an animation API
   - test with demo 4, at least
 
-- Clean up the code and documentation
+- [ ] package and publish (once ready for it)
 
-- Fix (or remove?) unnecessary demos (demo 2)
-
-- Consider if svg.js could be left out (direct access to browser's SVG API)
-
-- Release via npm packaging
-  
-- Would someone with Microsoft devices (using `pointerdown` etc.) want to suggest PR's? See -> [Issue #2](https://github.com/akauppi/svg.rx.js/issues/2)
+- [ ] Would someone with Microsoft devices (using `pointerdown` etc.) want to suggest PR's? See -> [Issue #2](https://github.com/akauppi/svg.rx.js/issues/2)
 
 - Is there a case to support mouse buttons other than the first?
 
 - Once ES7 `Observable`s are out, check if they are enough for us (i.e. would we still need/benefit from RxJS) (not urgent)
-
+  - Svelte observables could do the same
+  
 ## Backpressure 
 
 - if the drag produces more coordinates than the subscriber can handle, we'd be okay always skipping to the latest one. AKa251015
@@ -34,5 +29,3 @@ With this in mind, we might be best off just waiting for RxJS to develop in this
   - freeze the origin e.g. with first move
   - just make it so that `move`, `rotate` etc. really work (so we don`t need to move by translate, as it is now)
  
-
-<br />

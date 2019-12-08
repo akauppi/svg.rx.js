@@ -1,7 +1,8 @@
+// tbd. Likely taking this away - Svelte gives the warnings, right?
 {
-  // See "http://jshint.com/docs/options/",
+  // See http://jshint.com/docs/options/
 
-  // Did not work with jshint 2.8.0. AKa241215
+  // ES2015
   "esversion": 6,
 
   //--- Enforcing options (true = strict) ---

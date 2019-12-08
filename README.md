@@ -83,12 +83,13 @@ $ npm install
 
 <!-- remove (replace with mention of installing Puppeteer; only needed for running the tests)
 -->
-Have PhantomJS installed, on the command line:
+<strike>Have PhantomJS installed, on the command line:
 
 ```
 $ phantomjs --version
 2.1.1
 ```
+</strike>
 
 ><font color=orange>⚠️ PhantomJS is discontinued. Change tests to run with Puppeteer.</font>
 
@@ -118,33 +119,11 @@ This builds the demos and serves them. Changes to the code will be reflected in 
 
 ### Running on a mobile device
 
-Get to know your local IP, e.g. Option-click on the WLAN icon in macOS or use `ifconfig` on command line. Let's say it's `192.168.1.234`.
+Open the mobile device's browser at `http://192.168.1.234:5000` (IP mentioned by `npm run dev`).
 
-Open the mobile device's browser at `http://192.168.1.234:5000`. 
+This allows you to experiment with the demos. 
 
-For remote debugging, see [DEV-TIPS/Remote debugging](DEV-TIPS/Remote%20debugging.md).
-
-
-
-```
-$ 
-
-<!-- REMOVE
-To use the demos from touch devices (iOS or Android), you need to serve them locally:
-
-```
-$ npm run serve
-...
-Starting up http-server, serving demo
-Available on:
-  http://127.0.0.1:8080
-  http://192.168.1.234:8080
-Hit CTRL-C to stop the server
-...
-```
-
-Then reach for that `http://192.168.1.234:8080` from your mobile device (in the same WLAN).
--->
+>For setting up remote debugging, see [DEV-TIPS/Remote debugging](DEV-TIPS/Remote%20debugging.md).
 
 
 ## Code
@@ -171,26 +150,15 @@ Alternatively, you can run the tests in a browser:
 ```
 $ open test/index.html
 ```
- 
----
 
-Note: The `package.json` has a fixed path to `/usr/local/bin/phantomjs` binary. This works if you are on macOS and have installed `phantomjs` via HomeBrew.
+>💔<font color=orange>There are no tests at the moment. We'll tranfer the earlier ones to Puppeteer, at some point.</font>
 
-If you are on some other platform, try removing the `-p /usr/local/bin/phantomjs`.
-
-More info -> [mocha-phantomjs/issues/217](https://github.com/nathanboktae/mocha-phantomjs/issues/217)
-
----
-
-<!-- tbd. remove above, once we have Puppeteer in place.
--->
 
 ## Usage 
 
-<font color=red>Note: The APIs are still in flux, and it might be better to see the 
-working samples. AKa030416</font>
+>⚠️<font color=orange>WARNING: This section is out-of-date. To be corrected once we have transitioned to Svelte, fully.</font>
 
-You can simply download the `svg.rx.js` file and place it in your project. 
+<strike>You can simply download the `svg.rx.js` file and place it in your project. 
 
 ### HTML
 
@@ -235,6 +203,8 @@ outerObs.subscribe( function(dragObs) {
 ```
 
 !!: The library does not move (drag) your object automatically. This is intentional and allows other kinds of dragging behaviour (e.g. constraints or circular following) to happen, instead of the usual 1:1 dragging.
+
+</strike>
 
 ---
 
