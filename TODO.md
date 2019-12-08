@@ -1,5 +1,11 @@
 # TODO
 
+## Demos
+
+- Menu to be horizontally centered
+
+## Other
+
 - Using streams for an animation API
   - test with demo 4, at least
 

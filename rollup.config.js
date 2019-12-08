@@ -1,81 +1,104 @@
-// Rollup config
+// Rollup config for Sapper (multi-page apps)
 //
-// Note: This configuration is derived from https://github.com/sveltejs/template/blob/master/rollup.config.js
-//      and should closely resemble it (check from time to time for upstream edits?).
+// Note: This configuration is derived from:
+//          https://github.com/sveltejs/template/blob/master/rollup.config.js
+//          https://github.com/sveltejs/sapper-template/blob/master/rollup.config.js
+//      and should closely resemble them (check from time to time for upstream edits?).
 //
-import svelte from 'rollup-plugin-svelte';
 import resolve from 'rollup-plugin-node-resolve';
+import replace from '@rollup/plugin-replace';
 import commonjs from 'rollup-plugin-commonjs';
-import livereload from 'rollup-plugin-livereload';
+import svelte from 'rollup-plugin-svelte';
+//import livereload from 'rollup-plugin-livereload';
 import { terser } from 'rollup-plugin-terser';
 
-const production = !process.env.ROLLUP_WATCH;
+import config from 'sapper/config/rollup.js';
+import pkg from './package.json';
 
-export default [
-    // Demo app / triangles
-    {
-        input: "demo.svelte/main.js",
-        output: {
-            sourcemap: true,
-            format: "iife",
-            name: 'app',   // Q: what does this affect? (from 'svelte-template')
-            file: "public/build/bundle.js",
-        },
+const mode = process.env.NODE_ENV;
+const dev = mode === 'development';
+
+/*
+* Control of compilation warnings
+*/
+// tbd. How to disable only the 'circle.n{1..9}' classes?
+//
+const onwarn = (warning, onwarn) =>
+    (warning.code === 'CIRCULAR_DEPENDENCY' && /[/\\]@sapper[/\\]/.test(warning.message))
+    //|| console.log("WARNING CODE: "+ warning)
+    //|| (warning.code === 'PLUGIN_WARNING' && warning.message === "Unused CSS selector")
+    || onwarn(warning);
+
+const dedupe = importee => importee === 'svelte' || importee.startsWith('svelte/');
+
+export default {
+    client: {
+        input: config.client.input(),
+        output: config.client.output(),
         plugins: [
-            svelte({
-                // enable run-time checks when not in production
-                dev: !production,
-                // extract any component CSS into a separate file — better for performance and clearer
-                css: css => {
-                    css.write('public/build/bundle.css');
-                }
+            replace({
+                'process.browser': true,
+                'process.env.NODE_ENV': JSON.stringify(mode)
             }),
-
-            // If you have external dependencies installed from npm, you'll most likely need these plugins. In
-            // some cases you'll need additional configuration — consult the documentation for details:
-            // https://github.com/rollup/rollup-plugin-commonjs
+            svelte({
+                dev,
+                hydratable: true,
+                emitCss: true
+            }),
             resolve({
                 browser: true,
-                dedupe: importee => importee === 'svelte' || importee.startsWith('svelte/')
+                dedupe
             }),
             commonjs(),
 
-            // In dev mode, call `npm run start` once the bundle has been generated
-            !production && serve(),
-
-            // Watch the `public` directory and refresh the browser on changes when not in production
-            !production && livereload('public'),
-
-            // If we're building for production ('npm run build' instead of 'npm run dev'), minify
-            production && terser()
+            !dev && terser({
+                module: true
+            })
         ],
 
-        watch: {
-            clearScreen: false
-        }
+        onwarn,
+    },
+
+    server: {
+        input: config.server.input(),
+        output: config.server.output(),
+        plugins: [
+            replace({
+                'process.browser': false,
+                'process.env.NODE_ENV': JSON.stringify(mode)
+            }),
+            svelte({
+                generate: 'ssr',
+                dev
+            }),
+            resolve({
+                dedupe
+            }),
+            commonjs()
+        ],
+        external: Object.keys(pkg.dependencies).concat(
+            require('module').builtinModules || Object.keys(process.binding('natives'))
+        ),
+
+        onwarn,
     }
-];
 
-function serve() {
-    let started = false;
+    // Note: 'serviceworker' section not needed
+    /*** no need?
+    serviceworker: {
+        input: config.serviceworker.input(),
+        output: config.serviceworker.output(),
+        plugins: [
+            resolve(),
+            replace({
+                'process.browser': true,
+                'process.env.NODE_ENV': JSON.stringify(mode)
+            }),
+            commonjs(),
+            !dev && terser()
+        ],
 
-    return {
-        writeBundle() {
-            if (!started) {
-                started = true;
+        onwarn,
+    }***/
+};
 
-                // Note: Unlike in Svelte template, we start 'sirv' directly from here, instead of going through
-                //      'package.json'. This seems simpler - was there a reason to not do so, in the template?
-                //
-                //      Template had: 'npm run start -- --dev'
-                //
-                // Note: '--host' serves also in the network IP (e.g. '192.168.1.234'). We need this for mobile devices.
-                //
-                require('child_process').spawn('npx', ['sirv', 'public', '--dev', '--host'], {
-                    stdio: ['ignore', 'inherit', 'inherit'],
-                    shell: true
-                });
-            }
-        }
-    };
-}
