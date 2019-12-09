@@ -2,6 +2,16 @@
 * svg.rx.js
 */
 
+// Q: What is the recommended way (for Svelte) of bringing runtime asserts to the browser? #help
+//
+const assert = require('assert');   // via npm
+
+import { Observable } from "rxjs/Observable";
+import "rxjs/add/observable/fromEvent";
+import "rxjs/add/observable/merge";
+
+const Rx = { Observable };
+
 (function () {
   "use strict";
 
@@ -378,6 +388,7 @@
     ***/
   });
 
+  console.log("svg.rx.js initialised.")
 })();
 
 

@@ -47,6 +47,7 @@ export default {
             }),
             resolve({
                 browser: true,
+                preferBuiltins: true,
                 dedupe
             }),
             commonjs(),

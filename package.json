@@ -13,12 +13,14 @@
     "//cy:open": "npx cypress open",
     "//test": "run-p --race dev cy:run"
   },
+  "//dependencies": {
+    "//@reactivex/rxjs": "5.0.0-beta.10",
+    "//svg.js": "^2.3.2"
+  },
   "dependencies": {
-    "@reactivex/rxjs": "5.0.0-beta.10",
-    "svg.js": "^2.3.2",
-    "compression": "^1.7.1",
-    "polka": "next",
-    "sirv": "^0.4.0"
+    "assert": "^2.0.0",
+    "rxjs": "^5.0.0",
+    "compression": "^1.7.1"
   },
   "devDependencies": {
     "gh-pages": "^2.1.1",
@@ -30,6 +32,15 @@
     "rollup-plugin-commonjs": "^10.1.0",
     "rollup-plugin-node-resolve": "^5.2.0",
     "rollup-plugin-svelte": "^5.1.1",
-    "rollup-plugin-terser": "^5.1.2"
+    "rollup-plugin-terser": "^5.1.2",
+    "polka": "next",
+    "sirv": "^0.4.0"
+  },
+  "//devDependencies": {
+  },
+  "//comments": {
+    "dependencies": {
+      "compression": "seems to be needed (in runtime deps) by 'npm run build'"
+    }
   }
 }
