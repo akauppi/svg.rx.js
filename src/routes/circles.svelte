@@ -49,6 +49,9 @@
 
 <svelte:head>
 	<title>Circles</title>
+
+	<!-- Here until we don't need it -->
+	<script source="lib/svg.min.js"></script>
 </svelte:head>
 
 <h1>Circles demo</h1>
@@ -60,7 +63,7 @@
 	<br />The circles should not lag behind - that is a sign of the event skipping not working correctly.
 </p>
 
-<svg id="cradle">
+<svg>
 	{#each circles as o}
 		<circle class:n2={true} cx={o.x+o.r} cy={o.y+o.r} r={o.r}></circle>
 	{/each}

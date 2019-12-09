@@ -1,16 +1,25 @@
 /*
 * svg.rx.js
+*
+* tbd. Change this module to ES6 like exports
+*     - expect the parent to provide 'assert' function
 */
 
-// Q: What is the recommended way (for Svelte) of bringing runtime asserts to the browser? #help
+// See -> https://stackoverflow.com/questions/39883960/what-is-the-typescript-2-0-es2015-way-to-import-assert-from-node-js
 //
-const assert = require('assert');   // via npm
+//import { strict as assert } from 'assert';
+
+function assert(cond,msg) {
+  if (!cond) throw msg || "Assert failed";    // ..and we don't know how to import the real thing!
+}
 
 import { Observable } from "rxjs/Observable";
 import "rxjs/add/observable/fromEvent";
 import "rxjs/add/observable/merge";
 
 const Rx = { Observable };
+
+// Note: taking 'SVG' as a global for now. We're likely to abandon it, anyways (if not, there's a 3.0 out there).
 
 (function () {
   "use strict";
@@ -238,8 +247,7 @@ const Rx = { Observable };
   }
 
 
-  SVG.extend( SVG.Element, {
-
+  const methods =  {
     //---
     // Create an observable for touch events.
     //
@@ -386,7 +394,12 @@ const Rx = { Observable };
       );
     }
     ***/
-  });
+  };
+
+  // tbd. extend the actual 'SVGDocument' and others
+  //SVG.extend( SVG.Element,
+
+  console.warn("tbd. extending the methods")
 
   console.log("svg.rx.js initialised.")
 })();
@@ -410,3 +423,4 @@ const Rx = { Observable };
       }
     }
  **/
+

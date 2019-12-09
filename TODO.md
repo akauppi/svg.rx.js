@@ -35,3 +35,9 @@ With this in mind, we might be best off just waiting for RxJS to develop in this
   - freeze the origin e.g. with first move
   - just make it so that `move`, `rotate` etc. really work (so we don`t need to move by translate, as it is now)
  
+## svg.rx.js
+
+- How to use `assert`, in runtime? We don't want to cause dependencies to the project - is there some built-in `assert` for Svelte, or does it always mean importing `assert`?
+
+
+

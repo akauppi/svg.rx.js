@@ -32,15 +32,13 @@
     "rollup-plugin-commonjs": "^10.1.0",
     "rollup-plugin-node-resolve": "^5.2.0",
     "rollup-plugin-svelte": "^5.1.1",
-    "rollup-plugin-terser": "^5.1.2",
-    "polka": "next",
-    "sirv": "^0.4.0"
+    "rollup-plugin-terser": "^5.1.2"
   },
-  "//devDependencies": {
-  },
+  "//devDependencies": {},
   "//comments": {
     "dependencies": {
-      "compression": "seems to be needed (in runtime deps) by 'npm run build'"
+      "compression": "seems to be needed (in runtime deps) by 'npm run build'",
+      "polka, sirv": "tbd. not sure if they need to be in the 'dependencies' side (in a sample they were)"
     }
   }
 }
