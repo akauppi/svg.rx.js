@@ -1,7 +1,6 @@
 /*
 * svg.rx.js
 */
-/*jshint devel:true */
 
 (function () {
   "use strict";
@@ -35,15 +34,15 @@
 
   // Inner stream of drags. Handles coordinate transforms etc.
   //
-  // Note: The event handling code is originally based on 'svg.draggable.js' -> https://github.com/wout/svg.draggable.js
-  //      but we only enable stuff that we actually test (manually). I.e. 'SVG.Nested', 'SVG.Text' support remains
-  //      disabled until we need it, and there are demos that exercise those things.
+  // Note: The event handling code is originally based on https://github.com/wout/svg.draggable.js but we only enable
+  //      stuff that we actually test (manually). I.e. 'SVG.Nested', 'SVG.Text' support remains disabled.
   //
   // References:
   //    MouseEvent -> https://developer.mozilla.org/en-US/docs/Web/API/MouseEvent
   //    Touch -> https://developer.mozilla.org/en-US/docs/Web/API/Touch
   //
   // 'el' is the element that is being tracked
+  //
   // 'elCoords' is the element, whose coordinate system is used (can be 'el', or e.g. its parent)
   //
   // 'precise': If 'true', streams the exact position of the pointer/touch location. Otherwise hides that away and
@@ -51,16 +50,17 @@
   //    want to e.g. rotate by dragging a disk, in place. For normal drag, or rotational drag with a separate handle
   //    object, use 'false'.
   //
-  function innerObs (el, oStart, moveObs, endObs, elCoords, newMode) {    // (SVG.Element|SVG.G|SVG.Doc, MouseEvent or Touch, observable of MouseEvent or Touch, observable of MouseEvent or Touch, [SVG.Element], [true]) -> observable of {x:Int, y:Int}
+  function innerObs (el, oStart, moveObs, endObs, elCoords, precise) {    // (SVG.Element|SVG.G|SVG.Doc, MouseEvent or Touch, observable of MouseEvent or Touch, observable of MouseEvent or Touch, [SVG.Element], [true]) -> observable of {x:Int, y:Int}
 
     var isDoc = (el instanceof SVG.Doc);
+    var isG = (el instanceof SVG.G);
 
-    if (! ((el instanceof SVG.Element) || (el instanceof SVG.G) || isDoc)) {
+    if (! ((el instanceof SVG.Element) || isG || isDoc)) {
       throw "svg.rx.js does not support: "+ (typeof el);
     }
 
     if (el instanceof SVG.Text) {
-      console.log( "Warning: dragging might not work with "+ el );
+      console.warn( "Dragging might not work with "+ el );
     }
 
     // Select which element is used for reporting the coordinates.
@@ -81,6 +81,14 @@
     //
     var doc = isDoc ? el : /*el.parent(SVG.Nested) ||*/ el.parent(SVG.Doc);
 
+    /*
+    * About SVGPoint:
+    *   - it's "not attached to any document" (not part of the DOM): https://msdn.microsoft.com/en-us/windows/ff972165(v=vs.71)
+    *       If we trust that (tbd. check if we see it in the DOM), cleanup is a matter of just releasing the reference.
+    *   - there's a 'DOMPoint' in recent browsers (2019; except Edge). This seems to be the same as 'SVGPoint', or an
+    *       extension? WebStorm Option-B shows 'type SVGPoint = DOMPoint;'
+    */
+
     // Note: svg.js doesn't have an abstraction for applying a matrix transform. This kind of makes sense - such a
     //      transform uses SVGPoint structure specifically allocated for this purpose and handling the life span of
     //      such an object may be crucial for keeping drag behaviour optimal. So we are fine diving down to native
@@ -90,19 +98,18 @@
     //      See -> https://github.com/wout/svg.js/issues/437
     //             https://github.com/wout/svg.js/issues/403
     //
-    // tbd. The 'buf' should be cleared away when the dragging ends (currently, we are leaking point objects, one per
-    //      drag). AKa130316
-    //
     // Note: If thinking of not cleaning the point buffer, but keeping it always there, consider that multiple objects
     //      can be moved simultaneously (and their points may be cradled in the 'SVG.Doc'). The dynamic alloc/dealloc
     //      is probably the simplest way to go. AKa130316
     //
-    var buf = doc.node.createSVGPoint();    // point buffer (allocated just once per drag)
+    var buf = doc.node.createSVGPoint();    // point object (allocated just once per drag)
+
+    // tbd. Maybe we can create the point under the element itself (not just the doc)?
 
     // Clean the allocated buffer
     //
     endObs.take(1).subscribe( function () {
-      buf = null;     // GC will clean it up
+      buf = null;     // GC cleans it up
     });
 
     // If a group is observing the drag, we want its transform NOT to be included. Otherwise, we get problems if the group
@@ -113,6 +120,8 @@
     //
     var m = elCoords.screenCTM().inverse().native();
 
+    // Q: is the '.native()' needed? This doesn't have it -> https://schneide.blog/2018/03/05/some-tricks-for-working-with-svg-in-javascript/
+
     // Transform from screen to user coordinates
     //
     // Note: This gets called a lot, so should be swift, and not create new objects.
@@ -121,7 +130,7 @@
     //      by the caller.
     //
     // Note: Use '.client[XY]' (not '.screen[XY]') so that the position of the SVG cradle does not affect (the difference
-    //      becomes visible only when dragging is applied on 'svg' background, like in demo4).
+    //      becomes visible only when dragging is applied on 'svg' background).
     //
     var transformP = function (o /*, offset*/) {   // (MouseEvent or Touch) -> SVGPoint (which has '.x' and '.y')
       buf.x = o.clientX;  // - (offset || 0)
@@ -130,35 +139,18 @@
       return buf.matrixTransform(m);
     };
 
-    /** DISABLED text element support not needed, yet
-    var anchorOffset;
-
-    // fix text-anchor in text-element (svg.draggable.js #37)
-    if (el instanceof SVG.Text) {
-      anchorOffset = el.node.getComputedTextLength();
-
-      switch (el.attr('text-anchor')) {
-        case 'middle':
-          anchorOffset /= 2;
-          break;
-        case 'start':
-          anchorOffset = 0;
-          break;
-      }
-    }
-    **/
-
     var p0 = transformP(oStart /*, anchorOffset*/);
 
-    // Offset from the touch/point location to the origin of the target element. We're providing the drag coordinates
-    // in the observable, not the actual mouse/touch coordinates (tbd. maybe we should provide both). AKa080116
+    // Offset from the touch/point location to the origin of the target element, at the beginning of the drag.
+    // We provide the drag coordinates in the observable, not the actual mouse/touch coordinates (tbd. we should provide both). AKa080116
+    //    ^^- tbd. Provide both in the observable, and no need for 'precise' param. :)
     //
     var x_offset, y_offset;
 
-    if (newMode || isDoc) {
+    if (precise || isDoc) {
       x_offset = y_offset = 0;
 
-    } else if ((el instanceof SVG.Circle) || (el instanceof SVG.Ellipse)) {   // 'SVG.Circle', 'SVG.Ellipse' or 'SVG.Rx.Circle'
+    } else if ((el instanceof SVG.Circle) || (el instanceof SVG.Ellipse)) {   // 'SVG.Circle', 'SVG.Ellipse' or 'SVG.Rx.Circle' #edit
       //
       // Do not access '.x' or '.y' on a circle - they are not needed, and 'SVG.Rx.Circle' does not implement them.
 
@@ -173,6 +165,20 @@
     } else if (typeof el.x === "function") {    // normal 'svg.js' elements (all have '.x' and '.y', even the circle)
       x_offset = p0.x - el.x();
       y_offset = p0.y - el.y();
+    }
+
+    // The returned object.
+    //
+    //  .x, .y:   The top left coords (...tbd. for circle and ellipse, is this the center?)
+    //  .x2, .y2: The actual position of the drag (in which coord system?) tbd.
+    //
+    const pointWithOffset = function (p) {    // (SVGPoint) => { x: int, y: int [,x2: num][, y2: num] }
+      return {
+        x: p.x - x_offset,
+        y: p.y - y_offset,
+        x2: isDoc ? undefined : p.x,
+        y2: isDoc ? undefined : p.y
+      };
     }
 
     // Note: some events actually come with the same x,y values (at least on Safari OS X) - removed by the
@@ -192,14 +198,9 @@
     //      not need it. AKa140116
     //
     return moveObs.map( function (o) {
-      var p = transformP(o);
-
-      return {
-        x: p.x - x_offset,
-        y: p.y - y_offset
-      };
+      return pointWithOffset( transformP(o) );
     } )
-      .startWith( { x: p0.x - x_offset, y: p0.y - y_offset } )
+      .startWith( pointWithOffset(p0) )
       .distinctUntilChanged()
       .takeUntil( endObs );
   }  // innerObs
@@ -237,7 +238,7 @@
     //
     // Note: Touch id's are not reported, by design. The idea is to treat any touches alike, not mapping them to
     //      "fingers". Also, depending on the platform touch id's may or may not be in the 0...N-1 range (Android
-    //      reuses id's whereas iOS does not). The model chosen seems to be a good fit for allowing e.g. multiple
+    //      reuses id's whereas iOS does not. The model chosen seems to be a good fit for allowing e.g. multiple
     //      users to work on a touch interface simultaneously, i.e. it feels more generic and expandable. AKa060116
     //
     rx_touch: function (elCoords, precise) {   // ([SVG.Element], [Boolean]) -> observable of observables of { x: Int, y: Int }
@@ -378,3 +379,23 @@
   });
 
 })();
+
+
+
+/** DISABLED text element support not needed, yet
+ var anchorOffset;
+
+ // fix text-anchor in text-element (svg.draggable.js #37)
+ if (el instanceof SVG.Text) {
+      anchorOffset = el.node.getComputedTextLength();
+
+      switch (el.attr('text-anchor')) {
+        case 'middle':
+          anchorOffset /= 2;
+          break;
+        case 'start':
+          anchorOffset = 0;
+          break;
+      }
+    }
+ **/

@@ -1,10 +1,6 @@
 /node_modules/
 #*.map
 
-/public/*
-!/public/index.html
-!/public/global.css
-
 # Sapper
 /src/node_modules/@sapper/
 #yarn-error.log
@@ -13,6 +9,11 @@
 
 /npm-debug.log
 /package-lock.json
+
+# disabled - used this with plain Svelte
+#/public/*
+#!/public/index.html
+#!/public/global.css
 
 # IntelliJ IDEA folder '/.idea/' intentionally not included
 #/.idea/
