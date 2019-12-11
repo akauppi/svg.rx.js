@@ -1,18 +1,39 @@
 <script>
+	import { onMount } from 'svelte';
 	import '../svg.rx.js';
 
 	export let circles = [ {x: 100, y: 100, r: 20} ];		// { x: int, y: int, r: int }
+
+	/*
+	* Note: One can have '<svg on:mount={ ... }>` (Svelte 3.15.0) but there doesn't seem to be a way to pass that
+	* 	element (the <svg> node) to the handler, i.e. `<svg on:mount{ el => { ... } }>` does not work.
+	*
+	* 	This would be handy, but the whole `on:mount` seems undocumented, at the moment (10-Dec-19) so we continue
+	* 	with what works.
+	*
+	* 	btw. With `on:mount` also the `import { onMount } from 'svelte'` can be omitted.
+	*
+	* 	tbd. Discuss this in Svelte forums; make a sample (or share this code once we work, with a branch that
+	* 		exhibits the non-working inline)?
+	*/
+	let svgElem;	// 'SVGSVGElement'
+
+	onMount(() => {		// Svelte note: could provide the element as a parameter (now 'undefined')
+
+		const outerObs = svgElem.rx_draggable();		// -> observable of observables of { x: Int, y: Int }
+
+		alert(outerObs+"");	// :)
+	});
 
 	//...
 </script>
 
 <!-- CSS -->
 
-<!--
--- tbd. These classes are intended to be used dynamically, but they cause "Unused CSS selector" warnings at the
---		development console. How to mark they're good? #help
--->
 <style>
+	/* tbd. These classes are intended to be used dynamically, but they cause "Unused CSS selector" warnings at the
+	 * development console. How to mark they're good? #help
+	 *
 	circle.n0 {
 		fill: blue;
 	}
@@ -43,15 +64,16 @@
 	circle.n9 {
 		fill: aqua;
 	}
+	*/
+	circle {
+		fill: lightcoral;
+	}
 </style>
 
 <!-- HTML -->
 
 <svelte:head>
 	<title>Circles</title>
-
-	<!-- Here until we don't need it -->
-	<script source="lib/svg.min.js"></script>
 </svelte:head>
 
 <h1>Circles demo</h1>
@@ -63,9 +85,10 @@
 	<br />The circles should not lag behind - that is a sign of the event skipping not working correctly.
 </p>
 
-<svg>
+<svg bind:this={ svgElem }>
 	{#each circles as o}
 		<circle class:n2={true} cx={o.x+o.r} cy={o.y+o.r} r={o.r}></circle>
 	{/each}
 </svg>
+
 

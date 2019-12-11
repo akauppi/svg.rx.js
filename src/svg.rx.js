@@ -3,21 +3,57 @@
 *
 * tbd. Change this module to ES6 like exports
 *     - expect the parent to provide 'assert' function
+*
+* References:
+*   HTML5 API Index > SVG Overview
+*     -> http://html5index.org/SVG%20-%20Overview.html
+*       SVGDocument -> http://html5index.org/SVG%20-%20SVGDocument.html
+*       SVGSVGElement -> http://html5index.org/SVG%20-%20SVGSVGElement.html
+*
 */
 
-// See -> https://stackoverflow.com/questions/39883960/what-is-the-typescript-2-0-es2015-way-to-import-assert-from-node-js
+/*** remove
+// Note: We may get pulled in before global 'assert' is provided. Make this lazy.
 //
-//import { strict as assert } from 'assert';
+//    But even so, there should be a better way for dependency injection. Maybe we make our own 'assert' submodule,
+//    instead (treat it just as a common dependency for all)?
+//
+// track -> https://stackoverflow.com/questions/59274936/how-to-provide-a-global-assert-for-everyone-in-a-sapper-app
+//
+let assert = function(cond,msg) {   // first call sets it to the actual assert
 
-function assert(cond,msg) {
-  if (!cond) throw msg || "Assert failed";    // ..and we don't know how to import the real thing!
-}
+  const g_assert = (1, eval)('this').assert;    // see -> https://stackoverflow.com/questions/9107240/1-evalthis-vs-evalthis-in-javascript
+
+  if (g_assert) {
+    console.log( "Using 'assert' from above: "+ g_assert );
+    assert = g_assert;    // provided from above (essentially, dependency injection)
+  } else {
+    console.warn( "No 'assert' from above - using our own petty one.");
+    assert = (cond, msg) => {
+      if (cond) return;
+      msg |= "Assertion failed!";
+      console.assert(cond, msg);
+      debugger;
+      throw new Error(msg);
+    };
+  }
+
+  assert(cond,msg);
+};
+***/
+
+import { assert } from './assert.js';
+assert(true);
 
 import { Observable } from "rxjs/Observable";
 import "rxjs/add/observable/fromEvent";
 import "rxjs/add/observable/merge";
 
 const Rx = { Observable };
+
+// Classes we'll expand
+//
+//assert(SVGSVGElement);
 
 // Note: taking 'SVG' as a global for now. We're likely to abandon it, anyways (if not, there's a 3.0 out there).
 
@@ -399,7 +435,8 @@ const Rx = { Observable };
   // tbd. extend the actual 'SVGDocument' and others
   //SVG.extend( SVG.Element,
 
-  console.warn("tbd. extending the methods")
+  //tbd.
+  //SVGSVGElement.prototype.rx_draggable = methods.rx_draggable;
 
   console.log("svg.rx.js initialised.")
 })();

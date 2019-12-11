@@ -9,7 +9,6 @@ import resolve from 'rollup-plugin-node-resolve';
 import replace from '@rollup/plugin-replace';
 import commonjs from 'rollup-plugin-commonjs';
 import svelte from 'rollup-plugin-svelte';
-//import livereload from 'rollup-plugin-livereload';
 import { terser } from 'rollup-plugin-terser';
 
 import config from 'sapper/config/rollup.js';
