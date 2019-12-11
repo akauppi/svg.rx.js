@@ -11,37 +11,6 @@
 *       SVGSVGElement -> http://html5index.org/SVG%20-%20SVGSVGElement.html
 *
 */
-
-/*** remove
-// Note: We may get pulled in before global 'assert' is provided. Make this lazy.
-//
-//    But even so, there should be a better way for dependency injection. Maybe we make our own 'assert' submodule,
-//    instead (treat it just as a common dependency for all)?
-//
-// track -> https://stackoverflow.com/questions/59274936/how-to-provide-a-global-assert-for-everyone-in-a-sapper-app
-//
-let assert = function(cond,msg) {   // first call sets it to the actual assert
-
-  const g_assert = (1, eval)('this').assert;    // see -> https://stackoverflow.com/questions/9107240/1-evalthis-vs-evalthis-in-javascript
-
-  if (g_assert) {
-    console.log( "Using 'assert' from above: "+ g_assert );
-    assert = g_assert;    // provided from above (essentially, dependency injection)
-  } else {
-    console.warn( "No 'assert' from above - using our own petty one.");
-    assert = (cond, msg) => {
-      if (cond) return;
-      msg |= "Assertion failed!";
-      console.assert(cond, msg);
-      debugger;
-      throw new Error(msg);
-    };
-  }
-
-  assert(cond,msg);
-};
-***/
-
 import { assert } from './assert.js';
 assert(true);
 

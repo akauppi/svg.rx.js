@@ -79,8 +79,19 @@
 *           promiseReactionJob@[native code]
 *   <<
 */
-const sa = require("assert").strict;
+//const sa = require("assert").strict;
 //import { strict as sa } from 'assert';        // we can change which assert we use in one place
+
+
+assert = (cond, msg) => {
+    if (cond) return;
+    msg |= "Assertion failed!";
+    console.assert(cond, msg);
+    debugger;
+    throw new Error(msg);
+};
+
+
 
 console.debug( "Imported: "+ sa );
 
