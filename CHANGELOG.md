@@ -3,7 +3,8 @@
 ## latest
 
 - started transition to 2019 tech :)
-
+- tried Sapper but turned away
+- now based on `svelte-filerouter`; looks promising...
 
 ## 0.0.5
 

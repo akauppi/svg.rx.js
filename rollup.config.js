@@ -15,7 +15,7 @@ const production = !process.env.ROLLUP_WATCH;
 
 export default [
     {   // Demo app
-        input: "src/main.js",
+        input: "demo/main.js",
         output: {
             sourcemap: true,
             format: "iife",
@@ -24,8 +24,8 @@ export default [
         },
         plugins: [
             fileRouter({
-                appFile: 'src/App.svelte',
-                pages: './src/pages',
+                appFile: 'demo/App.svelte',
+                pages: './demo/pages',
                 dynamicImports: false
                 // ignore: ''
             }),
