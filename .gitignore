@@ -1,25 +1,14 @@
 /node_modules/
-#*.map
+/public/bundle.*
+/public/bundle/**
 
-# Sapper
-/src/node_modules/@sapper/
-#yarn-error.log
-#/cypress/screenshots/
-/__sapper__/
-
-/npm-debug.log
-/package-lock.json
-
-# disabled - used this with plain Svelte
-#/public/*
-#!/public/index.html
-#!/public/global.css
+#/npm-debug.log
+#/package-lock.json
 
 # IntelliJ IDEA folder '/.idea/' intentionally not included
 #/.idea/
 
-# OS X
-#
-# You should ignore these system-wide.
+# macOS:
+# You should ignore these system-wide
 #
 #.DS_Store

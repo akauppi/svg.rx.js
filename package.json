@@ -1,45 +1,43 @@
 {
   "name": "svg.rx.js",
-  "version": "0.0.6-svelte-sapper-maybe",
+  "version": "0.0.6-svelte-maybe",
   "private": true,
   "scripts": {
     "gh-pages": "gh-pages -d demo",
-    "//clean": "(rm public/build/* 2> /dev/null || true)",
-    "dev": "sapper dev",
-    "build": "sapper build",
-    "export": "sapper export",
-    "start": "node __sapper__/build",
-    "//cy:run": "npx cypress run",
-    "//cy:open": "npx cypress open",
-    "//test": "run-p --race dev cy:run"
-  },
-  "//dependencies": {
-    "//@reactivex/rxjs": "5.0.0-beta.10",
-    "//svg.js": "^2.3.2",
-    "//@mapbox/fusspot": "^0.7.0"
+    "//clean": "(rm public/bundle/* 2> /dev/null || true)",
+    "build": "rollup -c",
+    "dev": "rollup -c -w",
+    "start": "sirv public --single --host"
   },
   "dependencies": {
-    "assert": "^2.0.0",
-    "compression": "^1.7.1",
-    "rxjs": "^5.0.0"
+    "@reactivex/rxjs": "5.0.0-beta.10",
+    "sirv-cli": "^0.4.4",
+    "svelte-filerouter": "^1.4.6"
+  },
+  "//devDependencies": {
+    "//rollup-plugin-babel": "^4.3.3",
+    "//npm-run-all": "^4.1.5"
   },
   "devDependencies": {
-    "@rollup/plugin-replace": "^2.2.0",
     "gh-pages": "^2.1.1",
-    "npm-run-all": "^4.1.5",
     "rollup": "^1.27.9",
     "rollup-plugin-commonjs": "^10.1.0",
+    "rollup-plugin-livereload": "^1.0.0",
     "rollup-plugin-node-resolve": "^5.2.0",
     "rollup-plugin-svelte": "^5.1.1",
     "rollup-plugin-terser": "^5.1.2",
-    "sapper": "^0.27.0"
-  },
-  "//devDependencies": {
-    "//cypress": "^3.7.0"
+    "rollup-pluginutils": "^2.8.2",
+    "svelte": "^3.15.0"
   },
   "//comments": {
+    "": [
+      "Based on https://github.com/jakobrosenberg/svelte-filerouter-example/blob/master/package.json",
+      "..and https://github.com/sveltejs/template/blob/master/package.json",
+      "The latter does not need 'npm-run-all"
+    ],
     "dependencies": {
-      "compression": "seems to be needed (in runtime deps) by 'npm run build'"
+      "sirv-cli, svelte-filerouter": "tbd. can these be in the 'devDependencies' side?",
+      "rxjs": "tbd. update to 5.x latest"
     }
   }
 }

@@ -49,6 +49,11 @@ Let's see the alternatives, then. :)
 
 # svelte-router-spa
 
+---
 
+# Actual needs
+
+- URL paths (about etc.) - for the user to store and share
+- history handling: back/forward browser features should work
 
 
