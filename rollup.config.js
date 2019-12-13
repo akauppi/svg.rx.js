@@ -15,6 +15,8 @@ import globals from 'rollup-plugin-node-globals';
 
 const production = !process.env.ROLLUP_WATCH;
 
+console.debug("PRODUCTION: "+ production);
+
 export default [
     {   // Demo app
         input: "demo/main.js",
@@ -66,7 +68,10 @@ export default [
             !production && serve()
         ],
         watch: {
-            clearScreen: false      // tbd. and yet the screen clears
+            // Note: This supresses some clear screen, but not the one before `Your application is ready~! 🚀`.
+            //       track -> https://github.com/rollup/rollup/issues/2820
+            //
+            clearScreen: false
         }
     }
 ];
@@ -81,13 +86,12 @@ function serve() {
 
                 // Based on https://github.com/sveltejs/template/blob/master/rollup.config.js
                 //
-                // Differences:
-                //      - start 'sirv' directly from here, instead of going through 'package.json'. Simpler.
-                //      - using 'npx'
-                //      - added '--host': serves also in the network IP (e.g. '192.168.1.234'). We need this for mobile devices.
-                //      - added '--single'
+                // Uses 'package.json' 'start' target, but adds '--dev' to it. Alternatively, we could launch stuff
+                // right here, but going through 'package.json' has the benefit that other params are just in one
+                // place.
                 //
-                require('child_process').spawn('npx', ['sirv', 'public', '--dev', '--host', '--single'], {
+                //require('child_process').spawn('npx', ['sirv', 'public', '--dev', '--host', '--single'], {
+                require('child_process').spawn('npm', ['run', 'start', '--', '--dev'], {
                     stdio: ['ignore', 'inherit', 'inherit'],
                     shell: true
                 });
