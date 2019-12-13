@@ -15,14 +15,15 @@ if (typeof assert === "undefined") {
   throw "Expecting runtime 'assert', please enable 'rollup-plugin-node-builtins'."
 }
 
+// Check the things we will use of RxJS
+//
+assert( typeof RxObservable.fromEvent === "function" );
+assert( typeof RxObservable.merge === "function" );
+
 // Classes we'll expand
 //
 //assert(SVGSVGElement);
 
-// Check the things we will use of 'Rx'
-//
-assert( typeof RxObservable.fromEvent === "function" );
-assert( typeof RxObservable.merge === "function" );
 
 // Note: RxJS5 does not have what Scala calls '.collect': to both filter and convert.
 //
