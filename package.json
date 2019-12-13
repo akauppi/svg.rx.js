@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "gh-pages": "gh-pages -d demo",
-    "//clean": "(rm public/bundle/* 2> /dev/null || true)",
+    "clean": "(rm public/bundle/* public/bundle.css 2> /dev/null || true)",
     "build": "rollup -c",
     "dev": "rollup -c -w",
     "start": "sirv public --single --host"
@@ -23,6 +23,8 @@
     "rollup": "^1.27.9",
     "rollup-plugin-commonjs": "^10.1.0",
     "rollup-plugin-livereload": "^1.0.0",
+    "rollup-plugin-node-builtins": "^2.1.2",
+    "rollup-plugin-node-globals": "^1.4.0",
     "rollup-plugin-node-resolve": "^5.2.0",
     "rollup-plugin-svelte": "^5.1.1",
     "rollup-plugin-terser": "^5.1.2",

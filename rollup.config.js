@@ -10,6 +10,8 @@ import commonjs from 'rollup-plugin-commonjs';
 import livereload from 'rollup-plugin-livereload';
 import { terser } from 'rollup-plugin-terser';
 import { fileRouter } from 'svelte-filerouter';
+import builtins from 'rollup-plugin-node-builtins';
+import globals from 'rollup-plugin-node-globals';
 
 const production = !process.env.ROLLUP_WATCH;
 
@@ -42,10 +44,17 @@ export default [
             // some cases you'll need additional configuration — consult the documentation for details:
             // https://github.com/rollup/rollup-plugin-commonjs
             resolve({
-                browser: true,
+                // no warnings for 'assert', but see -> https://github.com/rollup/rollup-plugin-node-resolve/issues/107
+                //browser: true,
+                preferBuiltins: true,
+                mainFields: ['browser'],
                 dedupe: importee => importee === 'svelte' || importee.startsWith('svelte/')
             }),
             commonjs(),
+
+            // Needed for runtime 'assert' in the browser
+            globals(),
+            builtins(),
 
             // Watch the `public` directory and refresh the browser on changes when not in production
             !production && livereload('public'),
@@ -57,7 +66,7 @@ export default [
             !production && serve()
         ],
         watch: {
-            clearScreen: false
+            clearScreen: false      // tbd. and yet the screen clears
         }
     }
 ];

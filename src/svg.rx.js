@@ -11,14 +11,17 @@
 *       SVGSVGElement -> http://html5index.org/SVG%20-%20SVGSVGElement.html
 *
 */
-import { assert } from './assert.js';
-assert(true);
 
 import { Observable } from "rxjs/Observable";
 import "rxjs/add/observable/fromEvent";
 import "rxjs/add/observable/merge";
 
 const Rx = { Observable };
+
+if (typeof assert === "undefined") {
+  log.assert("Oops - no 'assert'");
+  throw "Expecting runtime 'assert', please enable 'rollup-plugin-node-builtins'."
+}
 
 // Classes we'll expand
 //
