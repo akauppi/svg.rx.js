@@ -1,11 +1,12 @@
 <script>
 	import { onMount } from 'svelte';
+	import { assert } from 'assert';
 
 	// tbd. an import from node, or elsewhere where published (to test the full route)
 	// import ...;
 	import '../../src/svg.rx.js';		// in the same repo
 
-	assert( SVGSVGElement.prototype.rx_draggable );
+	assert( SVGElement.prototype.rx_draggable );
 
 	export let circles = [ {x: 100, y: 100, r: 20} ];		// { x: int, y: int, r: int }
 

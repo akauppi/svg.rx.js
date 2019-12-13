@@ -1,5 +1,5 @@
 <script>
-	export let segment;
+	export let segment;		// undefined | "circles" | ... ; adjusts the visuals
 </script>
 
 <style>

@@ -1,8 +1,15 @@
 <script>
 	import Nav from '../components/Nav.svelte';
 
-	export let segment;
-	let layoutName = "pages/_layout";
+	export let route;		// { path: "/index" | "/circles" | ... }
+
+	// Segment for '<Nav>'
+	const segment =
+		(route.path === "/index") ? "" :
+		/^\/([^/]+)$/.exec(route.path)[1];		// "circles"|...
+
+	//remove?
+	//let layoutName = "pages/_layout";		// tbd. is this needed?
 </script>
 
 <style>
@@ -16,10 +23,9 @@
 	}
 </style>
 
-<Nav {segment}/>
+<Nav segment={segment} />
 
 <main>
-	<slot scoped="{{ layoutName: layoutName }}"></slot>
+	<!-- <slot scoped="{{ layoutName: layoutName }}"></slot> -->
+	<slot></slot>
 </main>
-
-

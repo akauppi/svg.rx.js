@@ -37,7 +37,5 @@ With this in mind, we might be best off just waiting for RxJS to develop in this
  
 ## svg.rx.js
 
-- How to use `assert`, in runtime? We don't want to cause dependencies to the project - is there some built-in `assert` for Svelte, or does it always mean importing `assert`?
-
 - [ ] Collision detection
 

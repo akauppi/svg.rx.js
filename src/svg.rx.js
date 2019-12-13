@@ -7,9 +7,11 @@
 *       SVGDocument -> http://html5index.org/SVG%20-%20SVGDocument.html
 *       SVGSVGElement -> http://html5index.org/SVG%20-%20SVGSVGElement.html
 */
-import { Observable as RxObservable } from "rxjs/Observable";
-import "rxjs/add/observable/fromEvent";
-import "rxjs/add/observable/merge";
+import { Observable } from 'rxjs/Observable';
+import 'rxjs/add/observable/fromEvent';
+import 'rxjs/add/observable/merge';
+
+import { assert } from 'assert';
 
 if (typeof assert === "undefined") {
   throw "Expecting runtime 'assert', please enable 'rollup-plugin-node-builtins'."
@@ -17,13 +19,12 @@ if (typeof assert === "undefined") {
 
 // Check the things we will use of RxJS
 //
-assert( typeof RxObservable.fromEvent === "function" );
-assert( typeof RxObservable.merge === "function" );
+assert( typeof Observable.fromEvent === "function" );
+assert( typeof Observable.merge === "function" );
 
 // Classes we'll expand
 //
-//assert(SVGSVGElement);
-
+assert(SVGElement.prototype);
 
 // Note: RxJS5 does not have what Scala calls '.collect': to both filter and convert.
 //
@@ -31,7 +32,7 @@ assert( typeof RxObservable.merge === "function" );
 //  -> http://stackoverflow.com/questions/35118707/rxjs5-how-to-map-and-filter-on-one-go-like-collect-in-scala
 //  -> https://xgrommx.github.io/rx-book/content/guidelines/implementations/index.html#implement-new-operators-by-composing-existing-operators
 //
-RxObservable.prototype.mapAndFilterUndefinedOut = function (f) {
+Observable.prototype.mapAndFilterUndefinedOut = function (f) {
   return this.map(f).filter( function (x) { return x !== undefined; } );
 };
 
@@ -257,10 +258,10 @@ const methods =  {
 
     var self = this;    // to be used within further inner functions
 
-    var startAllObs = RxObservable.fromEvent( self, "touchstart" );
-    var moveAllObs = RxObservable.fromEvent( window, "touchmove" );
-    var cancelAllObs = RxObservable.fromEvent( window, "touchcancel" );
-    var endAllObs = RxObservable.fromEvent( window, "touchend" );
+    var startAllObs = Observable.fromEvent( self, "touchstart" );
+    var moveAllObs = Observable.fromEvent( window, "touchmove" );
+    var cancelAllObs = Observable.fromEvent( window, "touchcancel" );
+    var endAllObs = Observable.fromEvent( window, "touchend" );
 
     // 'index': 0..n-1 (probably always 0); index to the starting touch
     //
@@ -295,7 +296,7 @@ const methods =  {
       var cancelObs = cancelAllObs.mapAndFilterUndefinedOut(f);
       var endObs = endAllObs.mapAndFilterUndefinedOut(f);
 
-      var cancelOrEndObs = RxObservable.merge( endObs, cancelObs );
+      var cancelOrEndObs = Observable.merge( endObs, cancelObs );
 
       return innerObs( self, touchStart, moveObs, cancelOrEndObs, elCoords, precise )
 
@@ -330,9 +331,9 @@ const methods =  {
       return ev.button === 0;
     }
 
-    var startObs =  RxObservable.fromEvent(self.node, "mousedown").filter(f);
-    var moveObs =   RxObservable.fromEvent(window, "mousemove").filter(f);
-    var endObs =    RxObservable.fromEvent(window, "mouseup").filter(f);
+    var startObs =  Observable.fromEvent(self.node, "mousedown").filter(f);
+    var moveObs =   Observable.fromEvent(window, "mousemove").filter(f);
+    var endObs =    Observable.fromEvent(window, "mouseup").filter(f);
 
     return startObs.map( function (ev) {   // (MouseEvent) -> observable of {x:Int, y:Int}
       preventDefault(ev);
@@ -351,7 +352,7 @@ const methods =  {
   //
   rx_draggable: function (elCoords, precise) {   // ([SVG.Element], [Boolean]) -> observable of observables of { x: Int, y: Int }
 
-    return RxObservable.merge(
+    return Observable.merge(
       this.rx_mouse(elCoords, precise),
       this.rx_touch(elCoords, precise)
     );
@@ -391,16 +392,12 @@ const methods =  {
 };
 
 // tbd. extend the actual 'SVGDocument' and others
-//SVG.extend( SVG.Element,
-
-//tbd.
-//SVGSVGElement.prototype.rx_draggable = methods.rx_draggable;
+//
+SVGElement.prototype.rx_draggable = methods.rx_draggable;
 
 console.log("svg.rx.js initialised.");
 
-// Q: Do ES6 modules need to do an export - we only cause side effects.
-//
-export default {};
+//export default null;  // we go by side effects
 
 
 /* --- scraps --- */
