@@ -29,9 +29,12 @@ export default [
         plugins: [
             fileRouter({
                 appFile: 'demo/App.svelte',
-                pages: './demo/pages',
-                dynamicImports: false
-                // ignore: ''
+                pages: 'demo/pages',
+                // ignore: '['widget.svelte']'      // interpreted as regex; '_'-prefixed files always excluded
+                unknownPropWarnings: false
+
+                // "UMD and IIFE output formats are not supported for code-splitting builds."
+                //dynamicImports: true        // "experimental code splitting"
             }),
             svelte({
                 // enable run-time checks when not in production

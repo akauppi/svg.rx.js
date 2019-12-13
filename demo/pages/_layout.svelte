@@ -2,6 +2,7 @@
 	import Nav from '../components/Nav.svelte';
 
 	export let segment;
+	let layoutName = "pages/_layout";
 </script>
 
 <style>
@@ -18,5 +19,7 @@
 <Nav {segment}/>
 
 <main>
-	<slot></slot>
+	<slot scoped="{{ layoutName: layoutName }}"></slot>
 </main>
+
+

@@ -1,6 +1,6 @@
 <script>
 	import { onMount } from 'svelte';
-	import '../../src/svg.rx.js';
+	//import '../../src/svg.rx.js';
 
 	export let circles = [ {x: 100, y: 100, r: 20} ];		// { x: int, y: int, r: int }
 
