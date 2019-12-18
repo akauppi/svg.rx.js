@@ -45,14 +45,14 @@ export default [
                 }
             }),
 
-            // If you have external dependencies installed from npm, you'll most likely need these plugins. In
-            // some cases you'll need additional configuration — consult the documentation for details:
-            // https://github.com/rollup/rollup-plugin-commonjs
+            // If you have external dependencies installed from npm, you'll most likely need these plugins. In some
+            // cases you'll need additional configuration — consult the documentation for details: https://github.com/rollup/rollup-plugin-commonjs
+            //
             resolve({
                 // no warnings for 'assert', but see -> https://github.com/rollup/rollup-plugin-node-resolve/issues/107
                 //browser: true,
                 preferBuiltins: true,
-                mainFields: ['browser'],
+                mainFields: ['browser'],        // tbd. what does this do? (from )
                 dedupe: importee => importee === 'svelte' || importee.startsWith('svelte/')
             }),
             commonjs(),

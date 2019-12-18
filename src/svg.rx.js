@@ -1,6 +1,13 @@
 /*
 * svg.rx.js
 *
+* Adds methods to SVG elements.
+*
+* Usage:
+*   <<
+*     import 'svg.rx.js'
+*   <<
+*
 * References:
 *   HTML5 API Index > SVG Overview
 *     -> http://html5index.org/SVG%20-%20Overview.html
@@ -10,6 +17,8 @@
 import { Observable } from 'rxjs/Observable';
 import 'rxjs/add/observable/fromEvent';
 import 'rxjs/add/observable/merge';
+import 'rxjs/add/observable/filter';
+import 'rxjs/add/observable/map';
 
 import { assert } from 'assert';
 
@@ -17,16 +26,28 @@ if (typeof assert === "undefined") {
   throw "Expecting runtime 'assert', please enable 'rollup-plugin-node-builtins'."
 }
 
+//TESTING
+// NOTE: Once tests are back, this can be removed. (would break tests if these are not right)
 // Check the things we will use of RxJS
 //
 assert( typeof Observable.fromEvent === "function" );
 assert( typeof Observable.merge === "function" );
+//assert( typeof Observable.filter === "function" );
+//assert( typeof Observable.map === "function" );
 
-// Classes we'll expand
+// SVG classes we use:
 //
+// 'SVGSVGElement'
+//    .somemethod
+//
+//    This is the '<svg>' node.
+//
+// ...
 assert(SVGElement.prototype);
+assert(SVGSVGElement.prototype);
 
-// Note: RxJS5 does not have what Scala calls '.collect': to both filter and convert.
+// tbd. Once in RxJS 6, see if it has '.collect'.
+// Note: RxJS 5 does not have what Scala calls '.collect': to both filter and convert.
 //
 // Ref.
 //  -> http://stackoverflow.com/questions/35118707/rxjs5-how-to-map-and-filter-on-one-go-like-collect-in-scala
@@ -242,136 +263,151 @@ function preventDefault (evStart) {    // (MouseEvent or TouchEvent) ->
 }
 
 
-const methods =  {
-  //---
-  // Create an observable for touch events.
-  //
-  // Returns:
-  //  observable of observables of { x: Int, y: Int }
-  //
-  // Note: Touch id's are not reported, by design. The idea is to treat any touches alike, not mapping them to
-  //      "fingers". Also, depending on the platform touch id's may or may not be in the 0...N-1 range (Android
-  //      reuses id's whereas iOS does not. The model chosen seems to be a good fit for allowing e.g. multiple
-  //      users to work on a touch interface simultaneously, i.e. it feels more generic and expandable. AKa060116
-  //
-  rx_touch: function (elCoords, precise) {   // ([SVG.Element], [Boolean]) -> observable of observables of { x: Int, y: Int }
+/*--- User API ---
+*
+* Note: '.rx_touch' and '.rx_mouse' were earlier exposed to user land, but it may be good to encourage an abstraction
+*     that always handles both (i.e. keep them private).
+*/
 
-    var self = this;    // to be used within further inner functions
+//---
+// Create an observable for touch events.
+//
+// Returns:
+//  observable of observables of { x: Int, y: Int }
+//
+// Note: Touch id's are not reported, by design. The idea is to treat any touches alike, not mapping them to
+//      "fingers". Also, depending on the platform touch id's may or may not be in the 0...N-1 range (Android
+//      reuses id's whereas iOS does not. The model chosen seems to be a good fit for allowing e.g. multiple
+//      users to work on a touch interface simultaneously, i.e. it feels more generic and expandable. AKa060116
+//
+SVGElement.prototype._rx_touch = function(elCoords, precise) {   // ([SVG.Element], [Boolean]) -> observable of observables of { x: Int, y: Int }
+  const self = this;
 
-    var startAllObs = Observable.fromEvent( self, "touchstart" );
-    var moveAllObs = Observable.fromEvent( window, "touchmove" );
-    var cancelAllObs = Observable.fromEvent( window, "touchcancel" );
-    var endAllObs = Observable.fromEvent( window, "touchend" );
+  var startAllObs = Observable.fromEvent( self, "touchstart" );
+  var moveAllObs = Observable.fromEvent( window, "touchmove" );
+  var cancelAllObs = Observable.fromEvent( window, "touchcancel" );
+  var endAllObs = Observable.fromEvent( window, "touchend" );
 
-    // 'index': 0..n-1 (probably always 0); index to the starting touch
+  // 'index': 0..n-1 (probably always 0); index to the starting touch
+  //
+  var touchDragObs = function (evStart, index) {      // (TouchEvent, Int) -> observable of {x:Int, y:Int}
+
+    preventDefault(evStart);
+
+    var touchStart = evStart.changedTouches[index];
+
+    // Note: 'touch.identifier' is 0..N-1 number on Android (reusing id's once a touch has ended); on iOS it is a
+    //        freely running counter. Just treat it as an opaque id between the start and the other (move/cancel/end)
+    //        touch events.
     //
-    var touchDragObs = function (evStart, index) {      // (TouchEvent, Int) -> observable of {x:Int, y:Int}
+    var wanted = touchStart.identifier;
 
-      preventDefault(evStart);
+    /* Pick the 'wanted' move, cancel and end events to track
+    */
+    var f = function (ev) {   // (TouchEvent) -> Touch or undefined
+      for (var i=0; i<ev.changedTouches.length; i++) {
+        var touch = ev.changedTouches[i];
 
-      var touchStart = evStart.changedTouches[index];
-
-      // Note: 'touch.identifier' is 0..N-1 number on Android (reusing id's once a touch has ended); on iOS it is a
-      //        freely running counter. Just treat it as an opaque id between the start and the other (move/cancel/end)
-      //        touch events.
-      //
-      var wanted = touchStart.identifier;
-
-      /* Pick the 'wanted' move, cancel and end events to track
-      */
-      var f = function (ev) {   // (TouchEvent) -> Touch or undefined
-        for (var i=0; i<ev.changedTouches.length; i++) {
-          var touch = ev.changedTouches[i];
-
-          if (touch.identifier === wanted) {
-            return touch;
-          }
+        if (touch.identifier === wanted) {
+          return touch;
         }
-        return undefined;   // will not pass this event further for the particular stream
       }
-
-      // Note: RxJS does not have what Scala calls '.collect': to both map and filter.
-      //
-      var moveObs = moveAllObs.mapAndFilterUndefinedOut(f);
-      var cancelObs = cancelAllObs.mapAndFilterUndefinedOut(f);
-      var endObs = endAllObs.mapAndFilterUndefinedOut(f);
-
-      var cancelOrEndObs = Observable.merge( endObs, cancelObs );
-
-      return innerObs( self, touchStart, moveObs, cancelOrEndObs, elCoords, precise )
-
-    }; // touchDragObs
-
-    // Each "touchstart" event can start multiple drags. This actually happens on iOS (9.2) but not on Android (6.0.1).
-    //
-    // Note: the '.selectMany' means that we can spawn multiple (0..n) values from within this one event, unlike the
-    //      single one that '.select' would.
-    //
-    return startAllObs.mergeMap( function (ev) {  // (TouchEvent) -> Array of observable of {x:Int, y:Int}
-
-      return range( 0, ev.changedTouches.length ).map( function (i) {
-        return touchDragObs( ev, i );
-      } );
-    });
-  },  // rx_touch
-
-  //---
-  // Mouse tracking for the element
-  //
-  // Note: We currently only support button 1. Would be easy to support any mouse buttons, if needed, but we probably
-  //      should see it from the application point of view. Also, shift etc. might be as important as the different
-  //      buttons. AKa060116
-  //
-  rx_mouse: function (elCoords, precise) {   // ([SVG.Element], [Boolean]) -> observable of observables of {x:Int, y:Int}
-    var self = this;
-
-    // Just consider primary button
-    //
-    var f = function (ev) {   // (MouseEvent) -> Boolean
-      return ev.button === 0;
+      return undefined;   // will not pass this event further for the particular stream
     }
 
-    var startObs =  Observable.fromEvent(self.node, "mousedown").filter(f);
-    var moveObs =   Observable.fromEvent(window, "mousemove").filter(f);
-    var endObs =    Observable.fromEvent(window, "mouseup").filter(f);
+    // Note: RxJS does not have what Scala calls '.collect': to both map and filter.
+    //
+    var moveObs = moveAllObs.mapAndFilterUndefinedOut(f);
+    var cancelObs = cancelAllObs.mapAndFilterUndefinedOut(f);
+    var endObs = endAllObs.mapAndFilterUndefinedOut(f);
 
-    return startObs.map( function (ev) {   // (MouseEvent) -> observable of {x:Int, y:Int}
-      preventDefault(ev);
-      return innerObs( self, ev, moveObs, endObs, elCoords, precise );
+    var cancelOrEndObs = Observable.merge( endObs, cancelObs );
+
+    return innerObs( self, touchStart, moveObs, cancelOrEndObs, elCoords, precise )
+
+  }; // touchDragObs
+
+  // Each "touchstart" event can start multiple drags. This actually happens on iOS (9.2) but not on Android (6.0.1).
+  //
+  // Note: the '.selectMany' means that we can spawn multiple (0..n) values from within this one event, unlike the
+  //      single one that '.select' would.
+  //
+  return startAllObs.mergeMap( function (ev) {  // (TouchEvent) -> Array of observable of {x:Int, y:Int}
+
+    // tbd. We can likely iterate 0..'ev.changedTouches.length' with some other means, not needing 'range'. #rework
+    //
+    return range( 0, ev.changedTouches.length ).map( function (i) {
+      return touchDragObs( ev, i );
     } );
-  },
+  });
+};  // rx_touch
 
-  //---
-  // Create an observable for either mouse or touch drags
-  //
-  // Note: Since we are handling drags here, 'precise' mode is off. It does not matter, where in the dragged object
-  //      one points/touches.
-  //
-  // Returns:
-  //  observable of observables of { x: Int, y: Int }
-  //
-  rx_draggable: function (elCoords, precise) {   // ([SVG.Element], [Boolean]) -> observable of observables of { x: Int, y: Int }
+//---
+// Mouse tracking for the element
+//
+// Note: We currently only support button 1. Would be easy to support any mouse buttons, if needed, but we probably
+//      should see it from the application point of view. Also, shift etc. might be as important as the different
+//      buttons. AKa060116
+//
+function rx_mouse (el, elCoords, precise) {   // (SVGElement, [SVGSVGElement | ...], [Boolean]) -> observable of observables of {x:Int, y:Int}
 
-    return Observable.merge(
-      this.rx_mouse(elCoords, precise),
-      this.rx_touch(elCoords, precise)
-    );
-  } //,
+  // Just consider primary button
+  //
+  var f = function (ev) {   // (MouseEvent) -> Boolean
+    return ev.button === 0;
+  };
 
-  /*** disabled (the rotational thing is a bit more complex; may need e.g. menu items to be rotated in compensation. AKa170716
-  //---
-  // Create an observable for either mouse or touch rotational drags.
-  //
-  // If the 'elCoords' param is given, and is not the same as 'this', 'this' is taken to be a separate handle object
-  // and the precise position where it's dragged does not matter.
-  //
-  // If 'elCoords' is not given, or is same as 'this', the precise position matters (this is the case of rotating
-  // a disk).
-  //
-  // Returns:
-  //  observable of observables of Number (radians)
-  //
-  rx_rotateable: function (elCoords) {   // ([SVG.Element]) -> observable of observables of Number
+  // DEBUG
+  var aObs =  Observable.fromEvent(el, "mousedown");
+  debugger;
+
+  var startObs =  Observable.fromEvent(el, "mousedown").filter(f);
+  var moveObs =   Observable.fromEvent(window, "mousemove").filter(f);
+  var endObs =    Observable.fromEvent(window, "mouseup").filter(f);
+
+  return startObs.map( function (ev) {   // (MouseEvent) -> observable of {x:Int, y:Int}
+    preventDefault(ev);
+    return innerObs( el, ev, moveObs, endObs, elCoords, precise );
+  } );
+}
+
+//---
+// Create an observable for either mouse or touch drags
+//
+// Returns:
+//  observable of observables of { x: Int, y: Int }
+//
+SVGElement.prototype.rx_draggable = function (elCoords, precise) {   // ([SVG.Element], [Boolean]) -> observable of observables of { x: Int, y: Int }
+
+  if (elCoords || precise) {  // tbd.
+    console.warn("NOT reworked with these options, yet. Maybe we won't need them?"+ elCoords +", "+ precise);
+  }
+
+  return Observable.merge(
+    rx_mouse(this, elCoords, precise) //,
+    //rx_touch(this, elCoords, precise)   tbd. re-enable
+  );
+};
+
+console.log("svg.rx.js initialised.");
+
+
+/* --- scraps --- */
+
+/*** disabled (the rotational thing is a bit more complex; may need e.g. menu items to be rotated in compensation. AKa170716
+ //---
+ // Create an observable for either mouse or touch rotational drags.
+ //
+ // If the 'elCoords' param is given, and is not the same as 'this', 'this' is taken to be a separate handle object
+ // and the precise position where it's dragged does not matter.
+ //
+ // If 'elCoords' is not given, or is same as 'this', the precise position matters (this is the case of rotating
+ // a disk).
+ //
+ // Returns:
+ //  observable of observables of Number (radians)
+ //
+ rx_rotateable: function (elCoords) {   // ([SVG.Element]) -> observable of observables of Number
 
     elCoords = elCoords | this;
     var precise = (elCoords === this);
@@ -388,19 +424,7 @@ const methods =  {
     }
     );
   }
-  ***/
-};
-
-// tbd. extend the actual 'SVGDocument' and others
-//
-SVGElement.prototype.rx_draggable = methods.rx_draggable;
-
-console.log("svg.rx.js initialised.");
-
-//export default null;  // we go by side effects
-
-
-/* --- scraps --- */
+***/
 
 /** DISABLED text element support not needed, yet
  var anchorOffset;

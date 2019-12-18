@@ -7,9 +7,6 @@
 	const segment =
 		(route.path === "/index") ? "" :
 		/^\/([^/]+)$/.exec(route.path)[1];		// "circles"|...
-
-	//remove?
-	//let layoutName = "pages/_layout";		// tbd. is this needed?
 </script>
 
 <style>
@@ -26,6 +23,5 @@
 <Nav segment={segment} />
 
 <main>
-	<!-- <slot scoped="{{ layoutName: layoutName }}"></slot> -->
 	<slot></slot>
 </main>

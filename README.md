@@ -130,7 +130,7 @@ This allows you to experiment with the demos.
 
 - [src/svg.rx.js](src/svg.rx.js)
 
->Note: The code is currently using RxJS 5.0.0 beta. Once RxJS 5 becomes available via node.js, we're moving to it. Check the [current situation](https://www.npmjs.com/package/rxjs) of RxJS releases for npm. |
+>Note: The code is currently using RxJS 5.
 
 ><font color=orange>⚠️ RxJS is now at 6.5.3 and 7.0.0-alpha.0. Upgrade to 6.x.</font>
 
@@ -158,31 +158,32 @@ $ open test/index.html
 
 >⚠️<font color=orange>WARNING: This section is out-of-date. To be corrected once we have transitioned to Svelte, fully.</font>
 
-<strike>You can simply download the `svg.rx.js` file and place it in your project. 
+<strike>You can simply download the `svg.rx.js` file and place it in your project.</strike>
+
+>tbd. Make pulling dependencies a separate part. Here just API usage.
+
 
 ### HTML
 
-```
-	<script src="svg.min.js"></script>
-	<script src="Rx.umd.min.js"></script>
-	<script src="svg.rx.js"></script>
-```
+...tbd.
+
 
 ### JavaScript API
 
-The library extends `SVGElement` and `SVGDocument` by:
+The library extends `SVGElement` by:
 
 ```
 .rx_draggable()		// () -> observable of observables of {x:int,y:int}
 ```
 
+<!-- disabled: treat them as an implementation detail?
 If you only wish to handle mouse or touch, you can also use:
 
 ```
 .rx_mouse()
 .rx_touch()
 ```
-
+-->
 
 ### Sample
 
@@ -208,9 +209,11 @@ outerObs.subscribe( function(dragObs) {
 
 ---
 
+<!-- disabled; doing this
 ## Road ahead
 
 Potentially, the `svg.js` library could be ditched at some point. It's turned out to be more of a bother - it embraces too much and things where it tries to be helpful, e.g. providing a `.move` for groups though they don't actually observe `.x` and `.y`  attributes, is simply misleading. In the end, we may be better off without it (but that is not a pressing concern).
+-->
 
 ## Help requested!!
 

@@ -8,15 +8,41 @@
 
 	assert( SVGElement.prototype.rx_draggable );
 
-	export let circles = [ {x: 100, y: 100, r: 20} ];		// { x: int, y: int, r: int }
+	export let circles = [];		// { x: int, y: int, r: int, n: 0..9 }
 
 	let svgElem;	// 'SVGSVGElement'
 
-	onMount(() => {		// Svelte note: could provide the element as a parameter (now 'undefined')
+	const COLORS = 10;
+	let nextN = 0; 		// 0..'COLORS-1' and again
 
+	onMount(() => {		// Svelte note: could provide the element as a parameter (now 'undefined')
 		const outerObs = svgElem.rx_draggable();		// -> observable of observables of { x: Int, y: Int }
 
-		alert(outerObs+"");	// :)
+		outerObs.subscribe( dragObs => {	// new drag
+
+			console.debug("New drag");
+			const myN = nextN;
+			nextN = (nextN+1) % COLORS;
+
+			const circle = { r: 50, n: myN };		// coords added at first drag handling
+			circles = circles.concat( circle );
+
+			//const firstTime = true;	// tbd. need this?
+
+			dragObs.subscribe( o => {		// { x: Int, y: Int }
+				console.debug(`Dragging at: { x: ${o.x}, y: ${o.y} }`);
+
+				circle.x = o.x;		// this updates the DOM
+				circle.y = o.y;
+			},
+			null,	// error handling
+			() => {		// end of drag
+				const i = circles.indexOf(circle);
+				circles.splice(i, 1);		// remove
+
+				console.debug("Circle removed");
+			})
+		});
 	});
 
 	//...
@@ -28,34 +54,34 @@
 	/* tbd. These classes are intended to be used dynamically, but they cause "Unused CSS selector" warnings at the
 	 * development console. How to mark they're good? #help
 	 */
-	circle.n0 {
+	circle[n="0"] {
 		fill: blue;
 	}
-	circle.n1 {
+	circle[n="1"] {
 		fill: gray;
 	}
-	circle.n2 {
+	circle[n="2"] {
 		fill: blue;
 	}
-	circle.n3 {
+	circle[n="3"] {
 		fill: purple;
 	}
-	circle.n4 {
+	circle[n="4"] {
 		fill: red;
 	}
-	circle.n5 {
+	circle[n="5"] {
 		fill: green;
 	}
-	circle.n6 {
+	circle[n="6"] {
 		fill: orange;
 	}
-	circle.n7 {
+	circle[n="7"] {
 		fill: yellow;
 	}
-	circle.n8 {
+	circle[n="8"] {
 		fill: magenta;
 	}
-	circle.n9 {
+	circle[n="9"] {
 		fill: aqua;
 	}
 </style>
@@ -68,16 +94,17 @@
 
 <h1>Circles demo</h1>
 
-<p>Each touch (or mouse drag with primary button) is shown with a circle.
-	<br />Once you end the drag, the circle disappears.
-	<br />Circles should be right under the fingers, also when the page is scrolled.
-	<br />Starting multiple drags at "precisely" the same time should be possible (try dual-finger tapping repeatedly).
-	<br />The circles should not lag behind - that is a sign of the event skipping not working correctly.
-</p>
+Each touch (or mouse drag with primary button) is shown with a circle.
+<ul>
+	<li>Once you end the drag, the circle disappears.</li>
+	<li>Circles should be right under the fingers, also when the page is scrolled.</li>
+	<li>Starting multiple drags at "precisely" the same time should be possible (try dual-finger tapping repeatedly).</li>
+	<li>The circles should not lag behind - that is a sign of the event skipping not working correctly.</li>
+</ul>
 
 <svg bind:this={ svgElem }>
 	{#each circles as o}
-		<circle class:n2={true} cx={o.x+o.r} cy={o.y+o.r} r={o.r}></circle>
+		<circle cx={o.x+o.r} cy={o.y+o.r} r={o.r} n={o.n}></circle>
 	{/each}
 </svg>
 

@@ -1,5 +1,5 @@
 <script>
-	export let segment;		// undefined | "circles" | ... ; adjusts the visuals
+	export let segment;		// undefined | "circles" | "transform" | ... ; adjusts the visuals
 </script>
 
 <style>
@@ -60,6 +60,7 @@
 	<ul>
 		<li><a class:selected='{segment === undefined}' href='.'>home</a></li>
 		<li><a class:selected='{segment === "circles"}' href='circles'>circles</a></li>
+		<li><a class:selected='{segment === "transform"}' href='transform'>transform</a></li>
 
 		<!--
 		<li><a class:dimmed={true} class:selected='{segment === "triangles"}' href='triangles'>triangles</a></li>
