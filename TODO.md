@@ -39,6 +39,9 @@ With this in mind, we might be best off just waiting for RxJS to develop in this
 
 - [ ] Collision detection
 
+### Demos
+
+- [ ] Heart demo's shadow to move by drag
 
 ## More Svelte
 

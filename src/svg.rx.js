@@ -18,7 +18,6 @@
 * References:
 *   HTML5 API Index > SVG Overview
 *     -> http://html5index.org/SVG%20-%20Overview.html
-*       SVGDocument -> http://html5index.org/SVG%20-%20SVGDocument.html
 *       SVGSVGElement -> http://html5index.org/SVG%20-%20SVGSVGElement.html
 *
 *   Learn RxJS
@@ -34,8 +33,8 @@
 // Note: Using 'pipe' approach means our set of imports does not affect downstream code.
 //    See -> https://www.learnrxjs.io/concepts/operator-imports.html
 //
-import { fromEvent, merge as staticMerge, range } from 'rxjs';
-import { filter, map } from 'rxjs/operators';
+import { fromEvent, merge, range } from 'rxjs';
+import { filter, map, first, startWith, distinctUntilChanged, takeUntil } from 'rxjs/operators';
 
 import { assert } from 'assert';
 
@@ -74,11 +73,6 @@ function innerObs (el, elCoords, oStart, moveObs, endObs, precise) {    // (SVGE
   const isG = el instanceof SVGGElement;
 
   assert(el instanceof SVGElement);   // DEBUG
-  /*** remove
-  if (! ((el instanceof SVGElement) || isG || isDoc)) {
-    throw "svg.rx.js does not support: "+ (typeof el);
-  }
-  ***/
 
   // Note: 'offset' and 'anchorOffset' in the code (commented out) have to do with this. (from svg.draggable.js)
   //
@@ -106,21 +100,21 @@ function innerObs (el, elCoords, oStart, moveObs, endObs, precise) {    // (SVGE
   * About 'SVGPoint':
   *   - it's "not attached to any document" (not part of the DOM): https://msdn.microsoft.com/en-us/windows/ff972165(v=vs.71)
   *       Therefore, cleanup should be just a matter of just releasing the reference.
+  *   - it needs to be created via a handle to the 'SVGSVGElement' (not sure why - just is).
   *   - there's a 'DOMPoint' in recent browsers (2019; except Edge). This seems to be the same as 'SVGPoint', or an
   *       extension? WebStorm Option-B shows 'type SVGPoint = DOMPoint;'
   */
-  const rootSvg = el.ownerSVGElement | el;   // need this as an anchor for the 'SVGPoint', even if it's not in the DOM (a bit weird)
+  const rootSvg = el.ownerSVGElement || el;   // need this as an anchor for the 'SVGPoint', even if it's not in the DOM (a bit weird)
 
-  // Note: Consider that multiple objects can be moved simultaneously. [...clip...] The dynamic alloc/dealloc
-  //      is probably the simplest way to go. AKa130316
+  assert(rootSvg instanceof SVGSVGElement);
+
+  // Note: Consider that multiple objects can be moved simultaneously (a per-drag store is optimal).
   //
   let buf = rootSvg.createSVGPoint();    // point object (allocated just once per drag)
 
-  debugger;   // check whether DOM got an 'SVGPoint'
-
   // Clean the allocated buffer
   //
-  endObs.take(1).subscribe( () => {
+  endObs.pipe(first()).subscribe( () => {
     buf = null;     // GC cleans it up (likely would even without this, since we are the only place keeping the 'buf' reference)
   });
 
@@ -130,7 +124,7 @@ function innerObs (el, elCoords, oStart, moveObs, endObs, precise) {    // (SVGE
   // Note: In the future, we might also do some group translation handling here [...clip...],
   //      so it may make sense to have the initialization within if-else (instead of tertiary operator). AKa290316
   //
-  const m = elCoords.screenCTM().inverse();
+  const m = elCoords.getScreenCTM().inverse();
 
   // Transform from screen to user coordinates
   //
@@ -154,7 +148,7 @@ function innerObs (el, elCoords, oStart, moveObs, endObs, precise) {    // (SVGE
   // Offset from the touch/point location to the origin of the target element, at the beginning of the drag.
   let x_offset, y_offset;
 
-  if (precise || isDoc) {
+  if (precise || isSvg) {
     x_offset = y_offset = 0;
 
   } else if ((el instanceof SVG.Circle) || (el instanceof SVG.Ellipse)) {
@@ -175,8 +169,8 @@ function innerObs (el, elCoords, oStart, moveObs, endObs, precise) {    // (SVGE
     return {
       x: p.x - x_offset,
       y: p.y - y_offset,
-      x2: isDoc ? undefined : p.x,
-      y2: isDoc ? undefined : p.y
+      x2: isSvg ? undefined : p.x,
+      y2: isSvg ? undefined : p.y
     };
   }
 
@@ -198,12 +192,14 @@ function innerObs (el, elCoords, oStart, moveObs, endObs, precise) {    // (SVGE
   //
   // tbd. RxJS 6 may have solved this. Try out different approaches on a slow tablet.
 
-  return moveObs.pipe(map( o => {
+  return moveObs.pipe(
+    map( o => {
       return pointWithOffset( transformP(o) );
-    }))
-    .startWith( pointWithOffset(p0) )
-    .distinctUntilChanged()
-    .takeUntil( endObs );
+    }),
+    startWith( pointWithOffset(p0) ),
+    distinctUntilChanged(),
+    takeUntil( endObs )
+  );
 }  // innerObs
 
 /*
@@ -275,7 +271,7 @@ function rx_touch (el, elCoords, precise) {   // (SVGElement, SVGElement, [Boole
     const cancelObs = cancelAllObs.pipe(filterWanted);
     const endObs = endAllObs.pipe(filterWanted);
 
-    const cancelOrEndObs = staticMerge( endObs, cancelObs );
+    const cancelOrEndObs = merge( endObs, cancelObs );
       // Note: Ignore the deprecation warning (if any). static 'merge' should _NOT_ be deprecated -> https://rxjs-dev.firebaseapp.com/api/index/function/merge
 
     return innerObs( self, elCoords, touchStart, moveObs, cancelOrEndObs, precise );
@@ -348,7 +344,7 @@ SVGElement.prototype.rx_draggable = function (myCoords, precise) {   // ([Boolea
         return parent ? parent : el;
       })();
 
-  return Observable.merge(
+  return merge(
     rx_mouse(el, elCoords, false /*precise*/) //,
     //rx_touch(this, elCoords, precise)   tbd. re-enable
   );
@@ -358,6 +354,13 @@ console.log("svg.rx.js initialised.");
 
 
 /* --- scraps --- */
+
+/*
+ * Possibly useful methods:      // scratch for browsing the net and debugger
+ *
+ *     SVGSVGElement:
+ *       .screenPixelToMillimeterX|Y: num
+ */
 
 /*** disabled (the rotational thing is a bit more complex; may need e.g. menu items to be rotated in compensation. AKa170716
  //---
