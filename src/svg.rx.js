@@ -1,24 +1,41 @@
 /*
 * svg.rx.js
 *
-* Adds methods to SVG elements.
+* Provides dragging support for most SVG elements, taking care of coordinate transforms.
 *
-* Usage:
-*   <<
-*     import 'svg.rx.js'
-*   <<
+* Drags are presented as 'observable of observable of { x: num, y: num }'.
+*   - The outer observables are the drags.
+*   - The inner observables are the coordinate stream within a single drag.
+*   - Coordinates ('x' and 'y') are provided as the coordinates of the element, who's '.rx_draggable()' was called.
+*
+* There can be multiple drags ongoing, even at the same time (touch interface with multiple fingers or even multiple
+* users). This abstraction cleanly handles that.
+*
+* Design:
+*   - support touch and mouse alike (don't require the application to know the difference)
+*   - be brief
 *
 * References:
 *   HTML5 API Index > SVG Overview
 *     -> http://html5index.org/SVG%20-%20Overview.html
 *       SVGDocument -> http://html5index.org/SVG%20-%20SVGDocument.html
 *       SVGSVGElement -> http://html5index.org/SVG%20-%20SVGSVGElement.html
+*
+*   Learn RxJS
+*     -> https://www.learnrxjs.io
+*
+*   MouseEvent
+*     -> https://developer.mozilla.org/en-US/docs/Web/API/MouseEvent
+*
+*   Touch
+*     -> https://developer.mozilla.org/en-US/docs/Web/API/Touch
 */
-import { Observable } from 'rxjs/Observable';
-import 'rxjs/add/observable/fromEvent';
-import 'rxjs/add/observable/merge';
-import 'rxjs/add/observable/filter';
-import 'rxjs/add/observable/map';
+
+// Note: Using 'pipe' approach means our set of imports does not affect downstream code.
+//    See -> https://www.learnrxjs.io/concepts/operator-imports.html
+//
+import { fromEvent, merge as staticMerge, range } from 'rxjs';
+import { filter, map } from 'rxjs/operators';
 
 import { assert } from 'assert';
 
@@ -26,78 +43,50 @@ if (typeof assert === "undefined") {
   throw "Expecting runtime 'assert', please enable 'rollup-plugin-node-builtins'."
 }
 
-//TESTING
-// NOTE: Once tests are back, this can be removed. (would break tests if these are not right)
-// Check the things we will use of RxJS
-//
-assert( typeof Observable.fromEvent === "function" );
-assert( typeof Observable.merge === "function" );
-//assert( typeof Observable.filter === "function" );
-//assert( typeof Observable.map === "function" );
-
-// SVG classes we use:
-//
-// 'SVGSVGElement'
-//    .somemethod
-//
-//    This is the '<svg>' node.
-//
+// SVG classes we use or refer to in the comments.
 // ...
 assert(SVGElement.prototype);
+assert(SVGGElement.prototype);
 assert(SVGSVGElement.prototype);
-
-// tbd. Once in RxJS 6, see if it has '.collect'.
-// Note: RxJS 5 does not have what Scala calls '.collect': to both filter and convert.
-//
-// Ref.
-//  -> http://stackoverflow.com/questions/35118707/rxjs5-how-to-map-and-filter-on-one-go-like-collect-in-scala
-//  -> https://xgrommx.github.io/rx-book/content/guidelines/implementations/index.html#implement-new-operators-by-composing-existing-operators
-//
-Observable.prototype.mapAndFilterUndefinedOut = function (f) {
-  return this.map(f).filter( function (x) { return x !== undefined; } );
-};
-
-// JavaScript does not have an Array for range constructor.
-//
-function range( start, count ) {    // (Int,Int) -> Array of Int
-  var arr = [];
-  for (var i=0; i<count; i++ ) {
-    arr[i]= start+i;
-  }
-  return arr;
-}
 
 // Inner stream of drags. Handles coordinate transforms etc.
 //
-// Note: The event handling code is originally based on https://github.com/wout/svg.draggable.js but we only enable
-//      stuff that we actually test (manually). I.e. 'SVG.Nested', 'SVG.Text' support remains disabled.
+// Note: The event handling code was originally based on https://github.com/wout/svg.draggable.js . We only enable
+//      stuff that we actually test. 'SVGText' support remains disabled, for this reason.
 //
-// References:
-//    MouseEvent -> https://developer.mozilla.org/en-US/docs/Web/API/MouseEvent
-//    Touch -> https://developer.mozilla.org/en-US/docs/Web/API/Touch
+// 'el' is the element being tracked
 //
-// 'el' is the element that is being tracked
+// 'oStart': event from "mousedown" or "touchstart"
+// 'moveObs': stream of "mousemove" or "touchmove"
+// 'endObs': stream of "mouseup" or "touchcancel" or "touchend"
 //
-// 'elCoords' is the element, whose coordinate system is used (can be 'el', or e.g. its parent)
+// 'elCoords' is the element, whose coordinate system is used (can be 'el', or e.g. its parent).
 //
+// #DEPRECATE THIS tbd.
 // 'precise': If 'true', streams the exact position of the pointer/touch location. Otherwise hides that away and
 //    treats any touch within the object the same (streams the position of the object, instead). Use 'true' if you
 //    want to e.g. rotate by dragging a disk, in place. For normal drag, or rotational drag with a separate handle
 //    object, use 'false'.
 //
-function innerObs (el, oStart, moveObs, endObs, elCoords, precise) {    // (SVG.Element|SVG.G|SVG.Doc, MouseEvent or Touch, observable of MouseEvent or Touch, observable of MouseEvent or Touch, [SVG.Element], [true]) -> observable of {x:Int, y:Int}
+function innerObs (el, elCoords, oStart, moveObs, endObs, precise) {    // (SVGElement, SVGElement, MouseEvent or Touch, observable of MouseEvent or Touch, observable of MouseEvent or Touch, [true]) -> observable of {x:Int, y:Int}
 
-  var isDoc = (el instanceof SVG.Doc);
-  var isG = (el instanceof SVG.G);
+  const isSvg = el instanceof SVGSVGElement;
+  const isG = el instanceof SVGGElement;
 
-  if (! ((el instanceof SVG.Element) || isG || isDoc)) {
+  assert(el instanceof SVGElement);   // DEBUG
+  /*** remove
+  if (! ((el instanceof SVGElement) || isG || isDoc)) {
     throw "svg.rx.js does not support: "+ (typeof el);
   }
+  ***/
 
-  if (el instanceof SVG.Text) {
+  // Note: 'offset' and 'anchorOffset' in the code (commented out) have to do with this. (from svg.draggable.js)
+  //
+  if (el instanceof SVGTextElement) {
     console.warn( "Dragging might not work with "+ el );
   }
 
+  /*** disabled
   // Select which element is used for reporting the coordinates.
   //
   // Note: For groups, do NOT include the group's transformation matrix, or things won't work when a group is rotated.
@@ -111,51 +100,37 @@ function innerObs (el, oStart, moveObs, endObs, elCoords, precise) {    // (SVG.
       elCoords = el;
     }
   }
-
-  // If 'el' is already the doc (or 'SVG.Nested', which we don't support), we can use that as the cradle for our point.
-  //
-  var doc = isDoc ? el : /*el.parent(SVG.Nested) ||*/ el.parent(SVG.Doc);
+  ***/
 
   /*
-  * About SVGPoint:
+  * About 'SVGPoint':
   *   - it's "not attached to any document" (not part of the DOM): https://msdn.microsoft.com/en-us/windows/ff972165(v=vs.71)
-  *       If we trust that (tbd. check if we see it in the DOM), cleanup is a matter of just releasing the reference.
+  *       Therefore, cleanup should be just a matter of just releasing the reference.
   *   - there's a 'DOMPoint' in recent browsers (2019; except Edge). This seems to be the same as 'SVGPoint', or an
   *       extension? WebStorm Option-B shows 'type SVGPoint = DOMPoint;'
   */
+  const rootSvg = el.ownerSVGElement | el;   // need this as an anchor for the 'SVGPoint', even if it's not in the DOM (a bit weird)
 
-  // Note: svg.js doesn't have an abstraction for applying a matrix transform. This kind of makes sense - such a
-  //      transform uses SVGPoint structure specifically allocated for this purpose and handling the life span of
-  //      such an object may be crucial for keeping drag behaviour optimal. So we are fine diving down to native
-  //      SVG API (using '.node' and '.native') here. It's an implementation detail, anyways (does not show in the
-  //      svg.rx.js API). AKa100116
-  //
-  //      See -> https://github.com/wout/svg.js/issues/437
-  //             https://github.com/wout/svg.js/issues/403
-  //
-  // Note: If thinking of not cleaning the point buffer, but keeping it always there, consider that multiple objects
-  //      can be moved simultaneously (and their points may be cradled in the 'SVG.Doc'). The dynamic alloc/dealloc
+  // Note: Consider that multiple objects can be moved simultaneously. [...clip...] The dynamic alloc/dealloc
   //      is probably the simplest way to go. AKa130316
   //
-  var buf = doc.node.createSVGPoint();    // point object (allocated just once per drag)
+  let buf = rootSvg.createSVGPoint();    // point object (allocated just once per drag)
 
-  // tbd. Maybe we can create the point under the element itself (not just the doc)?
+  debugger;   // check whether DOM got an 'SVGPoint'
 
   // Clean the allocated buffer
   //
-  endObs.take(1).subscribe( function () {
-    buf = null;     // GC cleans it up
+  endObs.take(1).subscribe( () => {
+    buf = null;     // GC cleans it up (likely would even without this, since we are the only place keeping the 'buf' reference)
   });
 
   // If a group is observing the drag, we want its transform NOT to be included. Otherwise, we get problems if the group
   // is rotated.
   //
-  // Note: In the future, we might also do some group translation handling here (instead of in the calling code, see 'demo3'),
+  // Note: In the future, we might also do some group translation handling here [...clip...],
   //      so it may make sense to have the initialization within if-else (instead of tertiary operator). AKa290316
   //
-  var m = elCoords.screenCTM().inverse().native();
-
-  // Q: is the '.native()' needed? This doesn't have it -> https://schneide.blog/2018/03/05/some-tricks-for-working-with-svg-in-javascript/
+  const m = elCoords.screenCTM().inverse();
 
   // Transform from screen to user coordinates
   //
@@ -167,37 +142,26 @@ function innerObs (el, oStart, moveObs, endObs, elCoords, precise) {    // (SVG.
   // Note: Use '.client[XY]' (not '.screen[XY]') so that the position of the SVG cradle does not affect (the difference
   //      becomes visible only when dragging is applied on 'svg' background).
   //
-  var transformP = function (o /*, offset*/) {   // (MouseEvent or Touch) -> SVGPoint (which has '.x' and '.y')
+  const transformP = function (o /*, offset*/) {   // (MouseEvent or Touch) -> SVGPoint (which has '.x' and '.y')
     buf.x = o.clientX;  // - (offset || 0)
     buf.y = o.clientY;
 
     return buf.matrixTransform(m);
   };
 
-  var p0 = transformP(oStart /*, anchorOffset*/);
+  const p0 = transformP(oStart /*, anchorOffset*/);
 
   // Offset from the touch/point location to the origin of the target element, at the beginning of the drag.
-  // We provide the drag coordinates in the observable, not the actual mouse/touch coordinates (tbd. we should provide both). AKa080116
-  //    ^^- tbd. Provide both in the observable, and no need for 'precise' param. :)
-  //
-  var x_offset, y_offset;
+  let x_offset, y_offset;
 
   if (precise || isDoc) {
     x_offset = y_offset = 0;
 
-  } else if ((el instanceof SVG.Circle) || (el instanceof SVG.Ellipse)) {   // 'SVG.Circle', 'SVG.Ellipse' or 'SVG.Rx.Circle' #edit
-    //
-    // Do not access '.x' or '.y' on a circle - they are not needed, and 'SVG.Rx.Circle' does not implement them.
-
-    // Note: Do not use 'el.center()' for reading coordinates; only '.cx()' and '.cy()' work as getters.
-
-    // Note: Once we get 'svg.js' replaced, positioning centers and ellipses will always happen just by their center
-    //      (then we can remove this special handling).
-
-    x_offset = p0.x - el.cx();   // we are providing center's coordinates to the circle / ellipse being dragged
+  } else if ((el instanceof SVG.Circle) || (el instanceof SVG.Ellipse)) {
+    x_offset = p0.x - el.cx();   // provide center's coordinates to the circle / ellipse being dragged
     y_offset = p0.y - el.cy();
 
-  } else if (typeof el.x === "function") {    // normal 'svg.js' elements (all have '.x' and '.y', even the circle)
+  } else /*if (typeof el.x === "function")*/ {    // normal 'svg.js' elements (all have '.x' and '.y', even the circle)     // remove comment
     x_offset = p0.x - el.x();
     y_offset = p0.y - el.y();
   }
@@ -216,14 +180,13 @@ function innerObs (el, oStart, moveObs, endObs, elCoords, precise) {    // (SVG.
     };
   }
 
-  // Note: some events actually come with the same x,y values (at least on Safari OS X) - removed by the
-  //      '.distinctUntilChanged()'.
+  // Note: some events come with the same x,y values (at least on Safari OS X) - remove by '.distinctUntilChanged()'.
   //
-  // Note: There does not seem to be a good way to introduce throttling (removing extraneous events from the stream).
-  //      The browser emits a reasonable (roughly 60 times a second, some web sites say) event stream. The application
+  //    // RxJS 5 alpha era comment STARTS:
+  // Note: The browser emits a reasonable (roughly 60 times a second, some web sites say) event stream. The application
   //      code tries to keep up with this, but may take longer than the 16ms to process the draws (especially on
-  //      multiple fingers on the Nexus 7 tablet). This causes a drag-behind effect where the circles (demo4) are
-  //      following the fingers with a delay.
+  //      multiple fingers on the Nexus 7 tablet). This causes a drag-behind effect where the circles are following
+  //      the fingers with a delay.
   //
   //      Neither '.debounce' or '.throttle( 1, Rx.Scheduler.requestAnimationFrame )' helps with this - they would
   //      simply drop the frame rate of all movements; we don't want that.
@@ -231,10 +194,13 @@ function innerObs (el, oStart, moveObs, endObs, elCoords, precise) {    // (SVG.
   //      What we want is proper back pressure, where the application can signal itself, when it's ready for receiving
   //      the next drag event. Let's implement this on the application side (demo4) for now, since most cases would
   //      not need it. AKa140116
+  //    // RxJS 5 alpha era comment ENDS.
   //
-  return moveObs.map( function (o) {
-    return pointWithOffset( transformP(o) );
-  } )
+  // tbd. RxJS 6 may have solved this. Try out different approaches on a slow tablet.
+
+  return moveObs.pipe(map( o => {
+      return pointWithOffset( transformP(o) );
+    }))
     .startWith( pointWithOffset(p0) )
     .distinctUntilChanged()
     .takeUntil( endObs );
@@ -243,7 +209,7 @@ function innerObs (el, oStart, moveObs, endObs, elCoords, precise) {    // (SVG.
 /*
 * Prevent default behaviour for 'mousedown' and 'touchstart', and bubbling up of the event to the parents.
 *
-* Note: this is not within 'innerObs' since here the TouchEvent, not Touch, is needed.
+* Note: this is not within 'innerObs' since here the 'TouchEvent', not 'Touch', is needed.
 */
 function preventDefault (evStart) {    // (MouseEvent or TouchEvent) ->
   // Prevent browser drag behavior
@@ -257,16 +223,12 @@ function preventDefault (evStart) {    // (MouseEvent or TouchEvent) ->
   //
   evStart.preventDefault();
 
-  // Prevent propagation to a parent that might also have dragging enabled (see demo1).
+  // Prevent propagation to a parent that might also have dragging enabled.
   //
   evStart.stopPropagation();
 }
 
-
 /*--- User API ---
-*
-* Note: '.rx_touch' and '.rx_mouse' were earlier exposed to user land, but it may be good to encourage an abstraction
-*     that always handles both (i.e. keep them private).
 */
 
 //---
@@ -280,50 +242,43 @@ function preventDefault (evStart) {    // (MouseEvent or TouchEvent) ->
 //      reuses id's whereas iOS does not. The model chosen seems to be a good fit for allowing e.g. multiple
 //      users to work on a touch interface simultaneously, i.e. it feels more generic and expandable. AKa060116
 //
-SVGElement.prototype._rx_touch = function(elCoords, precise) {   // ([SVG.Element], [Boolean]) -> observable of observables of { x: Int, y: Int }
-  const self = this;
+function rx_touch (el, elCoords, precise) {   // (SVGElement, SVGElement, [Boolean]) -> observable of observables of { x: Int, y: Int }
 
-  var startAllObs = Observable.fromEvent( self, "touchstart" );
-  var moveAllObs = Observable.fromEvent( window, "touchmove" );
-  var cancelAllObs = Observable.fromEvent( window, "touchcancel" );
-  var endAllObs = Observable.fromEvent( window, "touchend" );
+  const startAllObs = fromEvent( el, "touchstart" );
+  const moveAllObs = fromEvent( window, "touchmove" );
+  const cancelAllObs = fromEvent( window, "touchcancel" );
+  const endAllObs = fromEvent( window, "touchend" );
 
   // 'index': 0..n-1 (probably always 0); index to the starting touch
   //
-  var touchDragObs = function (evStart, index) {      // (TouchEvent, Int) -> observable of {x:Int, y:Int}
+  var touchDragObs = function (evStart, wantedId) {      // (TouchEvent, ???tbd.???) -> observable of {x:Int, y:Int}
 
+    debugger;   // type of 'wantedId'?
     preventDefault(evStart);
 
-    var touchStart = evStart.changedTouches[index];
-
-    // Note: 'touch.identifier' is 0..N-1 number on Android (reusing id's once a touch has ended); on iOS it is a
-    //        freely running counter. Just treat it as an opaque id between the start and the other (move/cancel/end)
-    //        touch events.
+    // Pick the 'wanted' move, cancel and end events to track
     //
-    var wanted = touchStart.identifier;
-
-    /* Pick the 'wanted' move, cancel and end events to track
-    */
-    var f = function (ev) {   // (TouchEvent) -> Touch or undefined
-      for (var i=0; i<ev.changedTouches.length; i++) {
-        var touch = ev.changedTouches[i];
-
-        if (touch.identifier === wanted) {
-          return touch;
-        }
-      }
-      return undefined;   // will not pass this event further for the particular stream
-    }
+    // Note: RxJS does not have what Scala calls '.collect' (map or reject as one operation).
+    //     -> http://stackoverflow.com/questions/35118707/rxjs5-how-to-map-and-filter-on-one-go-like-collect-in-scala
+    //     -> https://xgrommx.github.io/rx-book/content/guidelines/implementations/index.html#implement-new-operators-by-composing-existing-operators
+    //
+    const filterWanted = pipe(
+        map( ev => {    // (TouchEvent) -> Touch | undefined
+          ev.changedTouches.find( touch => touch.identifier === wantedId );   // Touch | undefined
+        }),
+        filter( x => x !== undefined )
+    );
 
     // Note: RxJS does not have what Scala calls '.collect': to both map and filter.
     //
-    var moveObs = moveAllObs.mapAndFilterUndefinedOut(f);
-    var cancelObs = cancelAllObs.mapAndFilterUndefinedOut(f);
-    var endObs = endAllObs.mapAndFilterUndefinedOut(f);
+    const moveObs = moveAllObs.pipe(filterWanted);
+    const cancelObs = cancelAllObs.pipe(filterWanted);
+    const endObs = endAllObs.pipe(filterWanted);
 
-    var cancelOrEndObs = Observable.merge( endObs, cancelObs );
+    const cancelOrEndObs = staticMerge( endObs, cancelObs );
+      // Note: Ignore the deprecation warning (if any). static 'merge' should _NOT_ be deprecated -> https://rxjs-dev.firebaseapp.com/api/index/function/merge
 
-    return innerObs( self, touchStart, moveObs, cancelOrEndObs, elCoords, precise )
+    return innerObs( self, elCoords, touchStart, moveObs, cancelOrEndObs, precise );
 
   }; // touchDragObs
 
@@ -334,10 +289,10 @@ SVGElement.prototype._rx_touch = function(elCoords, precise) {   // ([SVG.Elemen
   //
   return startAllObs.mergeMap( function (ev) {  // (TouchEvent) -> Array of observable of {x:Int, y:Int}
 
-    // tbd. We can likely iterate 0..'ev.changedTouches.length' with some other means, not needing 'range'. #rework
-    //
-    return range( 0, ev.changedTouches.length ).map( function (i) {
-      return touchDragObs( ev, i );
+    return range( 0, ev.changedTouches.length ).map( i => {   // tbd. iterate array contents directly
+        const touchStart = ev.changedTouches[i];
+
+        touchDragObs( ev, i );
     } );
   });
 };  // rx_touch
@@ -349,42 +304,52 @@ SVGElement.prototype._rx_touch = function(elCoords, precise) {   // ([SVG.Elemen
 //      should see it from the application point of view. Also, shift etc. might be as important as the different
 //      buttons. AKa060116
 //
-function rx_mouse (el, elCoords, precise) {   // (SVGElement, [SVGSVGElement | ...], [Boolean]) -> observable of observables of {x:Int, y:Int}
+function rx_mouse (el, elCoords, precise) {   // (SVGElement, [SVGSVGElement | SVGGElement], [Boolean]) -> observable of observables of {x:Int, y:Int}
 
   // Just consider primary button
   //
-  var f = function (ev) {   // (MouseEvent) -> Boolean
-    return ev.button === 0;
-  };
+  const filterButton = filter( ev =>  // MouseEvent
+      ev.button === 0
+  );
 
-  // DEBUG
-  var aObs =  Observable.fromEvent(el, "mousedown");
-  debugger;
+  const startObs =  fromEvent(el, "mousedown").pipe(filterButton);
+  const moveObs =   fromEvent(window, "mousemove").pipe(filterButton);
+  const endObs =    fromEvent(window, "mouseup").pipe(filterButton);
 
-  var startObs =  Observable.fromEvent(el, "mousedown").filter(f);
-  var moveObs =   Observable.fromEvent(window, "mousemove").filter(f);
-  var endObs =    Observable.fromEvent(window, "mouseup").filter(f);
-
-  return startObs.map( function (ev) {   // (MouseEvent) -> observable of {x:Int, y:Int}
-    preventDefault(ev);
-    return innerObs( el, ev, moveObs, endObs, elCoords, precise );
-  } );
+  return startObs.pipe(
+    map( ev => {   // (MouseEvent) -> observable of {x:Int, y:Int}
+      preventDefault(ev);
+      return innerObs( el, elCoords, ev, moveObs, endObs, precise );
+    })
+  );
 }
 
 //---
 // Create an observable for either mouse or touch drags
 //
+// 'myCoords': report coordinates in 'this' element's coordinate system, instead of its parent.
+          // tbd. ^-- do we need that?
+//
 // Returns:
 //  observable of observables of { x: Int, y: Int }
 //
-SVGElement.prototype.rx_draggable = function (elCoords, precise) {   // ([SVG.Element], [Boolean]) -> observable of observables of { x: Int, y: Int }
+SVGElement.prototype.rx_draggable = function (myCoords, precise) {   // ([Boolean] = false, [Boolean]) -> observable of observables of { x: Int, y: Int }
+  const el = this;
 
-  if (elCoords || precise) {  // tbd.
-    console.warn("NOT reworked with these options, yet. Maybe we won't need them?"+ elCoords +", "+ precise);
+  if (precise) {  // tbd.
+    console.warn("NOT reworked 'precise' option, yet. Maybe we won't need it? : "+ precise);
   }
 
+  // Coordinates are given in the parent's coordinate system, unless 'myCoords' is set or there is no parent.
+  //
+  const elCoords = myCoords ? el :
+      (function() {                   // tbd. would just 'el.parent || el' work?
+        const parent = el.parent;
+        return parent ? parent : el;
+      })();
+
   return Observable.merge(
-    rx_mouse(this, elCoords, precise) //,
+    rx_mouse(el, elCoords, false /*precise*/) //,
     //rx_touch(this, elCoords, precise)   tbd. re-enable
   );
 };

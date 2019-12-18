@@ -39,6 +39,7 @@ With this in mind, we might be best off just waiting for RxJS to develop in this
 
 - [ ] Collision detection
 
+
 ## More Svelte
 
 There are discussions about merger of Svelte and RxJS patterns. 
