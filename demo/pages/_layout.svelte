@@ -1,5 +1,5 @@
 <script>
-	import Nav from '../components/Nav.svelte';
+	import Nav from '../Nav.svelte';
 
 	export let route;		// { path: "/index" | "/circles" | ... }
 
@@ -7,6 +7,8 @@
 	const segment =
 		(route.path === "/index") ? "" :
 		/^\/([^/]+)$/.exec(route.path)[1];		// "circles"|...
+
+	debugger;
 </script>
 
 <style>

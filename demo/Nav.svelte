@@ -58,7 +58,7 @@
 
 <nav>
 	<ul>
-		<li><a class:selected='{segment === undefined}' href='.'>home</a></li>
+		<li><a class:selected='{segment === ""}' href='.'>home</a></li>
 		<li><a class:selected='{segment === "circles"}' href='circles'>circles</a></li>
 		<li><a class:selected='{segment === "transform"}' href='transform'>transform</a></li>
 

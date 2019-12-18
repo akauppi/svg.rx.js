@@ -231,11 +231,10 @@ for ways to help
 
 ### Other dragging libraries
 
-These are presented for code comparisons. Their approach is the normal event capture (no Rx).
+Presented for code comparisons. Their approach is the normal event capture (no Rx).
 
 - [svg.draggable.js](https://github.com/wout/svg.draggable.js)
   - has been the basis for our touch event and coordinate translation handling. Thanks, Fuzzy!
-- [svg.draggy.js](https://github.com/jillix/svg.draggy.js/)
 
 ### Background info
 
