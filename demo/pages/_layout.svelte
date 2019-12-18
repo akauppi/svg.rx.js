@@ -4,11 +4,11 @@
 	export let route;		// { path: "/index" | "/circles" | ... }
 
 	// Segment for '<Nav>'
+	//
+	// BUG: we don't get this updated when moving between the pages (without manual refresh).
 	const segment =
 		(route.path === "/index") ? "" :
 		/^\/([^/]+)$/.exec(route.path)[1];		// "circles"|...
-
-	debugger;
 </script>
 
 <style>
