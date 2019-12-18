@@ -1,5 +1,7 @@
 <script>
 	import { onMount } from 'svelte';
+	import { fade } from 'svelte/transition';
+
 	import { assert } from 'assert';
 
 	// tbd. an import from node, or elsewhere where published (to test the full route)
@@ -32,13 +34,15 @@
 			dragObs.subscribe( o => {		// { x: Int, y: Int }
 				console.debug(`Dragging at: { x: ${o.x}, y: ${o.y} }`);
 
-				circle.x = o.x;		// this updates the DOM
+				circle.x = o.x;
 				circle.y = o.y;
+				circles = circles;	// update the DOM on next chance
 			},
 			null,	// error handling
 			() => {		// end of drag
 				const i = circles.indexOf(circle);
 				circles.splice(i, 1);		// remove
+				circles = circles;			// update DOM on next chance
 
 				console.debug("Circle removed");
 			})
@@ -104,7 +108,7 @@ Each touch (or mouse drag with primary button) is shown with a circle.
 
 <svg bind:this={ svgElem }>
 	{#each circles as o}
-		<circle cx={o.x+o.r} cy={o.y+o.r} r={o.r} n={o.n}></circle>
+		<circle in:fade="{{ duration: 1000 }}" out:fade="{{ duration: 200 }}" cx={o.x} cy={o.y} r={o.r} n={o.n}></circle>
 	{/each}
 </svg>
 

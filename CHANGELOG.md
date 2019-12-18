@@ -1,10 +1,14 @@
 # CHANGELOG
 
-## latest
+## 0.0.6-alpha
 
 - started transition to 2019 tech :)
 - tried Sapper but turned away
 - now based on `svelte-filerouter`; looks promising...
+- removed dependency on `svg.js` :)
+- updated to ES6 coding
+- updated to RxJS 6
+- using Svelte 3 for the demos!!! 🎇
 
 ## 0.0.5
 
