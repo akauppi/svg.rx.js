@@ -1,12 +1,14 @@
 <script>
 	import { onMount } from 'svelte';
-	import { fade } from 'svelte/transition';
+	import { fade } from 'svelte/transition';		// KEEP: SVG uses this!  (ignore WebStorm IDE syntax lowlighting)
 
 	import { assert } from 'assert';
 
-	// tbd. an import from node, or elsewhere where published (to test the full route)
-	// import ...;
-	import '../../src/svg.rx.js';		// in the same repo
+	// Note: Cannot import 'svg.rx.js' to a project also called that (npm errors). How can we best test that
+	//		a package gone via npm registry works?  (temporarily rename the package if trying this)
+	//
+	//import 'svg.rx.js';
+	import '../../src/main.js';		// in the same repo
 
 	assert( SVGElement.prototype.rx_draggable );
 

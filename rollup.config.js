@@ -94,7 +94,7 @@ function serve() {
                 // place.
                 //
                 //require('child_process').spawn('npx', ['sirv', 'public', '--dev', '--host', '--single'], {
-                require('child_process').spawn('npm', ['run', 'start', '--', '--dev'], {
+                require('child_process').spawn('npm', ['run', 'demo:_start', '--', '--dev'], {
                     stdio: ['ignore', 'inherit', 'inherit'],
                     shell: true
                 });
