@@ -3,11 +3,15 @@
   "version": "0.0.6-alpha",
   "private": true,
   "scripts": {
-    "gh-pages": "gh-pages -d demo",
+    "gh-pages": "gh-pages -d public",
     "clean": "(rm public/bundle/* public/bundle.css 2> /dev/null || true)",
     "build": "rollup -c",
     "dev": "rollup -c -w",
-    "start": "sirv public --single --host"
+    "start": "sirv public --single --host",
+    "cy:run": "npx run cypress run",
+    "cy:open": "npx run cypress open",
+    "test": "run-p --race dev cy:run",
+    "pregh-pages": "npm run build"
   },
   "dependencies": {
     "rxjs": "^6.5.3",
@@ -25,7 +29,8 @@
     "rollup-plugin-svelte": "^5.1.1",
     "rollup-plugin-terser": "^5.1.2",
     "rollup-pluginutils": "^2.8.2",
-    "svelte": "^3.16.4"
+    "svelte": "^3.16.4",
+    "npm-run-all": "^4.1.5"
   },
   "//comments": {
     "": [
@@ -33,6 +38,10 @@
       "..and https://github.com/sveltejs/template/blob/master/package.json",
       "The latter does not need 'npm-run-all"
     ],
+    "scripts": {
+      "start": "Keep this. Called by Rollup.'",
+      "cy:...": "Using 'npx' so that test suite is installed only if used."
+    },
     "dependencies": {
       "sirv-cli, svelte-filerouter": "tbd. can these be in the 'devDependencies' side?",
       "rxjs": "tbd. update to 5.x latest"
