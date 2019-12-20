@@ -24,11 +24,13 @@
     "demo:build": "rollup -c",
     "demo:dev": "rollup -c -w",
     "demo:_start": "sirv public --single --host",
-    "cy:run": "npx run cypress run",
-    "cy:open": "npx run cypress open",
-    "test": "run-p --race dev cy:run",
-    "pretest": "npm run demo:build",
-    "//prepublishOnly": "npm test",
+    "test:headless": "cypress run",
+    "test:dev": "cypress open",
+    "test": "npm run test:headless",
+    "ci": "start-server-and-test 'sirv test --port 3000' 3000 test:headless",
+    "ci:dev": "start-server-and-test 'sirv test --port 3000' 3000 test",
+    "//pretest:...": "# lib needs no building. If it did, we'd do it here.",
+    "prepublishOnly": "npm test:headless",
     "gh-pages": "gh-pages -d public",
     "pregh-pages": "npm run demo:build",
     "clean": "(rm public/bundle/* public/bundle.css 2> /dev/null || true)",
@@ -51,28 +53,28 @@
     "rollup-plugin-terser": "^5.1.2",
     "rollup-pluginutils": "^2.8.2",
     "svelte": "^3.16.5",
-    "npm-run-all": "^4.1.5",
-    "gh-pages": "^2.1.1"
+    "gh-pages": "^2.1.1",
+    "cypress": "^3.2.0",
+    "start-server-and-test": "^1.7.13"
   },
   "//comments": {
     "": [
       "Based on:",
       "- https://github.com/jakobrosenberg/svelte-filerouter-example/blob/master/package.json",
       "- https://github.com/sveltejs/template/blob/master/package.json",
-      "The latter does not need 'npm-run-all",
       "",
-      "Also see -> https://github.com/svgdotjs/svg.js/blob/master/package.json"
+      "We prefer 'start-server-and-test' over 'npm-run-all' approach (just more explicit, than 'run-p' race).",
+      "",
+      "Also see:",
+      "- https://github.com/svgdotjs/svg.js/blob/master/package.json"
     ],
     "scripts": {
       "start": "Keep. Called by Rollup.'",
-      "cy:...": "Using 'npx' so that test suite is installed only if used (instead of 'devDependency').",
       "dev,build": "Temporary aliases until we get lib & demo detached."
     },
     "dependencies": {
       "sirv-cli, svelte-filerouter": "tbd. can these be in the 'devDependencies' side? https://github.com/akauppi/svg.rx.js/issues/10"
     },
-    "devDependencies": {
-      "npm-run-all": "Would like to get rid of this (needed for 'run-p')."
-    }
+    "devDependencies": {}
   }
 }

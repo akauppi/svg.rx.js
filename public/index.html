@@ -2,10 +2,8 @@
 <html lang='en'>
 <head>
 	<meta charset='utf-8'>
+	<meta http-equiv="X-UA-Compatible" content="IE=Edge">
 	<meta name='viewport' content='width=device-width'>
-
-	<!-- likely gets overridden by the app pages? -->
-	<title>(untitled)</title>
 
 	<!-- not used, yet
 	<link rel='icon' type='image/png' href='/favicon.png'>
@@ -14,7 +12,8 @@
 	<link rel='stylesheet' href='bundle.css'>
 
 	<!--
-	- tbd. How does this work, even for local development? (straight from the template) #help
+	- BUG: This doesn't work for GitHub Pages export (anything with interim path segments in URL).
+	-		See -> https://github.com/akauppi/svg.rx.js/issues/11
 	-->
 	<script type="module" src="https://unpkg.com/dimport?module" data-main="/bundle/main.js"></script>
 	<script nomodule src="https://unpkg.com/dimport/nomodule" data-main="/bundle/main.js"></script>

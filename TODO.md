@@ -37,6 +37,9 @@ With this in mind, we might be best off just waiting for RxJS to develop in this
  
 ## svg.rx.js
 
+- [ ] Tests: decide between Cypress and Puppeteer
+  - we only need to test static files (Cypress needs things to be served) 
+  - Cypress installs a native (GUI) app; a bit excessive... 
 - [ ] Split demo from main code
 - [ ] Touch back
 - [ ] Group handling

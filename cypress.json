@@ -1,4 +1,8 @@
 {
-	"baseUrl": "http://localhost:5000",
-	"video": false
+	"baseUrl": "http://localhost:3000",
+	"//video": false,
+
+	"//comments": {
+		"baseUrl": "where the app is running"
+	}
 }

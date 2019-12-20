@@ -1,23 +1,10 @@
-
+/*
+* test/common.css
+*
+* Styling for the test harness.
+*/
 svg {
-  margin-left: 10px;
-  margin-bottom: 10px;
-  width: 98%;
-  border: 1px solid red;
-
-  /*
-  * Note: Limit the height so clicking the small arrow icon (right side of Mocha UI) has the full output visible,
-  *       without scrolling.
-  */
-  height: 300px;
-}
-
-rect {
-  fill: green;
-}
-
-.debug {
-  fill: none;
-  stroke-width: 1px;
-  stroke: red;
+    border: 1px solid red;
+    width: 100%;
+    height: 600px;
 }

@@ -1,0 +1,45 @@
+<html>
+<head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge">
+    <meta charset="utf-8">
+    <link rel="stylesheet" href="../node_modules/mocha/mocha.css" />
+    <link rel="stylesheet" href="common.css" />
+</head>
+<body>
+    <!-- mocha -->
+    <div id="mocha"></div>
+    <script src="../node_modules/mocha/mocha.js"></script>
+    <script src="../node_modules/chai/chai.js"></script>
+    <script>
+        mocha.ui('bdd');
+    </script>
+
+    <!-- code under test -->
+    <script>
+        // Prepare 'assert' for the code (they'd simply expect it, tests can fetch themselves a 'chai.assert').
+        // Note: browser runtimes could use any assert.
+        //
+        var assert= chai.assert;
+    </script>
+    <script src="lib/svg.min.js"></script>
+    <script src="lib/Rx.umd.min.js"></script>
+    <script src="src/svg.rx.js"></script>
+    <script src="src/gx.js"></script>
+    <script src="src/gx.draggable.js"></script>
+    <script src="src/gx-halo.js"></script>
+
+    <!-- tests (add new ones to the list) -->
+    <script src="common.js"></script>
+    <script src="toolsTest.js"></script>
+    <script src="gx-test.js"></script>
+    <script src="gx.draggable-test.js"></script>
+    <script src="gx-halo-test.js"></script>
+
+    <script>
+        // Samples have it like this, but 'window.mochaPhantomJS' seems to always be 'undefined'. AKa010516
+        //
+        if (window.mochaPhantomJS) { mochaPhantomJS.run(); }
+        else { mocha.run(); }
+    </script>
+</body>
+</html>
