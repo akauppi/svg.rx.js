@@ -1,5 +1,5 @@
 /*
-* svg.rx.js
+* main.js
 *
 * Provides dragging support for most SVG elements, taking care of coordinate transforms.
 *

@@ -1,17 +1,39 @@
 {
   "name": "svg.rx.js",
-  "version": "0.0.6-alpha",
-  "private": true,
+  "version": "0.0.6-alpha.1",
+  "description": "Making SVG elements draggable, using RxJS.",
+  "keywords": [
+    "svg",
+    "vector",
+    "dragging",
+    "touch"
+  ],
+  "main": "src/main.js",
+  "files": [
+    "/src"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/akauppi/svg.rx.js"
+  },
+  "bugs": {
+    "url": "https://github.com/akauppi/svg.rx.js/issues"
+  },
+  "license": "MIT",
   "scripts": {
-    "gh-pages": "gh-pages -d public",
-    "clean": "(rm public/bundle/* public/bundle.css 2> /dev/null || true)",
-    "build": "rollup -c",
-    "dev": "rollup -c -w",
-    "start": "sirv public --single --host",
+    "demo:build": "rollup -c",
+    "demo:dev": "rollup -c -w",
+    "demo:_start": "sirv public --single --host",
     "cy:run": "npx run cypress run",
     "cy:open": "npx run cypress open",
     "test": "run-p --race dev cy:run",
-    "pregh-pages": "npm run build"
+    "pretest": "npm run demo:build",
+    "//prepublishOnly": "npm test",
+    "gh-pages": "gh-pages -d public",
+    "pregh-pages": "npm run demo:build",
+    "clean": "(rm public/bundle/* public/bundle.css 2> /dev/null || true)",
+    "dev": "npm run demo:dev",
+    "build": "npm run demo:build"
   },
   "dependencies": {
     "rxjs": "^6.5.3",
@@ -19,8 +41,7 @@
     "svelte-filerouter": "^1.4.6"
   },
   "devDependencies": {
-    "gh-pages": "^2.1.1",
-    "rollup": "^1.27.12",
+    "rollup": "^1.27.13",
     "rollup-plugin-commonjs": "^10.1.0",
     "rollup-plugin-livereload": "^1.0.0",
     "rollup-plugin-node-builtins": "^2.1.2",
@@ -29,22 +50,29 @@
     "rollup-plugin-svelte": "^5.1.1",
     "rollup-plugin-terser": "^5.1.2",
     "rollup-pluginutils": "^2.8.2",
-    "svelte": "^3.16.4",
-    "npm-run-all": "^4.1.5"
+    "svelte": "^3.16.5",
+    "npm-run-all": "^4.1.5",
+    "gh-pages": "^2.1.1"
   },
   "//comments": {
     "": [
-      "Based on https://github.com/jakobrosenberg/svelte-filerouter-example/blob/master/package.json",
-      "..and https://github.com/sveltejs/template/blob/master/package.json",
-      "The latter does not need 'npm-run-all"
+      "Based on:",
+      "- https://github.com/jakobrosenberg/svelte-filerouter-example/blob/master/package.json",
+      "- https://github.com/sveltejs/template/blob/master/package.json",
+      "The latter does not need 'npm-run-all",
+      "",
+      "Also see -> https://github.com/svgdotjs/svg.js/blob/master/package.json"
     ],
     "scripts": {
-      "start": "Keep this. Called by Rollup.'",
-      "cy:...": "Using 'npx' so that test suite is installed only if used."
+      "start": "Keep. Called by Rollup.'",
+      "cy:...": "Using 'npx' so that test suite is installed only if used (instead of 'devDependency').",
+      "dev,build": "Temporary aliases until we get lib & demo detached."
     },
     "dependencies": {
-      "sirv-cli, svelte-filerouter": "tbd. can these be in the 'devDependencies' side?",
-      "rxjs": "tbd. update to 5.x latest"
+      "sirv-cli, svelte-filerouter": "tbd. can these be in the 'devDependencies' side? https://github.com/akauppi/svg.rx.js/issues/10"
+    },
+    "devDependencies": {
+      "npm-run-all": "Would like to get rid of this (needed for 'run-p')."
     }
   }
 }

@@ -207,8 +207,6 @@ outerObs.subscribe( function(dragObs) {
 
 </strike>
 
----
-
 <!-- disabled; doing this
 ## Road ahead
 

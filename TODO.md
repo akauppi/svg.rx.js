@@ -37,11 +37,15 @@ With this in mind, we might be best off just waiting for RxJS to develop in this
  
 ## svg.rx.js
 
+- [ ] Split demo from main code
+- [ ] Touch back
+- [ ] Group handling
 - [ ] Collision detection
 
 ### Demos
 
 - [ ] Heart demo's shadow to move by drag
+- [ ] Undo in demos
 
 ## More Svelte
 
