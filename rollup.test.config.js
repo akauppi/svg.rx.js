@@ -1,4 +1,5 @@
-// Rollup config
+//
+// Rollup config for tests
 //
 // Note: This configuration is derived from
 //          https://github.com/jakobrosenberg/svelte-filerouter-example/blob/master/rollup.config.js
@@ -6,41 +7,31 @@
 import svelte from 'rollup-plugin-svelte';
 import resolve from 'rollup-plugin-node-resolve';
 import commonjs from 'rollup-plugin-commonjs';
-import livereload from 'rollup-plugin-livereload';
-import { terser } from 'rollup-plugin-terser';
-import { fileRouter } from 'svelte-filerouter';
+//import livereload from 'rollup-plugin-livereload';
+//import { terser } from 'rollup-plugin-terser';
 import builtins from 'rollup-plugin-node-builtins';
 import globals from 'rollup-plugin-node-globals';
 
-const production = !process.env.ROLLUP_WATCH;
-
-console.debug("PRODUCTION: "+ production);
+const production = false;   // always dev for tests
 
 export default [
-    {   // Demo app
-        input: "demo/main.js",
+    {   // Test app
+        input: "test/main.js",
         output: {
             sourcemap: true,
             format: "iife",
-            name: 'app',   // Q: what does this affect? #help
-            dir: "public/bundle"
+            name: 'blah',   // without this, Rollup gave a warning: >> (!) If you do not supply "output.name", you may not be able to access the exports of an IIFE bundle. <<
+            dir: "test/bundle"
         },
         plugins: [
-            fileRouter({
-                appFile: 'demo/App.svelte',
-                pages: 'demo/pages',
-                // ignore: '['widget.svelte']'      // interpreted as regex; '_'-prefixed files always excluded
-                unknownPropWarnings: false
-
-                // "UMD and IIFE output formats are not supported for code-splitting builds."
-                //dynamicImports: true        // "experimental code splitting"
-            }),
             svelte({
-                // enable run-time checks when not in production
+                //include: 'test/**/*.svelte',      // note this could be done
+
+                // enable run-time checks when not in production (tbd. Test always is - do we have a case for anything else?)
                 dev: !production,
-                // extract any component CSS into a separate file — better for performance and clearer
+                // extract any component CSS into a separate file — better for performance and clearer (tbd. not necessarily needed for tests?)
                 css: css => {
-                    css.write('public/bundle.css');
+                    css.write('test/bundle.css');
                 }
             }),
 
@@ -51,7 +42,7 @@ export default [
                 // no warnings for 'assert', but see -> https://github.com/rollup/rollup-plugin-node-resolve/issues/107
                 //browser: true,
                 preferBuiltins: true,
-                mainFields: ['browser'],        // tbd. what does this do? (from )
+                mainFields: ['browser'],        // tbd. what does this do? (from ...??)
                 dedupe: importee => importee === 'svelte' || importee.startsWith('svelte/')
             }),
             commonjs(),
@@ -60,17 +51,20 @@ export default [
             globals(),
             builtins(),
 
+            // disabled (if needing this, use 'test/public')
             // Watch the `public` directory and refresh the browser on changes when not in production
-            !production && livereload('public'),
+            //!production && livereload('test'),
 
+            // disabled
             // If we're building for production, minify
-            production && terser(),
+            //production && terser(),
 
+            // disabled
             // In dev mode, call `npm run start` once the bundle has been generated
-            !production && serve()
+            //!production && serve()
         ],
         watch: {
-            // Note: This supresses some clear screen, but not the one before `Your application is ready~! 🚀`.
+            // Note: This suppresses some clear screen, but not the one before `Your application is ready~! 🚀`.
             //       track -> https://github.com/rollup/rollup/issues/2820
             //
             clearScreen: false
@@ -93,7 +87,7 @@ function serve() {
                 // place.
                 //
                 //require('child_process').spawn('npx', ['sirv', 'public', '--dev', '--host', '--single'], {
-                require('child_process').spawn('npm', ['run', 'demo:_start', '--', '--dev'], {
+                require('child_process').spawn('npm', ['run', 'test:_start', '--', '--dev'], {
                     stdio: ['ignore', 'inherit', 'inherit'],
                     shell: true
                 });

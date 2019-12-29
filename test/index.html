@@ -7,22 +7,21 @@
 
     <title>svg.rx.js test harness</title>
 
-    <link rel="stylesheet" href="common.css" />
+    <link rel="stylesheet" href="global.css" />
+    <link rel='stylesheet' href='bundle.css'>
 
     <!--
     - Unit under test
     -->
-    <!--
-    <script src="lib/rxjs.umd.js"></script>
-    -->
-    <script type="module" src="svg.rx.js"></script>
+    <script type="module" src="bundle/test-all.js"></script>
 </head>
 <body>
+    <!-- disabled
     <script>
         console.log(".rx_draggable: "+ SVGElement.prototype.rx_draggable);
     </script>
 
     <h1>Test harness 🪓</h1>
-    <svg></svg>
+    -->
 </body>
 </html>

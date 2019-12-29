@@ -20,22 +20,26 @@
     "url": "https://github.com/akauppi/svg.rx.js/issues"
   },
   "license": "MIT",
+  "//scripts": {
+    "//test:headless": "cypress run",
+    "//test:dev": "cypress open",
+    "//test": "npm run test:headless",
+    "//ci": "start-server-and-test 'sirv test --port 3000' 3000 test:headless",
+    "//ci:dev": "start-server-and-test 'sirv test --port 3000' 3000 test",
+    "//pretest:...": "# lib needs no building. If it did, we'd do it here.",
+    "//prepublishOnly": "npm test:headless"
+  },
   "scripts": {
     "demo:build": "rollup -c",
     "demo:dev": "rollup -c -w",
     "demo:_start": "sirv public --single --host",
-    "test:headless": "cypress run",
-    "test:dev": "cypress open",
-    "test": "npm run test:headless",
-    "ci": "start-server-and-test 'sirv test --port 3000' 3000 test:headless",
-    "ci:dev": "start-server-and-test 'sirv test --port 3000' 3000 test",
-    "//pretest:...": "# lib needs no building. If it did, we'd do it here.",
-    "prepublishOnly": "npm test:headless",
     "gh-pages": "gh-pages -d public",
     "pregh-pages": "npm run demo:build",
     "clean": "(rm public/bundle/* public/bundle.css 2> /dev/null || true)",
     "dev": "npm run demo:dev",
-    "build": "npm run demo:build"
+    "build": "npm run demo:build",
+    "test:build": "rollup --config rollup.test.config.js",
+    "test:dev": "rollup --config rollup.test.config.js -w"
   },
   "dependencies": {
     "rxjs": "^6.5.3",
@@ -43,7 +47,10 @@
     "svelte-filerouter": "^1.4.6"
   },
   "devDependencies": {
-    "rollup": "^1.27.13",
+    "chai": "^4.2.0",
+    "cypress": "^3.2.0",
+    "gh-pages": "^2.1.1",
+    "rollup": "^1.27.14",
     "rollup-plugin-commonjs": "^10.1.0",
     "rollup-plugin-livereload": "^1.0.0",
     "rollup-plugin-node-builtins": "^2.1.2",
@@ -52,10 +59,8 @@
     "rollup-plugin-svelte": "^5.1.1",
     "rollup-plugin-terser": "^5.1.2",
     "rollup-pluginutils": "^2.8.2",
-    "svelte": "^3.16.5",
-    "gh-pages": "^2.1.1",
-    "cypress": "^3.2.0",
-    "start-server-and-test": "^1.7.13"
+    "start-server-and-test": "^1.7.13",
+    "svelte": "^3.16.7"
   },
   "//comments": {
     "": [

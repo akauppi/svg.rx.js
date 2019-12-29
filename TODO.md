@@ -37,16 +37,20 @@ With this in mind, we might be best off just waiting for RxJS to develop in this
  
 ## svg.rx.js
 
-- [ ] Tests: decide between Cypress and Puppeteer
+- [ ] Tests: <strike>decide</strike> between Cypress and Puppeteer
   - we only need to test static files (Cypress needs things to be served) 
   - Cypress installs a native (GUI) app; a bit excessive... 
+  - Use *both*: allows us to compare the stacks (with the price of writing the tests twice). Load on-demand via `npx`.
 - [ ] Split demo from main code
+  - demo doesn't need to have tests; good to separate Git histories
+  - [ ] use `demo/public` instead of `public` for the output
 - [ ] Touch back
 - [ ] Group handling
 - [ ] Collision detection
 
 ### Demos
 
+- [ ] **Import of graphics from external file**
 - [ ] Heart demo's shadow to move by drag
 - [ ] Undo in demos
 
@@ -57,4 +61,9 @@ There are discussions about merger of Svelte and RxJS patterns.
 Study if we can integrate the `svg.rx.js` APIs to be visible as Svelte observables, instead of RxJS observables.
 
 
+## References
 
+- [e2echeck](https://github.com/Mercateo/e2e-check) (GitHub; blog-like)
+  - mentions use of multiple test suits, for the same code
+
+  

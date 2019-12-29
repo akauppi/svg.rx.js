@@ -1,11 +1,17 @@
 /node_modules/
 /public/bundle.*
-/public/bundle/**
+/public/bundle/
+
+/test/bundle.*
+/test/bundle/
 
 #/npm-debug.log
 #/package-lock.json
 
+# npm output
 /*.tgz
+
+/cypress/videos/
 
 # IntelliJ IDEA folder '/.idea/' intentionally not included
 #/.idea/
