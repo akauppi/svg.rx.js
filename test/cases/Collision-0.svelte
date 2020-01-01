@@ -1,5 +1,5 @@
 <!--
-- cases/Collision0.svelte
+- cases/Collision-0.svelte
 -
 - Test cases as a Svelte component.
 - Checks that SVG elements that do not collide are reported as such.
