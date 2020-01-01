@@ -19,8 +19,22 @@
     const rect0 = document.querySelector("#case-0 > rect");
     const line0 = document.querySelector("#case-0 > line");
 
-    const x = checkCollision(rect0, line0);
+    // tbd...
+    //const x = checkCollision(rect0, line0);
 
+    /*** Chai tests could be here... (and run by simply opening the browser hmmmmm...) ***/
+
+    /*** Cypress tests ***/     // ..not even sure this is the right place for them
+
+    /*** disabled
+    describe('Sample Test', () => {
+        it('should visit home page', () => {
+            cy.visit('/index.html');
+        });
+    });
+    ***/
+
+    /*** remove?
     describe('Collision tests #0', () => {
         it('Tests should be here', () => {
             // tbd. should
@@ -29,6 +43,7 @@
             assert(false);
         });
     });
+    ***/
 </script>
 
 <style>

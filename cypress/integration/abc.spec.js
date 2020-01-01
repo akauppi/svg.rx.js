@@ -7,11 +7,12 @@
 */
 describe('svg.rx.js', () => {
     beforeEach(() => {
-        cy.visit('/')
+        cy.visit('index.html')
     });
 
     it('has an SVG cradle', () => {     // placeholder
-        cy.get('svg');      // note: we don't need to assert/should; CY fails if the 'get' does
+        cy.get('svg')
+            .should('exist');
     });
 
     //... tbd. Learn Cypress & make actual tests - per feature :)

@@ -21,3 +21,12 @@ See the `GxSub` code in `test/gx-test.js` for a sample on how to inherit.
 
 `Object.create` introduces the property table concept, which may be useful. The choice, whether to use this feature or not is wholly on the inheriting class.
 
+
+
+## Testability design
+
+Trying an approach where Svelte 3 is used *also* for the definition of test cases.
+
+
+
+

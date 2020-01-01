@@ -73,6 +73,19 @@ We embrace Svelte as the building technology and wish to remain familiar in stru
 
 ---
 
+## Requirements
+
+- `npm`
+
+If you wish to run tests, Cypress is expected to be globally installed:
+
+```
+$ npm install -g cypress
+```
+
+Alternatively, edit `package.json` and replace `cypress` with `npx cypress`.
+
+
 ## Getting started
 
 Install the tools and dependencies (needed for running demos):

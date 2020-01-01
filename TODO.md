@@ -48,6 +48,8 @@ With this in mind, we might be best off just waiting for RxJS to develop in this
 - [ ] Group handling
 - [ ] Collision detection
 
+- [ ] Rename src/*.js -> src/*.mjs ?    (does it matter?)
+
 ### Demos
 
 - [ ] **Import of graphics from external file**
@@ -59,6 +61,13 @@ With this in mind, we might be best off just waiting for RxJS to develop in this
 There are discussions about merger of Svelte and RxJS patterns. 
 
 Study if we can integrate the `svg.rx.js` APIs to be visible as Svelte observables, instead of RxJS observables.
+
+
+## Testing duel
+
+- [Puppeteer](https://developers.google.com/web/tools/puppeteer) has all that we need, and some useful stuff like "touch emulation". #drooling
+
+However, let's go Cypress, at least until we know it well. There's no benefit in *maintaining* two test stacks, but there's certainly benefit in *learning* them borh. ("borh", that's a nice word, eh?) /AKa 1-Jan-20 
 
 
 ## References

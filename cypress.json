@@ -1,8 +1,12 @@
 {
-	"baseUrl": "http://localhost:3000",
-	"//video": false,
+	"baseUrl": "http://localhost:3092",
+	"video": false,
 
 	"//comments": {
-		"baseUrl": "where the app is running"
+		"baseUrl": [
+			"where the app is running",
+			"couldn't use 'file://test/index.html' URL :( - tests are just static pages so this only compilcates things",
+			"Keep 3092 (port number) in sync with 'package.json'"
+		]
 	}
 }
