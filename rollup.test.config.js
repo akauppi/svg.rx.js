@@ -16,6 +16,8 @@ import globals from 'rollup-plugin-node-globals';
 //
 const watching = process.env.ROLLUP_WATCH;
 
+const production = false;
+
 export default [
     {   // Test app
         input: "test/main.js",
@@ -29,8 +31,8 @@ export default [
             svelte({
                 //include: 'test/**/*.svelte',      // note this could be done
 
-                // enable run-time checks always for tests (any reason not to? maybe performance testing?)
-                dev: true,
+                // enable run-time checks
+                dev: !production,
                 // extract any component CSS into a separate file — better for performance and clearer (tbd. not necessarily needed for tests?)
                 css: css => {
                     css.write('test/bundle.css');
