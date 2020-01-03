@@ -77,13 +77,7 @@ We embrace Svelte as the building technology and wish to remain familiar in stru
 
 - `npm`
 
-If you wish to run tests, Cypress is expected to be globally installed:
-
-```
-$ npm install -g cypress
-```
-
-Alternatively, edit `package.json` and replace `cypress` with `npx cypress`.
+If you run tests, Cypress gets installed, on-demand.
 
 
 ## Getting started
@@ -94,18 +88,65 @@ Install the tools and dependencies (needed for running demos):
 $ npm install
 ```
 
-<!-- remove (replace with mention of installing Puppeteer; only needed for running the tests)
+### Running tests
+
+The project has test cases that can be played with manually, or used for Cypress tests.
+
+<!-- disabled: We may remove the mention of 'bare' if Cypress works nice. We can play with code manually in its Chrome session just as well. --
+
+### Test cases - bare
+
+Now, you can open a test page manually:
+
+```
+$ npm run test:dev
+```
+
+This builds a test page and serves it at `http://localhost:3000`. If you edit the `test` source, changes are immediately shown in the browser. Use this for developing the test cases.
+
+You can also play around with the cases (drag etc.).
 -->
-<strike>Have PhantomJS installed, on the command line:
+
+
+### Test cases - with Cypress UI
+
+The test cases have unit tests written in Cypress (disclaimer: Cypress is *not* for unit tests - I know).
 
 ```
-$ phantomjs --version
-2.1.1
+$ npm run cy:open
 ```
-</strike>
 
-><font color=orange>⚠️ PhantomJS is discontinued. Change tests to run with Puppeteer.</font>
+This opens the tests in Cypress, a test maniac.
 
+![](.images/cypress.png)
+
+You can select the browser from the top right, then run a certain test suite or "Run all specs".
+
+The tests run in a separate browser window:
+
+![](.images/cypress-chrome.png)
+
+The nice thing about Cypress is you can time travel through the tests, seeing exactly what was going on in the browser. 
+
+
+### Test cases in command line
+
+The same tests can be run on the command line, by:
+
+```
+$ npm cy:run
+...
+       Spec                                              Tests  Passing  Failing  Pending  Skipped  
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ ✖  abc.spec.js                              00:01        1        -        1        -        - │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+    ✖  1 of 1 failed (100%)                     00:01        1        -        1        -        -  
+```
+
+
+---
+
+<font color=red>WARNING: remaining content out-of-data</font>
 
 ## Demos
 

@@ -5,24 +5,24 @@
 *
 * Let's test the library separately from the demos (allows us to detach them).
 */
-import {createEventDispatcher} from "svelte";
-
-describe('svg.rx.js', () => {
+describe('svg.rx.js collision detection', () => {
     beforeEach(() => {
         cy.visit('index.html')
     });
 
-    // tbd. Iterate over the SVG's and send 'cyTest' event to them.
-    //
+    // tbd. Iterate over the SVG's on the page, and assure we have tests for all of them.
 
-    let dispatch = createEventDispatcher();
-    function myCustom() {
-        cy.get('svg#case-1').dispatch("cyTest");
-    }
+    it('have a circle that changes colour', () => {     // EXPLORATION
+        cy.get('svg#case-1 > circle').then( $circle => {
+            getComputedStyle($circle.get(0)).fill.should.be( 'red');
+            cy.click($circle);
 
-    it('has an SVG cradle', () => {     // placeholder
-        cy.get('svg')
-            .should('exist');
+            getComputedStyle($circle.get(0)).fill.should.be( 'blue');
+            cy.click($circle);
+
+            getComputedStyle($circle.get(0)).fill.should.be( 'red');
+            cy.click($circle);
+        });
     });
 
     //... tbd. Learn Cypress & make actual tests - per feature :)

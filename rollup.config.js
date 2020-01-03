@@ -12,9 +12,10 @@ import { fileRouter } from 'svelte-filerouter';
 import builtins from 'rollup-plugin-node-builtins';
 import globals from 'rollup-plugin-node-globals';
 
-const production = !process.env.ROLLUP_WATCH;
+// Note: production status is derived from whether we're watching, but those are two different things.
 
-console.debug("PRODUCTION: "+ production);
+const watching = process.env.ROLLUP_WATCH;
+const production = !watching;       // tbd. for now, maybe introduce a 'PRODUCTION' env.var. in package.json
 
 export default [
     {   // Demo app
@@ -60,8 +61,8 @@ export default [
             globals(),
             builtins(),
 
-            // Watch the `public` directory and refresh the browser on changes when not in production
-            !production && livereload('public'),
+            // Bring changes to the browser automatically, if Rollup watches the sources
+            watching && livereload('public'),
 
             // If we're building for production, minify
             production && terser(),
@@ -78,6 +79,8 @@ export default [
     }
 ];
 
+// tbd. We probably want to remove this, in favor of 'concurrently' in package.json?
+//
 function serve() {
     let started = false;
 

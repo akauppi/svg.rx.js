@@ -21,13 +21,15 @@
 
     let circleClicked = false;
 
-    /*** remove
-    if (typeof describe !== "undefined") {     // running in Cypress (not interactive 'npm run test:dev')
-    ***/
+    /*
+    * Run the test, either manually or pushed by Cypress
+    */
+    function testMe() {
+        const circleEl = svgEl.querySelector('circle');
 
-    // Tests are run if opened in Cypress (not the interactive 'npm run test:dev')
-    //
-    function cyTest(cy, describe, it) {
+        // ...undone!
+
+
         describe('#indexOf()', function() {
             it('should return -1 when the value is not present', function() {
                 assert.equal([1, 2, 3].indexOf(4), -1);
@@ -55,8 +57,8 @@
 </style>
 
 <h1>Rect with circle (sounds like an art title)</h1>
-<svg viewBox="0 0 220 100" bind:this={svgEl} on:cyTest={cyTest}>
+<svg viewBox="0 0 220 100" bind:this={svgEl} id="case-1">
     <rect x="100" y="150" width="100" height="50"></rect>
     <circle class:selected={circleClicked} cx="78" cy="52" r="30" on:click={() => circleClicked = !circleClicked }/>
 </svg>
-<button>Test</button>
+<button on:click={testMe}>Test</button>

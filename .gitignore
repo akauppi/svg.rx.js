@@ -12,6 +12,7 @@
 /*.tgz
 
 /cypress/videos/
+/cypress/screenshots/
 
 # IntelliJ IDEA folder '/.idea/' intentionally not included
 #/.idea/

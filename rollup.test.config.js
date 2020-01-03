@@ -12,7 +12,9 @@ import livereload from 'rollup-plugin-livereload';
 import builtins from 'rollup-plugin-node-builtins';
 import globals from 'rollup-plugin-node-globals';
 
-const production = false;   // always dev for tests
+// Enable live reload if Rollup is watching the sources (note: this doesn't really mean "production")
+//
+const watching = process.env.ROLLUP_WATCH;
 
 export default [
     {   // Test app
@@ -27,8 +29,8 @@ export default [
             svelte({
                 //include: 'test/**/*.svelte',      // note this could be done
 
-                // enable run-time checks when not in production (tbd. Test always is - do we have a case for anything else?)
-                dev: !production,
+                // enable run-time checks always for tests (any reason not to? maybe performance testing?)
+                dev: true,
                 // extract any component CSS into a separate file — better for performance and clearer (tbd. not necessarily needed for tests?)
                 css: css => {
                     css.write('test/bundle.css');
@@ -63,18 +65,10 @@ export default [
             //      both exclusions and multiple watched directories. -> https://www.npmjs.com/package/livereload
             //      but didn't get that to work. With those, we could do without the 'public'.
             //
-            livereload({
+            watching && livereload({
                 watch: 'test' //,
                 //exclusions: ["**.svelte", "test/main.js"]
-            }),
-
-            // disabled
-            // If we're building for production, minify
-            //production && terser(),
-
-            // disabled
-            // In dev mode, call `npm run start` once the bundle has been generated
-            //!production && serve()
+            })
         ],
         watch: {
             // Note: This suppresses some clear screen, but not the one before `Your application is ready~! 🚀`.
@@ -84,27 +78,3 @@ export default [
         }
     }
 ];
-
-function serve() {
-    let started = false;
-
-    return {
-        writeBundle() {
-            if (!started) {
-                started = true;
-
-                // Based on https://github.com/sveltejs/template/blob/master/rollup.config.js
-                //
-                // Uses 'package.json' 'start' target, but adds '--dev' to it. Alternatively, we could launch stuff
-                // right here, but going through 'package.json' has the benefit that other params are just in one
-                // place.
-                //
-                //require('child_process').spawn('npx', ['sirv', 'public', '--dev', '--host', '--single'], {
-                require('child_process').spawn('npm', ['run', 'test:_start', '--', '--dev'], {
-                    stdio: ['ignore', 'inherit', 'inherit'],
-                    shell: true
-                });
-            }
-        }
-    };
-}
