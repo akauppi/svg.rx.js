@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## latest
+
+- using `npm test:dev` with `livereload` (not updated the README, yet)
+
 ## 0.0.6-alpha
 
 - started transition to 2019 tech :)

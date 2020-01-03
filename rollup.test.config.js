@@ -7,7 +7,7 @@
 import svelte from 'rollup-plugin-svelte';
 import resolve from 'rollup-plugin-node-resolve';
 import commonjs from 'rollup-plugin-commonjs';
-//import livereload from 'rollup-plugin-livereload';
+import livereload from 'rollup-plugin-livereload';
 //import { terser } from 'rollup-plugin-terser';
 import builtins from 'rollup-plugin-node-builtins';
 import globals from 'rollup-plugin-node-globals';
@@ -51,9 +51,22 @@ export default [
             globals(),
             builtins(),
 
-            // disabled (if needing this, use 'test/public')
-            // Watch the `public` directory and refresh the browser on changes when not in production
-            //!production && livereload('test'),
+            // Watch the 'test' directory and refresh the browser on changes. Covers both Svelte output (test/bundle**)
+            // and the more static frame files.
+            //
+            // Note:
+            //      Also Svelte source files ('test/main.js', 'test/**.svelte') are included in the pattern, but
+            //      changes in them don't seem to cause unnecessary refreshes.
+            //
+            //      If this becomes an issue:
+            //      'node-livereload' (that the 'rollup-plugin-reload' states "options are always passed to") supports
+            //      both exclusions and multiple watched directories. -> https://www.npmjs.com/package/livereload
+            //      but didn't get that to work. With those, we could do without the 'public'.
+            //
+            livereload({
+                watch: 'test' //,
+                //exclusions: ["**.svelte", "test/main.js"]
+            }),
 
             // disabled
             // If we're building for production, minify

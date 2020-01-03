@@ -56,6 +56,11 @@ With this in mind, we might be best off just waiting for RxJS to develop in this
 - [ ] Heart demo's shadow to move by drag
 - [ ] Undo in demos
 
+### Tests
+
+- [ ] Could do "accordeon" UI to keep multiple tests, but showing only one.
+ 
+
 ## More Svelte
 
 There are discussions about merger of Svelte and RxJS patterns. 

@@ -35,12 +35,11 @@
     "gh-pages": "gh-pages -d public",
     "pregh-pages": "npm run demo:build",
     "test:_build": "rollup --config rollup.test.config.js",
-    "test:_start": "sirv test --port 3000 --single --dev",
     "test:headless": "start-server-and-test 'sirv test --port 3092' 3092 'npx cypress run'",
     "//test:headless": "npx cypress run",
     "//test:open": "npx cypress open",
     "test:open": "start-server-and-test 'sirv test --port 3092' 3092 'npx cypress open'",
-    "test:dev": "rollup --config rollup.test.config.js -w",
+    "test:dev": "concurrently --restart-tries 10 --names rollup,sirv \"rollup --config rollup.test.config.js -w\" \"sirv test --port 3000 --single --dev\"",
     "pretest:headless": "npm run test:_build",
     "pretest:open": "npm run test:_build",
     "---pretest:_start": "npm run test:clean",
@@ -56,6 +55,7 @@
   },
   "devDependencies": {
     "chai": "^4.2.0",
+    "concurrently": "^5.0.2",
     "cypress": "^3.8.1",
     "gh-pages": "^2.1.1",
     "rollup": "^1.27.14",
@@ -89,6 +89,8 @@
     "dependencies": {
       "sirv-cli, svelte-filerouter": "tbd. can these be in the 'devDependencies' side? https://github.com/akauppi/svg.rx.js/issues/10"
     },
-    "devDependencies": {}
+    "devDependencies": {
+      "concurrently": "Sweet!🍭 -> https://www.npmjs.com/package/concurrently"
+    }
   }
 }
