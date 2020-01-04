@@ -59,7 +59,11 @@ With this in mind, we might be best off just waiting for RxJS to develop in this
 ### Tests
 
 - [ ] Could do "accordeon" UI to keep multiple tests, but showing only one.
- 
+- [ ] Replace `sirv` with something more...
+  - It clears the screen unoptionally (before the rocket)
+  - It doesn't document the options (though source code is clear on `--single` = fallback missing routes to index and `--dev` = no caching)
+  - **It carries on with auto-generated port**, and this cannot be switched off.
+  - [ ] Maybe see how some samples had a `serve` function, as part of `package.json`
 
 ## More Svelte
 
