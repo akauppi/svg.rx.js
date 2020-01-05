@@ -25,3 +25,28 @@ Then again, loading from `file://` will introduce CORS issues with some browsers
 
 ---
 
+
+## `.should.have.css(...)`
+
+Cypress allows this:
+
+```
+expect($el).to.have.css('background-color', 'rgb(0, 0, 0)')
+```
+
+...but not this:
+
+```
+$el.should.have.css('background-color', 'rgb(0, 0, 0)')
+
+# $el.should.have.css('background-color', 'rgb(0, 0, 0)')
+```
+
+Is there a reason, why not?  Can we make it support it?
+
+- [ ] open discussion at their forums. Nothing to track, yet.
+
+Nah, seems that's the way `.should` works, in general. Maybe we can extend, but that would change the *overall* should, not just this case.
+
+-> https://docs.cypress.io/api/commands/should.html#Yields
+

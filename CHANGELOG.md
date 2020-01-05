@@ -2,7 +2,8 @@
 
 ## latest
 
-- using `npm test:dev` with `livereload` (not updated the README, yet)
+- using `npm test:dev` with `livereload`
+- got first realish Cypress tests to pass 🎉 
 
 ## 0.0.6-alpha
 
