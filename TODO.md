@@ -1,15 +1,14 @@
 # TODO
 
-## Demos
+Sometimes it's faster to write down things here. [GitHub Issues](https://github.com/akauppi/svg.rx.js/issues) is the official place for feedback.
 
-- Menu to be horizontally centered
+---
 
-## Other
-
-- Using streams for an animation API
-  - test with demo 4, at least
+## npm 
 
 - [ ] package and publish (once ready for it)
+
+## Other
 
 - [ ] Would someone with Microsoft devices (using `pointerdown` etc.) want to suggest PR's? See -> [Issue #2](https://github.com/akauppi/svg.rx.js/issues/2)
 
@@ -17,53 +16,45 @@
 
 - Once ES7 `Observable`s are out, check if they are enough for us (i.e. would we still need/benefit from RxJS) (not urgent)
   - Svelte observables could do the same
+
   
+<!-- disabled. test with modern RxJS, one day.  
 ## Backpressure 
+
+<font color=red>This may have already been handled by recent (>5) RxJS versions. Just need manual testing.</font>
 
 - if the drag produces more coordinates than the subscriber can handle, we'd be okay always skipping to the latest one. AKa251015
   
-Note that RxJS states this about [backpressure](https://github.com/Reactive-Extensions/RxJS/blob/master/doc/gettingstarted/backpressure.md#future-work):
+Note that RxJS states this about [backpressure](https://github.com/Reactive-Extensions/RxJS/blob/master/doc/gettingstarted/backpressure.md#future-work) (version 4):
 
 >In future versions of RxJS, the idea of the controlled observable will be baked into the subscription itself which then allows the backpressure to be an essential part of the contract or requesting n number of items.
 
 With this in mind, we might be best off just waiting for RxJS to develop in this direction, and handling all the drag events until it does. AKa050616
-
-## One Day...
-
-- redefining group methods so that `move` etc. start making sense.
-  - change translation before first move = set the origin of a group
-  - freeze the origin e.g. with first move
-  - just make it so that `move`, `rotate` etc. really work (so we don`t need to move by translate, as it is now)
- 
-## svg.rx.js
+-->
 
 - [ ] Tests: <strike>decide</strike> between Cypress and Puppeteer
   - we only need to test static files (Cypress needs things to be served) 
   - Cypress installs a native (GUI) app; a bit excessive... 
-  - Use *both*: allows us to compare the stacks (with the price of writing the tests twice). Load on-demand via `npx`.
-- [ ] Split demo from main code
+
+- [x] Split demo from main code
   - demo doesn't need to have tests; good to separate Git histories
-  - [ ] use `demo/public` instead of `public` for the output
-- [ ] Touch back
+- [ ] **Touch back**
 - [ ] Group handling
-- [ ] Collision detection
 
-- [ ] Rename src/*.js -> src/*.mjs ?    (does it matter?)
+- [ ] Rename src/*.js -> src/*.mjs ? (does it matter?)
 
-### Demos
+<!-- mentioned in demo; needs work in both
+## Asset workflow
 
-- [ ] **Import of graphics from external file**
-- [ ] Heart demo's shadow to move by drag
-- [ ] Undo in demos
+- [ ] **Import of graphics from external file** (where it is editable)
+  - handle e.g. arms, as subgroups of such graphics, from the script
 
-### Tests
+-->
+
+
+## Tests
 
 - [ ] Could do "accordeon" UI to keep multiple tests, but showing only one.
-- [ ] Replace `sirv` with something more...
-  - It clears the screen unoptionally (before the rocket)
-  - It doesn't document the options (though source code is clear on `--single` = fallback missing routes to index and `--dev` = no caching)
-  - **It carries on with auto-generated port**, and this cannot be switched off.
-  - [ ] Maybe see how some samples had a `serve` function, as part of `package.json`
 
 ## More Svelte
 
@@ -83,5 +74,4 @@ However, let's go Cypress, at least until we know it well. There's no benefit in
 
 - [e2echeck](https://github.com/Mercateo/e2e-check) (GitHub; blog-like)
   - mentions use of multiple test suits, for the same code
-
-  
+ 

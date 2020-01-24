@@ -4,6 +4,7 @@
 
 - using `npm test:dev` with `livereload`
 - got first realish Cypress tests to pass 🎉 
+- carving demo out to a separate repo
 
 ## 0.0.6-alpha
 

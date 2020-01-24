@@ -1,7 +1,7 @@
 {
   "name": "svg.rx.js",
   "version": "0.0.7-alpha.1",
-  "description": "Making SVG elements draggable, using RxJS.",
+  "description": "Making SVG elements interactive, using Svelte 3 and RxJS.",
   "keywords": [
     "svg",
     "vector",
@@ -21,36 +21,26 @@
   },
   "license": "MIT",
   "scripts": {
-    "build": "npm run demo:build",
-    "dev": "npm run demo:dev",
     "test": "npm run cy:run",
-    "demo:build": "rollup -c",
-    "demo:dev": "rollup -c -w",
-    "demo:_start": "sirv public --single --host",
-    "~~~gh-pages": "gh-pages -d public",
-    "pregh-pages": "npm run demo:build",
     "test:_build": "rollup --config rollup.test.config.js",
+    "test:dev": "concurrently --restart-tries 10 --names rollup,sirv \"rollup --config rollup.test.config.js -w\" \"sirv test --port 3000 --single --dev\"",
     "cy:run": "start-server-and-test 'http-server test -c-1 --port 3091' 3091 'npx cypress run --config baseUrl=http://localhost:3091'",
     "cy:open": "start-server-and-test 'http-server test -c-1 --port 3092' 3092 'npx cypress open --config baseUrl=http://localhost:3092'",
-    "test:dev": "concurrently --restart-tries 10 --names rollup,sirv \"rollup --config rollup.test.config.js -w\" \"sirv test --port 3000 --single --dev\"",
     "precy:run": "npm run test:_build",
-    "---precy:open": "npm run test:_build",
+    "precy:open": "npm run test:_build",
     "prepublishOnly": "npm test",
-    "demo:clean": "(rm public/bundle/* public/bundle.css 2> /dev/null || true)",
+    "--aaa:clean": "(rm public/bundle/* public/bundle.css 2> /dev/null || true)",
     "test:clean": "(rm test/bundle/* test/bundle.css 2> /dev/null || true)",
-    "clean": "concurrently \"npm run demo:clean\" \"npm run test:clean\""
+    "clean": "concurrently \"npm run aaa:clean\" \"npm run test:clean\""
   },
   "dependencies": {
     "http-server": "^0.12.0",
-    "rxjs": "^6.5.4",
-    "sirv-cli": "^0.4.4",
-    "svelte-filerouter": "^1.4.6"
+    "rxjs": "^6.5.4"
   },
   "devDependencies": {
     "chai": "^4.2.0",
     "concurrently": "^5.0.2",
     "cypress": "^3.8.1",
-    "gh-pages": "^2.1.1",
     "rollup": "^1.27.14",
     "rollup-plugin-commonjs": "^10.1.0",
     "rollup-plugin-livereload": "^1.0.0",
@@ -65,23 +55,14 @@
   },
   "//comments": {
     "": [
-      "Based on:",
-      "- https://github.com/jakobrosenberg/svelte-filerouter-example/blob/master/package.json",
-      "- https://github.com/sveltejs/template/blob/master/package.json",
-      "",
       "We prefer 'start-server-and-test' over 'npm-run-all' approach (just more explicit, than 'run-p' race).",
-      "",
-      "Also see:",
-      "- https://github.com/svgdotjs/svg.js/blob/master/package.json"
+      "We also prefer 'concurrently' over 'run-p'."
     ],
     "scripts": {
-      "": "Targets which are aimed to be implementation-detail (can change any time) have underscores (e.g. 'demo:_start')",
-      "start": "Keep. Called by Rollup.'",
-      "dev,build": "Temporary aliases until we get lib & demo detached."
+      "": "Targets which are aimed to be implementation-detail (can change any time) have underscores (e.g. 'demo:_start')"
     },
     "dependencies": {
-      "sirv-cli, svelte-filerouter": "tbd. can these be in the 'devDependencies' side? https://github.com/akauppi/svg.rx.js/issues/10",
-      "http-server": "Prefer over 'sirv' if we can (sirv has the feature of suggesting another port if the one we want is taken, and it cannot be turned off...)"
+      "http-server": "Prefer over 'sirv' if we can (sirv 0.4.4 has the feature of suggesting another port if the one we want is taken, and it cannot be turned off...)"
     },
     "devDependencies": {
       "concurrently": "Sweet!🍭 -> https://www.npmjs.com/package/concurrently"

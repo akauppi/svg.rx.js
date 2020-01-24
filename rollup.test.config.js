@@ -8,7 +8,6 @@ import svelte from 'rollup-plugin-svelte';
 import resolve from 'rollup-plugin-node-resolve';
 import commonjs from 'rollup-plugin-commonjs';
 import livereload from 'rollup-plugin-livereload';
-//import { terser } from 'rollup-plugin-terser';
 import builtins from 'rollup-plugin-node-builtins';
 import globals from 'rollup-plugin-node-globals';
 
@@ -73,9 +72,6 @@ export default [
             })
         ],
         watch: {
-            // Note: This suppresses some clear screen, but not the one before `Your application is ready~! 🚀`.
-            //       track -> https://github.com/rollup/rollup/issues/2820
-            //
             clearScreen: false
         }
     }

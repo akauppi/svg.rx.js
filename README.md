@@ -4,40 +4,41 @@
 
 ## What is it?
 
-`svg.rx.js` binds [RxJS](https://github.com/Reactive-Extensions/RxJS) together with SVG graphics.
+`svg.rx.js` binds [RxJS](https://github.com/Reactive-Extensions/RxJS) together with SVG graphics. It's intended for Svelte 3 applications, but is published as a plain node.js browser-targeted library.
 
-It currently uses [svg.js](https://github.com/wout/svg.js) for dealing with the SVG elements, but this dependency may later be relaxed (so that any such library could be used, or none at all, leaving it an application decision).
+With `svg.rx.js`, you can:
 
-With `svg.rx.js`, user interactions such as touch and mouse events can be modeled as `RX.Observable`s, tremendously simplifying the code concerned.
+- follow touch and mouse events on SVG graphic components, as an RxJS `Observable`, tremendously simplifying the code concerned.
+- forget about most of conversions needed in the process
 
-The intention is that also animations would be modeled to use `Rx.Observable`s, instead of SVG-specific constructs that have a learning curve, and limitations.
+The end game is to get a simple programming paradigm for making SVG-only animated, interactive applications that run fast in the browser. This programming model was pioneered by (at least) [Asymetrix Toolbook](https://en.wikipedia.org/wiki/ToolBook) (1990-), [Macromedia/Adobe Flash](https://en.wikipedia.org/wiki/Adobe_Flash) (~1996-2020), and maybe originates in [HyperCard](https://fi.wikipedia.org/wiki/HyperCard) (1987-).
 
-The end game is to get a simple programming paradigm for making SVG-only animated, interactive applications that run fast in the browser.
+The reasons why this isn't already practical lie within the SVG details and simply missing workflows.
 
-The reasons why this isn't already practical lie within the SVG details. It doesn't seem easy to make a group out of SVG elements that can be dragged and interacted with. <strike>We're intending to fix these shortcomings, with the `gx` object.</strike>
-
-><font color=orange>tbd. In the mean time (2017-19), Svelte 3 emerged. Looking at integration with it, now.</font>
 
 ## Design goals
 
-- simplicity of API over feature support
-- every documented API must have unit tests
 - touch and mouse should not seem very different
 - touch first (treat mouse as a useable fallback 2nd class citizen)
 - any touch is treated the same (enables multiuser touch on a big tablet/table)
-- providing the bare mechanisms needed, instead of trying to cater for a certain kind of application
+
+Implementation details:
+
+- every documented API must have unit tests
 - value brewity of the code, and maintainability
-- provide support for both desktop and touch use cases, equally
-- embrace Svelte 3, as a development abstraction and toolchain
+
+<!-- disabled
+- embrace Svelte 3, as a development abstraction and toolchain (doesn't necessarily matter to this project)
+-->
   
 ## Platform scope
 
-Scope of the project is SVG on modern browsers. That probably means no IE9..11 support (we can always add that later). In practice the code gets tested on:
+Scope of the project is SVG on modern "evergreen" browsers. That probably means no IE9..10 support (IE11 support can be added, if needed). In practice the code gets tested on:
 
 - Latest Safari on macOS
 - Latest Chrome on macOS
 - Safari on iOS 13 (iPad Pro)
-- Chrome on Android 9 (Sony Xperia phone) 
+- Chrome on Android 9/10 (Sony Xperia phone) 
 
 <!-- hidden (but take back?)
 - Chrome on Andoid xxx (Nexus 7)
@@ -47,6 +48,8 @@ If you find platforms where it doesn't work for you, [issues](https://github.com
 
 ## Not supported
   
+>Note: These details are from earlier version. To be updated, in 2020.
+  
 - Dragging of `SVG.Nested` and `SVG.Text`
   - there is special code for these in the [svg.draggable.js](https://github.com/wout/svg.draggable.js) project but since we don't have demos for these, we are currently not supporting them, at all
 
@@ -55,30 +58,16 @@ If you find platforms where it doesn't work for you, [issues](https://github.com
 
 Please send a PR if you need these - and provide a demo or test that proves when the support works.
 
-## Following Svelte conventions
-
-The folder structure is derived from [Svelte template](https://github.com/sveltejs/template). In particular:
-
-```
-|- public      # files to host
-|   |- index.html
-|   |- global.css
-|   |- build      # output folder for the bundles
-|       |- ...
-|- src         # source files
-``` 
-
-We embrace Svelte as the building technology and wish to remain familiar in structure to developers using it, elsewhere.
-
-
 ---
 
 ## Requirements
 
 - `npm`
 
-If you run tests, Cypress gets installed, on-demand.
+<!-- disabled: are we going to use Cypress or Puppeteer?
 
+If you run tests, Cypress gets installed, on-demand.
+-->
 
 ## Getting started
 
@@ -88,15 +77,22 @@ Install the tools and dependencies (needed for running demos):
 $ npm install
 ```
 
-### Running tests
+Run the tests:
+
+```
+$ npm test
+```
+
+## Running tests
 
 The project has test cases that can be played with manually, or used for Cypress tests.
 
-<!-- disabled: We may remove the mention of 'bare' if Cypress works nice. We can play with code manually in its Chrome session just as well. --
+<!-- disabled: We may remove the mention of 'bare' if Cypress works nice. We can play with code manually in its Chrome session just as well. 
+-->
 
 ### Test cases - bare
 
-Now, you can open a test page manually:
+You can open a test page manually:
 
 ```
 $ npm run test:dev
@@ -104,8 +100,13 @@ $ npm run test:dev
 
 This builds a test page and serves it at `http://localhost:3000`. If you edit the `test` source, changes are immediately shown in the browser. Use this for developing the test cases.
 
-You can also play around with the cases (drag etc.).
--->
+#### Running on a mobile device
+
+While `test:dev` is served, open the mobile device's browser at `http://192.168.1.234:3000` (IP mentioned by `npm run test:dev`).
+
+This allows you to experiment with the demos. 
+
+>For setting up remote debugging, see [DEV-TIPS/Remote debugging](DEV-TIPS/Remote%20debugging.md).
 
 
 ### Test cases - with Cypress UI
@@ -144,73 +145,19 @@ $ npm cy:run
 ```
 
 
----
-
-<font color=red>WARNING: remaining content out-of-data</font>
-
-## Demos
-
-- [sources](demo.svelte/)
-- [online](http://akauppi.github.io/svg.rx.js/index.html) - may not be the latest versions
-
-><font color=orange>Note: The online demos are currently from an older branch (2015-16); they are *not* what the source creates. WIP</font>
-
-The demos work both as sample code and as manual tests.
-
-```
-$ npm run dev
-...
-  Your application is ready~! 🚀
-
-  - Local:      http://0.0.0.0:5000
-  - Network:    http://192.168.1.234:5000
-
-────────────────── LOGS ──────────────────
-```
-
-This builds the demos and serves them. Changes to the code will be reflected in the browser, without need of refresh. 😏
-
-
-### Running on a mobile device
-
-Open the mobile device's browser at `http://192.168.1.234:5000` (IP mentioned by `npm run dev`).
-
-This allows you to experiment with the demos. 
-
->For setting up remote debugging, see [DEV-TIPS/Remote debugging](DEV-TIPS/Remote%20debugging.md).
-
-
+<!-- disabled (no need?)
 ## Code
 
-- [src/svg.rx.js](src/svg.rx.js)
+|||
+|---|---|
+|`src/main.js`|main entry point|
+|`src/dragging.js`|dragging features|
+-->
 
->Note: The code is currently using RxJS 5.
-
-><font color=orange>⚠️ RxJS is now at 6.5.3 and 7.0.0-alpha.0. Upgrade to 6.x.</font>
-
-
-## Tests 
-
-All claimed features should have tests.
-
-Run the tests:
-
-```
-$ npm test
-```
-
-Alternatively, you can run the tests in a browser:
-
-```
-$ open test/index.html
-```
-
->💔<font color=orange>There are no tests at the moment. We'll tranfer the earlier ones to Puppeteer, at some point.</font>
-
-
+<!-- disabled (outdated)
 ## Usage 
 
->⚠️<font color=orange>WARNING: This section is out-of-date. To be corrected once we have transitioned to Svelte, fully.</font>
+>⚠️<font color=orange>WARNING: This section is out-of-date. To be corrected in 2020.</font>
 
 <strike>You can simply download the `svg.rx.js` file and place it in your project.</strike>
 
@@ -230,14 +177,14 @@ The library extends `SVGElement` by:
 .rx_draggable()		// () -> observable of observables of {x:int,y:int}
 ```
 
-<!-- disabled: treat them as an implementation detail?
+<!_-- disabled: treat them as an implementation detail?
 If you only wish to handle mouse or touch, you can also use:
 
 ```
 .rx_mouse()
 .rx_touch()
 ```
--->
+--_>
 
 ### Sample
 
@@ -260,11 +207,6 @@ outerObs.subscribe( function(dragObs) {
 !!: The library does not move (drag) your object automatically. This is intentional and allows other kinds of dragging behaviour (e.g. constraints or circular following) to happen, instead of the usual 1:1 dragging.
 
 </strike>
-
-<!-- disabled; doing this
-## Road ahead
-
-Potentially, the `svg.js` library could be ditched at some point. It's turned out to be more of a bother - it embraces too much and things where it tries to be helpful, e.g. providing a `.move` for groups though they don't actually observe `.x` and `.y`  attributes, is simply misleading. In the end, we may be better off without it (but that is not a pressing concern).
 -->
 
 ## Help requested!!
@@ -280,17 +222,9 @@ for ways to help
 
 ## References
 
-### Other dragging libraries
-
-Presented for code comparisons. Their approach is the normal event capture (no Rx).
-
-- [svg.draggable.js](https://github.com/wout/svg.draggable.js)
-  - has been the basis for our touch event and coordinate translation handling. Thanks, Fuzzy!
-
-### Tools
-
 - [How to Use npm as a Build Tool](https://www.keithcirkel.co.uk/how-to-use-npm-as-a-build-tool/) - (blog, Dec 2014) by Keith Cirkel
 - [End to End Testing a Web Application using Cypress](https://www.youtube.com/watch?v=woI490HRM34) (Youtube 20:40, Apr 2019)
+
+<!-- disabled
 - [Writing your first test](https://docs.cypress.io/guides/getting-started/writing-your-first-test.html#Add-a-test-file) (Cypress docs)
-
-
+-->
