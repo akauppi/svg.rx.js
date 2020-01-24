@@ -209,20 +209,22 @@ outerObs.subscribe( function(dragObs) {
 </strike>
 -->
 
-## Publishing / using
+## `npm link`
 
-You need a registered http://npmjs.com account, with access to publish this project.
+For using `svg.rx.js` in another `npm` project on the *same* machine, you don't need publishing. This is handy for e.g. development of the `svg.rx.js-demo` application.
 
-See [publish/README.md](publish/README) for details.
+In the downstream app:
+
+```
+$ npm link ../svg.rx.js
+```
+
+## Publishing to `npm` registry
+
+See [Publish/README.md](Publish/README.md) for details.
 
 Alpha and beta snapshots are published under the `next` tag. Stable versions follow the normal versioning.
 
-<!-- disabled: say something about versions; can we sniff the latest stable?
-```
-    "svg.rx.js": "next"
-    "svg.rx.js": "^0.0.7"
-```
--->
 
 ## Help requested!!
 

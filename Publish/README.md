@@ -1,14 +1,13 @@
-# Deployment
+# Publish
 
-To publish the package, you must:
+To publish the package, you must have a *npmjs.com* user registered and be logged in:
 
-- have a user and be logged in to the `npm` registry:
+```
+$ npm login
+```
 
-   ```
-   $ npm login
-   ```
-   
-   The login will ask you for 2FA codes as well, if you have enabled such.
+>Note: For sharing this module with an application on the *same* machine, you can use `npm link`.
+
 
 ## Publish a `next` snapshot
 
@@ -23,7 +22,7 @@ $ npm publish --tag next
 ```
 
 
-## Publish a versioned release
+## Versioned releases
 
 The actual publishing. 
 
@@ -32,4 +31,3 @@ The actual publishing.
 ```
 $ npm publish
 ```
-
