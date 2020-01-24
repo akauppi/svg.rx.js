@@ -16,6 +16,8 @@ We use `next` tags for work-in-progress releases, to be used e.g. in developing 
 
 You can export these as often as is needed. There are no guarantees to the users!
 
+- Check the version in `package.json` says `alpha` or `beta`
+
 ```
 $ npm publish --tag next
 ```

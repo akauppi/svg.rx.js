@@ -1,6 +1,6 @@
 {
   "name": "svg.rx.js",
-  "version": "0.0.7-alpha.1",
+  "version": "0.0.7-alpha.2",
   "description": "Making SVG elements interactive, using Svelte 3 and RxJS.",
   "keywords": [
     "svg",
@@ -34,24 +34,24 @@
     "clean": "concurrently \"npm run aaa:clean\" \"npm run test:clean\""
   },
   "dependencies": {
-    "http-server": "^0.12.0",
+    "http-server": "^0.12.1",
     "rxjs": "^6.5.4"
   },
   "devDependencies": {
     "chai": "^4.2.0",
     "concurrently": "^5.0.2",
-    "cypress": "^3.8.1",
-    "rollup": "^1.27.14",
+    "cypress": "^3.8.2",
+    "rollup": "^1.29.1",
     "rollup-plugin-commonjs": "^10.1.0",
     "rollup-plugin-livereload": "^1.0.0",
     "rollup-plugin-node-builtins": "^2.1.2",
     "rollup-plugin-node-globals": "^1.4.0",
     "rollup-plugin-node-resolve": "^5.2.0",
     "rollup-plugin-svelte": "^5.1.1",
-    "rollup-plugin-terser": "^5.1.2",
+    "rollup-plugin-terser": "^5.2.0",
     "rollup-pluginutils": "^2.8.2",
-    "start-server-and-test": "^1.7.13",
-    "svelte": "^3.16.7"
+    "start-server-and-test": "^1.10.7",
+    "svelte": "^3.17.3"
   },
   "//comments": {
     "": [

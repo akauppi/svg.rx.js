@@ -8,6 +8,8 @@ Sometimes it's faster to write down things here. [GitHub Issues](https://github.
 
 - [ ] package and publish (once ready for it)
 
+- Make scripts for `next` and release publishing, that check the existance (or lack) of "-alpha" or "-beta" in `package.json` (releases not to have it, `next` to require it!)
+
 ## Other
 
 - [ ] Would someone with Microsoft devices (using `pointerdown` etc.) want to suggest PR's? See -> [Issue #2](https://github.com/akauppi/svg.rx.js/issues/2)

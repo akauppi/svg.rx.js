@@ -209,6 +209,21 @@ outerObs.subscribe( function(dragObs) {
 </strike>
 -->
 
+## Publishing / using
+
+You need a registered http://npmjs.com account, with access to publish this project.
+
+See [publish/README.md](publish/README) for details.
+
+Alpha and beta snapshots are published under the `next` tag. Stable versions follow the normal versioning.
+
+<!-- disabled: say something about versions; can we sniff the latest stable?
+```
+    "svg.rx.js": "next"
+    "svg.rx.js": "^0.0.7"
+```
+-->
+
 ## Help requested!!
 
 See:
