@@ -9,6 +9,9 @@ Sometimes it's faster to write down things here. [GitHub Issues](https://github.
 - [ ] package and publish (once ready for it)
 
 - Make scripts for `next` and release publishing, that check the existance (or lack) of "-alpha" or "-beta" in `package.json` (releases not to have it, `next` to require it!)
+  - >To publish a prerelease without making it installed by default, you should specify a tag other than “latest”. For example, to set the “next” tag:
+  
+     Mention that in docs. Source here: https://medium.com/@mbostock/prereleases-and-npm-e778fc5e2420
 
 ## Other
 
